@@ -515,7 +515,7 @@ export default function App() {
               </div>
               <div className="grid md:grid-cols-[300px_1fr] gap-0">
                 <div className="p-5 border-r border-zinc-800 bg-zinc-950/40">
-                  <div className="text-[11px] font-mono tracking-widest text-zinc-500">Today · Oct 14 · 3/5</div>
+                  <div className="text-[11px] font-mono tracking-widest text-zinc-500">Day 14 · 3 of 5 done</div>
                   <div className="mt-3 space-y-2">
                     {[
                       { n: 'Gym 45m', icon: 'dumbbell', d: true },
@@ -531,7 +531,7 @@ export default function App() {
                       </div>
                     ))}
                   </div>
-                  <div className="mt-4 flex items-center justify-between text-[11px] font-mono"><span className="text-zinc-500">3 / 5 done</span><span className="text-zinc-400">60% · Keep going</span></div>
+                  <div className="mt-4 flex items-center justify-between text-[11px] font-mono"><span className="text-zinc-500">3 of 5</span><span className="text-zinc-400">60%</span></div>
                 </div>
                 <div className="p-5">
                   <div className="flex items-center justify-between"><span className="text-[11px] font-mono tracking-widest text-zinc-500">Oct → Dec grid</span><span className="text-[11px] font-mono text-zinc-600">Missed stays visible</span></div>
@@ -629,7 +629,7 @@ export default function App() {
                   { n: '03', t: 'Watch the grid fill', d: 'White is a clean day, grey is partial, red stays red. There is no reset button, and that is the point.' },
                 ].map(s => (
                   <motion.div variants={fadeUp} key={s.n} className="flex gap-4">
-                    <div className="text-[13px] font-mono tracking-widest text-zinc-400 pt-0.5">{s.n}</div>
+                    <div className="text-[13px] font-mono tracking-widest text-zinc-500 pt-0.5">{s.n}</div>
                     <div><div className="text-[14px] font-semibold text-white">{s.t}</div><div className="mt-1 text-[13px] leading-5 text-zinc-500">{s.d}</div></div>
                   </motion.div>
                 ))}
@@ -637,11 +637,6 @@ export default function App() {
             </motion.div>
           </section>
 
-          <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pb-12">
-            <div className="text-center text-xs font-mono text-zinc-600">
-              Ideas or bugs go through <a href="https://github.com/ashutosh887/winterarc/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer" className="underline decoration-zinc-700 hover:text-zinc-400">CONTRIBUTING.md</a> or <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="underline decoration-zinc-700 hover:text-zinc-400">@ashutosh887_</a> on X.
-            </div>
-          </section>
         </main>
       )}
 
