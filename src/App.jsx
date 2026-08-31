@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, User, Settings, Menu, LayoutGrid, Compass,
   Footprints, Moon, Salad, Egg, Droplets, Target, Ban, Wind, NotebookPen, Sun, PhoneOff, TreePine, Coins, BrushCleaning, ShowerHead, AlarmClock,
-  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone, Copy, Share2, MessageCircle, ImageDown, MoreHorizontal, Info
+  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone, Copy, ChevronDown, Share2, MessageCircle, ImageDown, MoreHorizontal, Info
 } from 'lucide-react'
 import { site, resources, templates, challenges, quotes as QUOTES_CFG } from './config'
 import { Button } from '@/components/ui/button'
@@ -170,6 +170,34 @@ export default function App() {
   const [customName, setCustomName] = useState('')
   const [customList, setCustomList] = useState([])
   const [tmpDays, setTmpDays] = useState(ALL_WEEKDAYS)
+  const selectedIsFuture = selectedDate > today
+  const isPerfectDay = useCallback(d => {
+    const e = entries[d] || {}
+    return effectiveHabits.length > 0 && effectiveHabits.every(h => e[h.id])
+  }, [entries, effectiveHabits])
+
+  const months = useMemo(() => {
+    const fmt = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' })
+    const byKey = new Map()
+    allDates.forEach(d => {
+      const key = d.slice(0, 7)
+      if (!byKey.has(key)) byKey.set(key, { key, label: fmt.format(parseYMD(d)), dates: [] })
+      byKey.get(key).dates.push(d)
+    })
+    return [...byKey.values()].map(m => ({
+      ...m,
+      scheduled: m.dates.filter(isActiveDay).length,
+      perfect: m.dates.filter(d => isActiveDay(d) && isPerfectDay(d)).length,
+    }))
+  }, [allDates, isActiveDay, isPerfectDay])
+
+  const focusMonth = useMemo(() => {
+    const clamped = today < start ? start : today > end ? end : today
+    return clamped.slice(0, 7)
+  }, [today, start, end])
+
+  const [openMonths, setOpenMonths] = useState([])
+  useEffect(() => { setOpenMonths([focusMonth]) }, [focusMonth])
   const arcLength = useMemo(() => daysBetween(tmpStart, tmpEnd), [tmpStart, tmpEnd])
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [stars, setStars] = useState(null)
@@ -180,6 +208,8 @@ export default function App() {
   const [promptOpen, setPromptOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [streakInfo, setStreakInfo] = useState(false)
+  const [confirmReset, setConfirmReset] = useState(false)
+  const [backupBeforeReset, setBackupBeforeReset] = useState(true)
   const [promptCopied, setPromptCopied] = useState(false)
   const canvasRef = useRef(null)
   const overlayDown = useRef(false)
@@ -344,6 +374,7 @@ export default function App() {
   }), [stats, totalDays])
 
   function toggleHabit(date, habitId) {
+    if (date > today || date < start || date > end) return
     setEntries(prev => {
       const cur = { ...(prev[date] || {}) }
       cur[habitId] = !cur[habitId]
@@ -407,9 +438,11 @@ export default function App() {
     const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `winter-arc-${start}_${end}.csv`; a.click(); URL.revokeObjectURL(url)
   }
   function resetAll() {
-    if (!confirm('Reset all WinterArc data? This cannot be undone. Are you sure?')) return
-    for (const k of ['wa_settings','wa_settings_v2','wa_habits','wa_habits_v2','wa_entries','wa_stars']) { try { localStorage.removeItem(k) } catch {} }
-    location.reload()
+    if (backupBeforeReset) exportJSON()
+    for (const k of ['wa_settings', 'wa_settings_v2', 'wa_habits', 'wa_habits_v2', 'wa_entries', 'wa_stars']) {
+      try { localStorage.removeItem(k) } catch {}
+    }
+    window.location.replace('/')
   }
   const llmPrompt = `Here is my habit data from ${start} to ${end}. Habits: ${effectiveHabits.map(h => h.name).join(', ')}. Days elapsed: ${stats.dayNum} of ${totalDays}. Perfect days: ${stats.perfect} (${stats.perfectPct}%). Checks completed: ${stats.pct}%. Current streak: ${stats.streak}, best ${stats.bestStreak}.\nRaw entries: ${JSON.stringify(entries).slice(0, 4000)}\n\nTell me which habit I miss most and on which weekdays. Then give me one change to make this week. Keep it under 150 words and skip the pep talk.`
 
@@ -602,7 +635,7 @@ export default function App() {
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 flex items-center gap-3">
             <span className="w-7 h-7 shrink-0 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-400"><Snowflake size={13} /></span>
             <span className="text-sm text-zinc-400 line-clamp-2 sm:truncate">{quote}</span>
-            <span className="ml-auto hidden md:inline shrink-0 text-[11px] font-mono text-zinc-500">Day {stats.dayNum}/{totalDays}</span>
+            <span className="ml-auto hidden md:inline shrink-0 text-[11px] font-mono text-zinc-500">{Math.round((stats.dayNum / totalDays) * 100)}% through</span>
           </motion.div>
         </div>
       )}
@@ -999,7 +1032,7 @@ export default function App() {
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
           <motion.div initial="hidden" animate="show" variants={stagger} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex items-center gap-3">
-              <Ring pct={Math.round((stats.dayNum / totalDays) * 100)} size={56}><span className="text-[10px] font-mono font-bold tabular-nums text-white">{stats.dayNum}/{totalDays}</span></Ring>
+              <Ring pct={Math.round((stats.dayNum / totalDays) * 100)} size={56}><span className="text-[11px] font-mono font-bold tabular-nums text-white">{Math.round((stats.dayNum / totalDays) * 100)}%</span></Ring>
               <div className="min-w-0">
                 <div className="text-[11px] font-mono tracking-widest text-zinc-500">Day</div>
                 <div className="text-lg font-bold text-white">{stats.remaining} left</div>
@@ -1089,17 +1122,19 @@ export default function App() {
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <div className="text-[15px] font-semibold text-white">Daily check-in</div>
-                  {!isActiveDay(selectedDate) && <div className="text-[11px] font-mono text-zinc-500">Rest day, nothing owed</div>}
+                  {selectedIsFuture
+                    ? <div className="text-[11px] font-mono text-zinc-500">Not here yet. Come back on the day.</div>
+                    : !isActiveDay(selectedDate) && <div className="text-[11px] font-mono text-zinc-500">Rest day, nothing owed</div>}
                 </div>
                 <Ring pct={dailyPct} size={44} stroke={3}><span className="text-[11px] font-mono font-bold text-zinc-300">{dailyPct}%</span></Ring>
               </div>
-              <input type="date" value={selectedDate} min={start} max={end} onChange={e => { const v = e.target.value; if (v) setSelectedDate(v < start ? start : v > end ? end : v) }} className="mt-3 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 min-h-11 text-base sm:text-sm text-white" />
+              <input type="date" value={selectedDate} min={start} max={today < end ? today : end} onChange={e => { const v = e.target.value; if (!v) return; const cap = today < end ? today : end; setSelectedDate(v < start ? start : v > cap ? cap : v) }} className="mt-3 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 min-h-11 text-base sm:text-sm text-white" />
               <div className="mt-4 space-y-2">
                 {effectiveHabits.map(h => {
                   const done = !!(entries[selectedDate] || {})[h.id]
                   return (
-                    <label key={h.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 cursor-pointer transition ${done ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}>
-                      <input type="checkbox" checked={done} onChange={() => toggleHabit(selectedDate, h.id)} className="accent-zinc-900 w-4 h-4" />
+                    <label key={h.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition ${selectedIsFuture ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'} ${done ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}>
+                      <input type="checkbox" checked={done} disabled={selectedIsFuture} onChange={() => toggleHabit(selectedDate, h.id)} className="accent-zinc-900 w-4 h-4 disabled:cursor-not-allowed" />
                       <span className={`w-7 h-7 rounded-full grid place-items-center border ${done ? 'bg-zinc-900 border-zinc-900 text-white' : 'bg-zinc-800 border-zinc-700 text-zinc-300'}`}><HabitIcon name={h.icon} size={14} /></span>
                       <span className={`text-sm flex-1 ${done ? 'text-zinc-900 font-medium' : 'text-zinc-200'}`}>{h.name}</span>
                       {done && <span className="text-zinc-900"><Check size={14} /></span>}
@@ -1109,24 +1144,92 @@ export default function App() {
               </div>
               <div className="mt-3 flex items-center justify-between text-xs font-mono"><span className="text-zinc-400">{effectiveHabits.filter(h => (entries[selectedDate] || {})[h.id]).length}/{effectiveHabits.length} done</span>{effectiveHabits.length > 0 && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) && <span className="text-white inline-flex items-center gap-1"><Check size={12} /> Perfect day</span>}</div>
               <div className="mt-3 flex gap-2">
-                <button onClick={() => { const e = entries[selectedDate] || {}; const allDone = effectiveHabits.every(h => e[h.id]); const next = {}; effectiveHabits.forEach(h => next[h.id] = !allDone ? true : false); setEntries(prev => ({ ...prev, [selectedDate]: !allDone ? next : {} })) }} className="flex-1 h-11 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium border border-zinc-700 transition">{effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'Clear day' : 'Mark all done'}</button>
+                <button
+                  disabled={selectedIsFuture || effectiveHabits.length === 0}
+                  onClick={() => {
+                    if (selectedIsFuture) return
+                    const e = entries[selectedDate] || {}
+                    const allDone = effectiveHabits.length > 0 && effectiveHabits.every(h => e[h.id])
+                    setEntries(prev => {
+                      const kept = { ...(prev[selectedDate] || {}) }
+                      effectiveHabits.forEach(h => { if (allDone) delete kept[h.id]; else kept[h.id] = true })
+                      return { ...prev, [selectedDate]: kept }
+                    })
+                  }}
+                  className="flex-1 h-11 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium border border-zinc-700 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-zinc-800"
+                >{effectiveHabits.length > 0 && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'Clear day' : 'Mark all done'}</button>
                 <button onClick={() => setSelectedDate(today)} className="px-5 h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Today</button>
   
             </div>
             </div>
 
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 sm:p-4">
-              <div className="flex items-center justify-between"><div className="text-[15px] font-semibold text-white">{totalDays} day grid</div></div>
-              <div className="mt-4 grid grid-cols-7 gap-1 sm:gap-1.5">
-                {allDates.map(d => {
-                  const e = entries[d] || {}; const done = effectiveHabits.filter(h => e[h.id]).length; const perfect = effectiveHabits.length > 0 && done === effectiveHabits.length; const isToday = d === today; const isSelected = d === selectedDate; const isFuture = d > today; const rest = !isActiveDay(d)
-                  let bg = 'bg-zinc-800 border-zinc-700'
-                  if (rest) bg = 'bg-zinc-950 border-zinc-800/70'
-                  else if (isFuture) bg = 'bg-zinc-900 border-zinc-800 opacity-40'
-                  else if (perfect) bg = 'bg-white border-white'
-                  else if (done > 0) bg = 'bg-zinc-300 border-zinc-300'
-                  else if (d < today) bg = 'bg-red-500/15 border-red-500/20'
-                  return (<button key={d} onClick={() => setSelectedDate(d)} className={`relative aspect-square rounded-md border flex flex-col items-center justify-center transition active:scale-95 hover:scale-[1.04] ${bg} ${isSelected ? 'ring-2 ring-inset ring-white' : ''}`} aria-label={rest ? `${d}, rest day` : `${d}, ${done} of ${effectiveHabits.length} done`} title={rest ? `${d} - rest day` : `${d} - ${done}/${effectiveHabits.length}`}><span className={`text-[11px] font-mono tabular-nums ${rest ? 'text-zinc-700' : perfect ? 'text-zinc-900' : done > 0 ? 'text-zinc-900' : d < today ? 'text-red-300' : 'text-zinc-500'}`}>{d.slice(8, 10)}</span><span className={`hidden sm:block text-[9px] font-mono ${rest ? 'text-zinc-700' : perfect ? 'text-zinc-700' : 'text-zinc-500'}`}>{rest ? 'rest' : `${done}/${effectiveHabits.length}`}</span>{isToday && <span className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full border border-zinc-900" />}</button>)
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="text-[15px] font-semibold text-white">Your grid</div>
+                <button
+                  onClick={() => setOpenMonths(openMonths.length === months.length ? [focusMonth] : months.map(m => m.key))}
+                  className="h-9 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 text-xs hover:text-white hover:border-zinc-700 transition"
+                >
+                  {openMonths.length === months.length ? 'Collapse' : `Show all ${totalDays} days`}
+                </button>
+              </div>
+
+              <div className="mt-4 space-y-2">
+                {months.map(m => {
+                  const open = openMonths.includes(m.key)
+                  return (
+                    <div key={m.key} className="rounded-xl border border-zinc-800 bg-zinc-950 overflow-hidden">
+                      <button
+                        onClick={() => setOpenMonths(prev => prev.includes(m.key) ? prev.filter(k => k !== m.key) : [...prev, m.key])}
+                        aria-expanded={open}
+                        className="w-full min-h-11 px-3 flex items-center gap-3 text-left hover:bg-zinc-900/60 transition"
+                      >
+                        <ChevronDown size={14} className={`shrink-0 text-zinc-500 transition-transform ${open ? '' : '-rotate-90'}`} />
+                        <span className="text-[13px] font-medium text-white">{m.label}</span>
+                        <span className="ml-auto flex items-center gap-2 shrink-0">
+                          <span className="hidden sm:flex gap-0.5" aria-hidden>
+                            {m.dates.map(d => (
+                              <span key={d} className={`w-1 h-4 rounded-full ${!isActiveDay(d) ? 'bg-zinc-800' : d > today ? 'bg-zinc-800/60' : isPerfectDay(d) ? 'bg-white' : Object.values(entries[d] || {}).some(Boolean) ? 'bg-zinc-500' : 'bg-red-500/40'}`} />
+                            ))}
+                          </span>
+                          <span className="text-[11px] font-mono text-zinc-500 tabular-nums">{m.perfect}/{m.scheduled}</span>
+                        </span>
+                      </button>
+                      {open && (
+                        <div className="px-3 pb-3 grid grid-cols-7 gap-1 sm:gap-1.5">
+                          {m.dates.map(d => {
+                            const e = entries[d] || {}
+                            const done = effectiveHabits.filter(h => e[h.id]).length
+                            const perfect = isPerfectDay(d)
+                            const isToday = d === today
+                            const isSelected = d === selectedDate
+                            const isFuture = d > today
+                            const rest = !isActiveDay(d)
+                            let bg = 'bg-zinc-800 border-zinc-700'
+                            if (rest) bg = 'bg-zinc-950 border-zinc-800/70'
+                            else if (isFuture) bg = 'bg-zinc-900 border-zinc-800/60'
+                            else if (perfect) bg = 'bg-white border-white'
+                            else if (done > 0) bg = 'bg-zinc-300 border-zinc-300'
+                            else if (d < today) bg = 'bg-red-500/15 border-red-500/20'
+                            return (
+                              <button
+                                key={d}
+                                onClick={() => setSelectedDate(d)}
+                                disabled={isFuture}
+                                aria-label={isFuture ? `${d}, not yet` : rest ? `${d}, rest day` : `${d}, ${done} of ${effectiveHabits.length} done`}
+                                title={isFuture ? `${d} - not yet` : rest ? `${d} - rest day` : `${d} - ${done}/${effectiveHabits.length}`}
+                                className={`relative aspect-square rounded-md border flex flex-col items-center justify-center transition ${isFuture ? 'cursor-not-allowed opacity-45' : 'active:scale-95 hover:scale-[1.04]'} ${bg} ${isSelected ? 'ring-2 ring-inset ring-white' : ''}`}
+                              >
+                                <span className={`text-[11px] font-mono tabular-nums ${rest ? 'text-zinc-700' : perfect ? 'text-zinc-900' : done > 0 ? 'text-zinc-900' : isFuture ? 'text-zinc-600' : 'text-red-300'}`}>{d.slice(8, 10)}</span>
+                                <span className={`hidden sm:block text-[9px] font-mono ${rest || perfect ? 'text-zinc-700' : 'text-zinc-500'}`}>{rest ? 'rest' : isFuture ? '' : `${done}/${effectiveHabits.length}`}</span>
+                                {isToday && <span className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full border border-zinc-900" />}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )
                 })}
               </div>
               <div className="mt-6">
@@ -1155,7 +1258,6 @@ export default function App() {
                   <button onClick={copyPrompt} className="px-4 h-9 rounded-full bg-white text-zinc-900 text-xs font-semibold hover:bg-zinc-100 transition">{promptCopied ? 'Copied' : 'Copy prompt'}</button>
                   <button onClick={exportJSON} className="px-4 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">JSON</button>
                   <button onClick={exportCSV} className="px-4 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">CSV</button>
-                  <button onClick={resetAll} className="ml-auto px-4 h-9 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-xs font-semibold hover:bg-red-500/15 transition">Reset arc</button>
                 </div>
                 <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 overflow-auto max-h-56"><pre className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-words font-mono">{llmPrompt}</pre></div>
                 <div className="mt-2 text-xs text-zinc-500">Paste this with your exported JSON. Nothing leaves the device until you do.</div>
@@ -1164,6 +1266,45 @@ export default function App() {
           </div>
         </main>
       )}
+
+      {view === 'tracker' && hasData && (
+        <div className="max-w-[1040px] mx-auto px-5 sm:px-6 pb-8">
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/[0.04] p-4 flex flex-wrap items-center gap-3">
+            <div className="min-w-0">
+              <div className="text-[15px] font-semibold text-white">Start over</div>
+              <p className="mt-1 text-[13px] leading-5 text-zinc-500">Deletes this arc from the browser. There is no undo and no copy on a server.</p>
+            </div>
+            <button onClick={() => setConfirmReset(true)} className="ml-auto shrink-0 h-11 px-5 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-sm font-semibold hover:bg-red-500/15 transition">Reset arc</button>
+          </div>
+        </div>
+      )}
+
+      <AnimatePresence>
+        {confirmReset && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onMouseDown={e => { overlayDown.current = e.target === e.currentTarget }}
+            onClick={e => { if (e.target === e.currentTarget && overlayDown.current) setConfirmReset(false) }}
+            className="fixed inset-0 z-50 grid place-items-center p-4 bg-zinc-950/80 backdrop-blur-xl"
+            role="dialog" aria-modal="true" aria-label="Reset your arc"
+          >
+            <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} onClick={e => e.stopPropagation()} className="w-full max-w-[440px] rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+              <h2 className="text-[22px] font-bold tracking-tight text-white">Reset your arc</h2>
+              <p className="mt-2 text-sm leading-6 text-zinc-500">
+                This removes {stats.totalChecked} checks across {stats.dayNum} days. It lives only in this browser, so once it is gone there is nothing to restore it from.
+              </p>
+              <label className="mt-4 flex items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 cursor-pointer">
+                <input type="checkbox" checked={backupBeforeReset} onChange={e => setBackupBeforeReset(e.target.checked)} className="mt-0.5 accent-white w-4 h-4" />
+                <span className="text-[13px] leading-5 text-zinc-300">Download a JSON backup first<span className="block text-zinc-500">Saves the file, then clears the arc.</span></span>
+              </label>
+              <div className="mt-5 flex flex-wrap gap-2 justify-end">
+                <button onClick={() => setConfirmReset(false)} className="h-11 px-5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-sm hover:text-white hover:border-zinc-700 transition">Keep my arc</button>
+                <button onClick={resetAll} className="h-11 px-5 rounded-full bg-red-500/15 border border-red-500/25 text-red-200 text-sm font-semibold hover:bg-red-500/25 transition">Reset everything</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {view === 'dashboard' && hasData && (
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
@@ -1208,7 +1349,7 @@ export default function App() {
                 <div className="flex justify-between"><span className="text-zinc-400">Range</span><span className="text-white font-mono text-xs truncate ml-2">{start} to {end}</span></div>
                 <div className="flex justify-between"><span className="text-zinc-400">Best streak</span><span className="text-white font-mono">{stats.bestStreak}</span></div>
                 <div className="mt-auto pt-3 flex gap-2"><button onClick={exportJSON} className="flex-1 h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">JSON</button><button onClick={exportCSV} className="flex-1 h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">CSV</button></div>
-                <button onClick={resetAll} className="w-full h-11 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-sm hover:bg-red-500/15 transition">Reset</button>
+                <button onClick={() => setConfirmReset(true)} className="w-full h-11 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-sm hover:bg-red-500/15 transition">Reset</button>
               </div>
             </div>
           </div>
