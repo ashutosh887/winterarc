@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap } from 'lucide-react'
+import { Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, Heart } from 'lucide-react'
 import { Canvas } from '@react-three/fiber'
 import { Float, Icosahedron } from '@react-three/drei'
+import { site, resources, templates, quotes as QUOTES_CFG } from './config'
 
 const DEFAULT_START = '2026-10-01'
 const DEFAULT_END = '2026-12-31'
@@ -32,23 +33,7 @@ const PRESETS = [
   { id: 'pushups', name: '100 pushups', icon: '🔥', tier: 'aesthetic', desc: 'Challenge style.' },
 ]
 
-const QUOTES = [
-  { q: 'Discipline is choosing between what you want now and what you want most.', a: 'Abraham Lincoln' },
-  { q: 'You do not rise to the level of your goals. You fall to the level of your systems.', a: 'James Clear' },
-  { q: 'The winter will ask what you did all summer.', a: '—' },
-  { q: 'Lock in while they coast. Unleash while they scramble.', a: 'Winter Arc' },
-  { q: 'Small hinges swing big doors.', a: '—' },
-  { q: 'Consistency is harder than intensity. Harder. And more powerful.', a: '—' },
-  { q: 'No zero days. A little is still a lot.', a: '—' },
-  { q: 'You are what you do when no one is clapping.', a: '—' },
-  { q: '90 days of boring effort beats 3 days of heroic effort.', a: '—' },
-  { q: 'The work you do in the dark puts you in the light.', a: '—' },
-  { q: 'Motivation gets you going, but discipline keeps you growing.', a: 'John C. Maxwell' },
-  { q: 'In the middle of difficulty lies opportunity.', a: 'Albert Einstein' },
-  { q: 'First it hurts, then it becomes habit.', a: '—' },
-  { q: 'Stay the course. January you will thank October you.', a: '—' },
-  { q: 'Build body. Build career. Fix sleep. Kill bad habits.', a: 'Winter Arc' },
-]
+const QUOTES = QUOTES_CFG
 
 function useLocalStorage(key, initial) {
   const [val, setVal] = useState(() => {
@@ -229,6 +214,12 @@ export default function App() {
     setCustomList(prev => [...prev, { id, name: customName.trim(), icon: '✦', tier: 'custom', desc: 'Custom' }])
     setTmpSelected(s => new Set([...s, id])); setCustomName('')
   }
+  function applyTemplate(tid) {
+    const t = templates.find(x => x.id === tid); if (!t) return
+    setTmpName(settings?.name ?? tmpName)
+    setTmpStart(settings?.start ?? DEFAULT_START); setTmpEnd(settings?.end ?? DEFAULT_END)
+    setTmpSelected(new Set(t.habitIds)); setCustomList([]); setOnboardStep(3); setShowOnboarding(true)
+  }
   function exportJSON() {
     const data = { settings: { start, end }, habits: effectiveHabits, entries, exportedAt: new Date().toISOString() }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -309,7 +300,9 @@ export default function App() {
               <div className="text-[11px] tracking-wide text-zinc-500 font-mono">{hasData ? (settings?.name ? `Hey ${settings.name} • ${start} → ${end}` : `${start} → ${end}`) : 'Oct 1 → Dec 31'}</div>
             </div>
           </button>
-          <nav className="flex items-center gap-2">
+          <nav className="flex items-center gap-1 sm:gap-2">
+            <button onClick={() => setView('templates')} className={`hidden sm:inline-flex px-3 py-1.5 rounded-full text-[13px] font-medium ${view === 'templates' ? 'bg-zinc-900 text-white border border-zinc-800' : 'text-zinc-400 hover:text-white'}`}>Templates</button>
+            <button onClick={() => setView('resources')} className={`hidden sm:inline-flex px-3 py-1.5 rounded-full text-[13px] font-medium ${view === 'resources' ? 'bg-zinc-900 text-white border border-zinc-800' : 'text-zinc-400 hover:text-white'}`}>Resources</button>
             {hasData && (<>
               <button onClick={() => setView('tracker')} aria-current={view === 'tracker'} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'tracker' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>Tracker</button>
               <button onClick={() => setView('dashboard')} aria-current={view === 'dashboard'} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'dashboard' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>Dashboard</button>
@@ -319,14 +312,33 @@ export default function App() {
         </div>
       </header>
 
-      {/* quote bar */}
+      {/* top notification — last day record */}
+      {hasData && (() => {
+        const prev = addDays(selectedDate, -1)
+        if (prev < start || prev > end) return null
+        const pe = entries[prev] || {}
+        const done = effectiveHabits.filter(h => pe[h.id]).length
+        const perfect = effectiveHabits.length && done === effectiveHabits.length
+        return (
+          <div className="max-w-[980px] mx-auto px-6 pt-3">
+            <div className={`rounded-full border px-4 py-2 flex items-center gap-2 text-xs font-mono ${perfect ? 'bg-white text-zinc-900 border-white' : done > 0 ? 'bg-amber-500/10 text-amber-200 border-amber-500/20' : 'bg-zinc-900 text-zinc-400 border-zinc-800'}`}>
+              <span className="hidden sm:inline">Last day {prev}:</span><span className="sm:hidden">{prev}:</span>
+              <span className="font-semibold">{perfect ? 'Perfect ✓' : `${done}/${effectiveHabits.length} done`}</span>
+              <span className="hidden sm:inline opacity-60">— {perfect ? 'Streak lives' : 'Backfill honestly, grid stays truthful'}</span>
+              <button onClick={() => setSelectedDate(prev)} className="ml-auto text-[11px] underline decoration-zinc-600 hover:text-white">View</button>
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* quote bar — today's + future preview */}
       {hasData && (
         <div className="max-w-[980px] mx-auto px-6 pt-3">
           <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="rounded-full bg-zinc-900 border border-zinc-800 px-4 py-2 flex items-center gap-3 overflow-hidden">
             <span className="text-white">❝</span>
             <span className="text-sm text-zinc-300 truncate">“{quote.q}”</span>
             <span className="hidden sm:inline text-xs font-mono text-zinc-500 whitespace-nowrap">— {quote.a}</span>
-            <span className="ml-auto hidden sm:inline text-[11px] font-mono text-zinc-500">Day {stats.dayNum}</span>
+            <span className="ml-auto hidden sm:inline text-[11px] font-mono text-zinc-500">Day {stats.dayNum} / {totalDays} • <button onClick={() => setView('resources')} className="underline hover:text-white">Quotes history</button></span>
           </motion.div>
         </div>
       )}
@@ -446,6 +458,70 @@ export default function App() {
               ))}
             </div>
           </section>
+        </main>
+      )}
+
+      {view === 'templates' && (
+        <main id="main" className="max-w-[980px] mx-auto px-6 py-10">
+          <div className="flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><BookOpen size={12} /> TEMPLATES • FREE</div>
+          <h1 className="mt-2 text-[28px] font-bold tracking-tight text-white">Pick a template — keep it free</h1>
+          <p className="mt-1 text-sm text-zinc-400">All habits are free forever. Config is in <code className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800">src/config.ts</code> — edit and redeploy.</p>
+          <div className="mt-6 grid sm:grid-cols-2 gap-4">
+            {templates.map(t => (
+              <div key={t.id} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col">
+                <div className="flex items-center gap-2"><span className="text-xl">{t.icon}</span><span className="font-semibold text-white">{t.name}</span><span className="ml-auto text-[11px] font-mono px-2 py-1 rounded-full bg-white text-zinc-900">Free</span></div>
+                <div className="mt-2 text-sm text-zinc-400">{t.desc}</div>
+                <div className="mt-3 flex flex-wrap gap-1.5">{t.habitIds.map(hid => { const h = PRESETS.find(p => p.id === hid); return <span key={hid} className="text-xs px-2 py-1 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700">{h ? `${h.icon} ${h.name}` : hid}</span> })}</div>
+                <button onClick={() => applyTemplate(t.id)} className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100">Use template <ArrowRight size={14} /></button>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 flex items-center justify-between">
+            <div className="text-sm text-zinc-300 flex items-center gap-2"><Heart size={14} className="text-zinc-400" /> Like it? Star the repo — it helps the community.</div>
+            <a href={site.support.github} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm">Star on GitHub</a>
+          </div>
+        </main>
+      )}
+
+      {view === 'resources' && (
+        <main id="main" className="max-w-[980px] mx-auto px-6 py-10">
+          <div className="flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Dumbbell size={12} /> RESOURCES • FREE ONLY</div>
+          <h1 className="mt-2 text-[28px] font-bold tracking-tight text-white">Free resources — curated</h1>
+          <p className="mt-1 text-sm text-zinc-400">All links are free. Edit <code className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800">src/config.ts → resources</code>.</p>
+          <div className="mt-6 grid gap-6">
+            {Object.entries(resources).map(([key, cat]) => (
+              <div key={key} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+                <div className="text-sm font-semibold text-white">{cat.title}</div>
+                <div className="mt-3 grid sm:grid-cols-2 gap-3">
+                  {cat.items.map(it => (
+                    <a key={it.name} href={it.url} target="_blank" rel="noreferrer" className="rounded-xl border border-zinc-800 bg-zinc-950 p-3 hover:border-zinc-700 transition block">
+                      <div className="flex items-center gap-2"><span className="text-sm font-medium text-white">{it.name}</span><ExternalLink size={12} className="text-zinc-500" /><span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">FREE</span></div>
+                      <div className="text-xs text-zinc-500 mt-1">{it.desc}</div>
+                      <div className="text-[11px] font-mono text-zinc-600 truncate">{it.url}</div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Quotes history & future */}
+          <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+            <div className="flex items-center justify-between"><h2 className="font-semibold text-white flex items-center gap-2"><Star size={14} /> Quotes — 120 days</h2><span className="text-xs font-mono text-zinc-500">Today: Day {stats.dayNum} • {totalDays} days arc + buffer</span></div>
+            <p className="text-xs text-zinc-500 mt-1">Free tool — see past, today, and future quotes. After 92 days, buffer keeps you going.</p>
+            <div className="mt-4 grid sm:grid-cols-2 gap-2 max-h-[420px] overflow-auto pr-1">
+              {QUOTES.slice(0, 120).map((qq, i) => {
+                const isToday = i === (stats.dayNum % QUOTES.length)
+                const isPast = i < stats.dayNum
+                return (
+                  <div key={i} className={`rounded-xl border p-3 ${isToday ? 'bg-white border-white' : isPast ? 'bg-zinc-950 border-zinc-800 opacity-80' : 'bg-zinc-900 border-zinc-700 border-dashed'}`}>
+                    <div className="text-[11px] font-mono text-zinc-500">Day {i + 1} {isToday ? '• TODAY' : isPast ? '• past' : '• future'}</div>
+                    <div className={`text-sm mt-1 ${isToday ? 'text-zinc-900 font-medium' : 'text-zinc-300'} italic`}>“{qq.q}”</div>
+                    <div className={`text-xs ${isToday ? 'text-zinc-600' : 'text-zinc-500'}`}>— {qq.a}</div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         </main>
       )}
 
@@ -667,15 +743,21 @@ export default function App() {
       )}
 
       <footer className="max-w-[980px] mx-auto px-6 py-10 border-t border-zinc-800/60 mt-8">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] font-mono tracking-wide text-zinc-600">
-          <span className="flex items-center gap-1.5">© 2026 TryWinterArc • Built by <a href="https://ashutosh887.in" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-white transition">Ashutosh Jha <ExternalLink size={10} /></a> • Lock in while they coast.</span>
-          <span className="flex items-center gap-3">
-            <a href="https://github.com/ashutosh887/winterarc" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-zinc-300"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.85v2.74c0 .26.18.58.69.48A10 10 0 0 0 12 2z" /></svg> GitHub</a>
-            <span className="opacity-30">•</span>
-            <span>trywinterarc.vercel.app</span>
-            <span className="opacity-30">•</span>
-            <span className="flex items-center gap-1"><Trophy size={12} /> Free forever</span>
-          </span>
+        <div className="flex flex-col gap-3 text-[11px] font-mono tracking-wide text-zinc-600">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span className="flex items-center gap-1.5">© 2026 TryWinterArc • Built by <a href={site.author.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-white transition">{site.author.name} <ExternalLink size={10} /></a> • <a href={site.author.github} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-zinc-300"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.85v2.74c0 .26.18.58.69.48A10 10 0 0 0 12 2z" /></svg> GitHub</a> • Lock in while they coast.</span>
+            <span className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1"><Heart size={10} /> Free forever</span>
+              <span className="opacity-30">•</span>
+              <a href={site.support.github} target="_blank" rel="noreferrer" className="hover:text-zinc-300">Star us</a>
+              <span className="opacity-30">•</span>
+              <span>trywinterarc.vercel.app</span>
+            </span>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-zinc-900 pt-3">
+            <span>Built on <a href="https://vercel.com" target="_blank" rel="noreferrer" className="hover:text-white">Vercel</a> • 100% local • No tracking</span>
+            <span className="flex items-center gap-2"><a href={site.author.url} target="_blank" rel="noreferrer" className="hover:text-white">ashutosh887.in</a> <span className="opacity-30">*</span> <a href={site.author.github} target="_blank" rel="noreferrer" className="hover:text-white">github.com/ashutosh887</a></span>
+          </div>
         </div>
       </footer>
     </div>

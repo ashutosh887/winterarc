@@ -53,8 +53,13 @@ Push to `main` → Vercel auto-deploys. Aliases: `trywinterarc.vercel.app` (SSO-
 ## Ideas
 See `IDEAS.md`
 
+## Support — free, just star ⭐
+If you like it, drop a star on [ashutosh887/winterarc](https://github.com/ashutosh887/winterarc) and follow [@ashutosh887](https://github.com/ashutosh887) — it helps the community.
+
+All features free forever. No paywall. Config-driven: edit `src/config.ts` for resources/templates/quotes.
+
 ## Credits
-Built by [Ashutosh Jha](https://ashutosh887.in) — inspired by Winter Arc trend (Oct 1 → Dec 31, 92 days). Research: 3-5 binary habits, self-selected > assigned, one miss ≠ break.
+Built by [Ashutosh Jha](https://ashutosh887.in) — [GitHub](https://github.com/ashutosh887) • Built on [Vercel](https://vercel.com) — inspired by Winter Arc trend (Oct 1 → Dec 31, 92 days). Research: 3-5 binary habits, self-selected > assigned, one miss ≠ break.
 
 ## License
-MIT — PRs welcome.
+MIT — PRs welcome. Star us if it helped your arc.
