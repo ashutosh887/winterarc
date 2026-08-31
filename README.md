@@ -1,7 +1,8 @@
 # WinterArc
 
-A habit tracker for the 92 days from October 1 to December 31, with graduation on January 1.
-Everything is stored in your browser. No account, no server, works offline.
+A habit tracker for a fixed run of days. It defaults to October 1 through December 31, the winter arc,
+but you can set any start and end date you want. Everything is stored in your browser. No account, no
+server, works offline.
 
 Live: https://trywinterarc.vercel.app
 

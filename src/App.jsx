@@ -42,7 +42,7 @@ const PRESETS = [
   { id: 'protein', name: 'Protein target', icon: 'egg', tier: 'non-neg', desc: 'Track grams per day.' },
   { id: 'water', name: 'Water 2 to 3L', icon: 'droplets', tier: 'non-neg', desc: 'Spread through day.' },
   { id: 'work', name: 'Deep work 90m', icon: 'target', tier: 'non-neg', desc: 'Before email, phone away.' },
-  { id: 'no-alcohol', name: 'No alcohol', icon: 'ban', tier: 'non-neg', desc: 'Binary until Jan 1.' },
+  { id: 'no-alcohol', name: 'No alcohol', icon: 'ban', tier: 'non-neg', desc: 'Yes or no, no exceptions.' },
   { id: 'reading', name: 'Reading 10 pages', icon: 'bookopen', tier: 'extra', desc: 'Non-fiction preferred.' },
   { id: 'meditation', name: 'Meditation 10m', icon: 'wind', tier: 'extra', desc: '5 to 15 min.' },
   { id: 'journaling', name: 'Journaling', icon: 'notebookpen', tier: 'extra', desc: 'Thoughts / gratitude.' },
@@ -369,7 +369,7 @@ export default function App() {
     if (navigator.share) { try { await navigator.share({ title: 'WinterArc', text, url: location.href }) } catch {} } else { shareToX(achievement) }
   }
   const navLinks = [
-    { label: 'How it works', onClick: () => scrollToId('how'), active: false },
+    { label: 'Winter arc', onClick: () => goTo('about'), active: view === 'about' },
     { label: 'Templates', onClick: () => goTo('templates'), active: view === 'templates' },
     { label: 'Resources', onClick: () => goTo('resources'), active: view === 'resources' },
     ...(hasData ? [
@@ -394,11 +394,6 @@ export default function App() {
     setView(next)
     setMobileMenuOpen(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-  function scrollToId(id) {
-    if (view !== 'landing') { setView('landing'); setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80) }
-    else document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    setMobileMenuOpen(false)
   }
 
   return (
@@ -568,7 +563,7 @@ export default function App() {
                 <div className="p-6 sm:p-7 flex flex-col justify-center">
                   <div className="w-9 h-9 rounded-full bg-white text-zinc-900 grid place-items-center"><Check size={16} /></div>
                   <h3 className="mt-3 text-[15px] font-semibold text-white">The grid does not lie</h3>
-                  <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">92 squares. White is perfect, gray is partial, red is missed. Fill any past date. No reset button. What you see is what you did.</p>
+                  <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">One square per day. White is a clean day, grey is partial, red is a miss. Fill any past date. There is no reset button, so what you see is what you did.</p>
                   <div className="mt-4 text-xs font-mono text-zinc-600">Local only · Export JSON/CSV anytime</div>
                 </div>
                 <div className="bg-zinc-950 border-t md:border-t-0 md:border-l border-zinc-800 p-5 grid place-items-center">
@@ -712,6 +707,58 @@ export default function App() {
         </main>
       )}
 
+      {view === 'about' && (
+        <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
+          <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Snowflake size={12} /> The idea</div>
+          <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">What a winter arc actually is</h1>
+          <p className="mt-2 text-sm leading-6 text-zinc-500 max-w-[620px]">
+            A winter arc is the stretch of the year most people write off. School is grinding, work is grinding, the weather is bad, and the plan quietly becomes January. The idea is to use that window instead of waiting it out.
+          </p>
+
+          <div className="mt-8 grid md:grid-cols-2 gap-4">
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+              <div className="text-[15px] font-semibold text-white">Why the end of the year</div>
+              <p className="mt-2 text-[13px] leading-6 text-zinc-500">
+                Nobody is watching in October. There is no new year energy to borrow and nobody to perform for, so the only thing keeping you going is the habit itself. That is the whole test. If you can hold it through the worst stretch, January is a formality.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+              <div className="text-[15px] font-semibold text-white">Why a fixed window</div>
+              <p className="mt-2 text-[13px] leading-6 text-zinc-500">
+                An open ended habit has no finish line, so there is never a day you can point at. A fixed window gives you a start, an end, and a grid that fills in between. You either did it or you did not, and the grid remembers either way.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+              <div className="text-[15px] font-semibold text-white">Why the dates are yours</div>
+              <p className="mt-2 text-[13px] leading-6 text-zinc-500">
+                The default is October 1 to December 31 because that is what people mean by a winter arc. It is a default, not a rule. Set any start and end date in setup and the grid, the streaks and the badges all follow your dates.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+              <div className="text-[15px] font-semibold text-white">Why no streak insurance</div>
+              <p className="mt-2 text-[13px] leading-6 text-zinc-500">
+                Most trackers let you freeze a streak or repair a day. That turns the number into a score you protect rather than a record of what happened. Here a missed day stays red, and you can still fill in any past date you actually did.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+            <div className="text-[15px] font-semibold text-white">How to not waste it</div>
+            <ul className="mt-3 space-y-2 text-[13px] leading-6 text-zinc-500">
+              <li>Pick fewer habits than you think you can hold. Three you never miss beats eight you miss half of.</li>
+              <li>Make every habit answerable with yes or no. "Eat better" is not a habit, "no sugar" is.</li>
+              <li>Set a floor, not a target. The gym habit is showing up, not the perfect session.</li>
+              <li>Missing one day is noise. Missing two in a row is the thing that ends arcs.</li>
+            </ul>
+          </div>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            <button onClick={startOnboarding} className="inline-flex items-center gap-2 h-11 px-5 rounded-full bg-white text-zinc-900 font-semibold text-sm hover:bg-zinc-100 transition">Start your arc <ArrowRight size={14} /></button>
+            <button onClick={() => goTo('templates')} className="inline-flex items-center h-11 px-5 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-200 text-sm hover:bg-zinc-800 hover:border-zinc-700 transition">See templates</button>
+          </div>
+        </main>
+      )}
+
       {view === 'install' && (
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
           <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Smartphone size={12} /> Install</div>
@@ -762,7 +809,7 @@ export default function App() {
             <ul className="mt-3 space-y-2 text-[13px] leading-5 text-zinc-500">
               <li>Apple only lets Safari add a web app to the home screen, so that step cannot be skipped.</li>
               <li>The installed copy keeps its own storage. If you set up your arc in Safari first, it carries over. If you set it up somewhere else, it does not.</li>
-              <li>Storage is capped lower than a native app. A full 92 day arc is a few kilobytes, so this will not bite you.</li>
+              <li>Storage is capped lower than a native app. A whole arc is a few kilobytes, so this will not bite you.</li>
               <li>Notifications need iOS 16.4 or later and only work after you add it to the home screen. WinterArc does not send any yet.</li>
             </ul>
           </div>
@@ -865,7 +912,7 @@ export default function App() {
             </div>
 
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-              <div className="flex items-center justify-between"><div className="text-[15px] font-semibold text-white">92 day grid</div><div className="text-xs font-mono text-zinc-500">Missed stays visible · No restart</div></div>
+              <div className="flex items-center justify-between"><div className="text-[15px] font-semibold text-white">{totalDays} day grid</div><div className="text-xs font-mono text-zinc-500">Missed stays visible · No restart</div></div>
               <div className="mt-4 grid grid-cols-7 sm:grid-cols-14 gap-1.5">
                 {allDates.map(d => {
                   const e = entries[d] || {}; const done = effectiveHabits.filter(h => e[h.id]).length; const perfect = effectiveHabits.length > 0 && done === effectiveHabits.length; const isToday = d === todayYMD(); const isSelected = d === selectedDate; const isFuture = d > todayYMD()
@@ -1073,6 +1120,7 @@ export default function App() {
             </div>
             <div className="grid grid-cols-2 gap-x-10 gap-y-2 sm:ml-auto text-[13px]">
               <div className="space-y-2">
+                <button onClick={() => goTo('about')} className="block text-zinc-400 hover:text-white transition">What is a winter arc</button>
                 <button onClick={() => goTo('templates')} className="block text-zinc-400 hover:text-white transition">Templates</button>
                 <button onClick={() => goTo('resources')} className="block text-zinc-400 hover:text-white transition">Resources</button>
                 <button onClick={() => goTo('install')} className="block text-zinc-400 hover:text-white transition">Install as app</button>

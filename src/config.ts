@@ -71,7 +71,7 @@ export const challenges: { id: string; label: string; icon: string; desc: string
   { id: 'streak30', label: '30 day forge', icon: 'gem', desc: 'Thirty perfect days in a row', metric: 'streak', target: 30 },
   { id: 'perfect30', label: '30 perfect', icon: 'crown', desc: 'Thirty perfect days total', metric: 'perfect', target: 30 },
   { id: 'complete75', label: '75 percent', icon: 'rocket', desc: 'Three quarters of all checks', metric: 'pct', target: 75 },
-  { id: 'graduate', label: 'Graduation', icon: 'graduationcap', desc: 'Every day perfect. Jan 1', metric: 'perfect', target: 92 },
+  { id: 'graduate', label: 'Graduation', icon: 'graduationcap', desc: 'Every single day perfect', metric: 'perfect', target: 92 },
 ]
 
 export const quotes: { q: string; a: string }[] = [
