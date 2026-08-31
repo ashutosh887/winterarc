@@ -392,6 +392,7 @@ export default function App() {
 
   function toggleHabit(date, habitId) {
     if (date > today || date < start || date > end) return
+    setUndo(null)
     setEntries(prev => {
       const cur = { ...(prev[date] || {}) }
       cur[habitId] = !cur[habitId]
@@ -767,7 +768,7 @@ export default function App() {
       </AnimatePresence>
 
       {hasData && view === 'tracker' && (
-        <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-20 bg-zinc-950/95 backdrop-blur-xl">
+        <div className={`sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-10 lg:z-20 bg-zinc-950/95 backdrop-blur-xl ${mobileMenuOpen ? 'lg:relative' : ''}`}>
           <div className="max-w-[1040px] mx-auto px-5 sm:px-6 py-3">
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 flex items-center gap-3">
             <span className="w-7 h-7 shrink-0 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-400"><Snowflake size={13} /></span>
@@ -1215,7 +1216,7 @@ export default function App() {
             <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex items-center gap-2.5">
               <Ring pct={Math.round((stats.dayNum / totalDays) * 100)} size={44} stroke={3}><span className="text-[11px] font-mono font-bold tabular-nums text-white">{Math.round((stats.dayNum / totalDays) * 100)}%</span></Ring>
               <div className="min-w-0">
-                <div className="text-[11px] font-mono tracking-widest text-zinc-500">Day</div>
+                <div className="text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-500 truncate">Day</div>
                 <div className="text-[17px] font-bold text-white leading-tight tabular-nums">Day {stats.dayNum}</div>
                 <div className="text-[10px] font-mono text-zinc-500 truncate">{stats.remaining} left</div>
               </div>
@@ -1223,17 +1224,17 @@ export default function App() {
             <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex items-center gap-2.5">
               <Ring pct={stats.perfectPct} size={44} stroke={3}><span className="text-zinc-300"><Flame size={18} /></span></Ring>
               <div className="min-w-0">
-                <div className="text-[11px] font-mono tracking-widest text-zinc-500">Perfect days</div>
+                <div className="text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-500 truncate">Perfect days</div>
                 <div className="text-[17px] font-bold text-white leading-tight">{stats.perfect}<span className="text-xs font-mono text-zinc-500">/{stats.scheduled}</span></div>
-                <div className="text-[10px] font-mono text-zinc-500">{stats.perfectPct}% of scheduled</div>
+                <div className="text-[10px] font-mono text-zinc-500 truncate">{stats.perfectPct}% of sched</div>
               </div>
             </motion.div>
             <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex items-center gap-2.5">
               <Ring pct={stats.pct} size={44} stroke={3}><span className="text-xs font-bold tabular-nums text-white">{stats.pct}%</span></Ring>
               <div className="min-w-0">
-                <div className="text-[11px] font-mono tracking-widest text-zinc-500">Completion</div>
+                <div className="text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-500 truncate">Completion</div>
                 <div className="text-[17px] font-bold text-white leading-tight">{stats.totalChecked}<span className="text-xs font-mono text-zinc-500">/{stats.totalPossible}</span></div>
-                <div className="text-[10px] font-mono text-zinc-500">{activeDays.length < 7 ? `across ${stats.scheduled} scheduled days` : 'checks logged'}</div>
+                <div className="text-[10px] font-mono text-zinc-500 truncate">{activeDays.length < 7 ? `${stats.scheduled} sched days` : 'checks'}</div>
               </div>
             </motion.div>
             <motion.div variants={fadeUp} className={`rounded-2xl border border-zinc-800 bg-zinc-900 p-3 ${shareOpen ? 'col-span-2 lg:col-span-4' : 'col-span-2 lg:col-span-1 flex flex-col justify-center'}`}>
@@ -1260,7 +1261,7 @@ export default function App() {
           <div className="mt-3 grid lg:grid-cols-[360px_1fr] gap-4 items-start">
             <div className="lg:sticky lg:top-[calc(8.5rem+env(safe-area-inset-top))] z-10">
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-[15px] font-semibold text-white">Daily check-in</div>
                   {!arcStarted
@@ -1293,7 +1294,7 @@ export default function App() {
                   onClick={() => stepDay(-1)}
                   disabled={selectedDate <= start}
                   aria-label="Previous day"
-                  className="w-11 h-11 shrink-0 grid place-items-center rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white hover:border-zinc-700 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="w-11 h-11 shrink-0 grid place-items-center rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white hover:border-zinc-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
                 ><ChevronLeft size={16} /></button>
                 <div className="flex-1 min-w-0 text-center">
                   <div className="text-sm font-medium text-white">{dayLabel(selectedDate)}</div>
@@ -1303,7 +1304,7 @@ export default function App() {
                   onClick={() => stepDay(1)}
                   disabled={selectedDate >= (today < end ? today : end)}
                   aria-label="Next day"
-                  className="w-11 h-11 shrink-0 grid place-items-center rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white hover:border-zinc-700 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="w-11 h-11 shrink-0 grid place-items-center rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white hover:border-zinc-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
                 ><ChevronRight size={16} /></button>
               </div>
               <input type="date" value={selectedDate} min={start} max={today < end ? today : end} disabled={!arcStarted} onChange={e => { const v = e.target.value; if (!v) return; const cap = today < end ? today : end; setSelectedDate(v < start ? start : v > cap ? cap : v) }} className="mt-2 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 min-h-11 text-base sm:text-sm text-zinc-400" />
@@ -1338,8 +1339,8 @@ export default function App() {
                 <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 flex items-center gap-2">
                   <span className="text-xs text-zinc-400">Day cleared.</span>
                   <button
-                    onClick={() => { setEntries(prev => ({ ...prev, [undo.date]: undo.entry })); setUndo(null) }}
-                    className="ml-auto h-8 px-3 rounded-full border border-zinc-700 bg-zinc-800 text-xs text-white hover:bg-zinc-700 transition"
+                    onClick={() => { setEntries(prev => ({ ...prev, [undo.date]: { ...undo.entry } })); setUndo(null) }}
+                    className="ml-auto min-h-11 px-4 rounded-full border border-zinc-700 bg-zinc-800 text-xs text-white hover:bg-zinc-700 transition"
                   >Undo</button>
                 </div>
               )}
@@ -1360,7 +1361,7 @@ export default function App() {
                   }}
                   className="flex-1 h-11 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium border border-zinc-700 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-zinc-800"
                 >{effectiveHabits.length > 0 && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'Clear day' : 'Mark all done'}</button>
-                <button onClick={() => setSelectedDate(today)} className="px-5 h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Today</button>
+                <button disabled={selectedDate === (today < end ? today : end)} onClick={() => setSelectedDate(today < end ? today : end)} className="px-5 h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition disabled:opacity-40 disabled:cursor-not-allowed">Today</button>
   
             </div>
             </div>
@@ -1372,7 +1373,7 @@ export default function App() {
                   onClick={() => setStreakInfo(v => !v)}
                   aria-label="How streaks are counted"
                   aria-expanded={streakInfo}
-                  className="w-6 h-6 grid place-items-center rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition"
+                  className="w-11 h-11 -m-2.5 grid place-items-center rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition"
                 >
                   <Info size={13} />
                 </button>
@@ -1408,7 +1409,7 @@ export default function App() {
 
             </div>
 
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 sm:p-4">
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-2.5 sm:p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="text-[15px] font-semibold text-white">Your grid</div>
                 <button
@@ -1419,6 +1420,12 @@ export default function App() {
                 </button>
               </div>
 
+              <div className="mt-3 sm:hidden flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-mono text-zinc-500">
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-white" /> all</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-zinc-300" /> some</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-red-500/15 border border-red-500/20" /> missed</span>
+                {activeDays.length < 7 && <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-zinc-950 border border-zinc-800" /> rest</span>}
+              </div>
               <div className="mt-4 space-y-2">
                 {months.map(m => {
                   const open = openMonths.includes(m.key)
@@ -1441,7 +1448,7 @@ export default function App() {
                         </span>
                       </button>
                       {open && (
-                        <div className="px-3 pb-3 grid grid-cols-7 gap-1 sm:gap-1.5">
+                        <div className="px-1.5 sm:px-3 pb-3 grid grid-cols-7 gap-1 sm:gap-1.5">
                           {m.dates.map(d => {
                             const e = entries[d] || {}
                             const done = effectiveHabits.filter(h => e[h.id]).length
@@ -1479,15 +1486,16 @@ export default function App() {
               </div>
               <div className="mt-6">
                 <div className="text-[11px] font-mono tracking-widest text-zinc-500">Habit rings</div>
-                <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                   {effectiveHabits.map(h => {
                     const hits = allDates.filter(d => (entries[d] || {})[h.id]).length
                     const pct = Math.round((hits / totalDays) * 100)
+                    const streak = habitStreak(h.id)
                     return (
                       <div key={h.id} className="rounded-xl border border-zinc-800 bg-zinc-950 p-2.5 flex flex-col items-center gap-1.5">
                         <Ring pct={pct} size={56} stroke={4}><span className="text-zinc-200"><HabitIcon name={h.icon} size={16} /></span></Ring>
-                        <div className="text-[11px] text-center leading-tight text-zinc-200 line-clamp-2" title={h.name}>{h.name}</div>
-                        <div className="text-[10px] font-mono text-white tabular-nums">{habitStreak(h.id)}{habitStreak(h.id) === 1 ? ' day' : ' days'}</div>
+                        <div className="text-[11px] text-center leading-tight text-zinc-200 line-clamp-2 min-h-[26px] flex items-center" title={h.name}>{h.name}</div>
+                        <div className="text-[10px] font-mono text-zinc-300 tabular-nums">{streak}d streak</div>
                         <div className="text-[11px] font-mono text-zinc-400">{pct}% · {hits}/{totalDays}</div>
                       </div>
                     )
@@ -1748,9 +1756,8 @@ export default function App() {
                             type="button"
                             aria-pressed={on}
                             onClick={() => setTmpDays(prev => on ? prev.filter(x => x !== d.i) : [...prev, d.i])}
-                            className={`h-11 flex-1 min-w-[52px] px-2 rounded-full text-[13px] font-medium border transition inline-flex items-center justify-center gap-1 ${on ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'}`}
+                            className={`h-11 min-w-0 px-0 rounded-full text-[12px] font-medium border transition grid place-items-center ${on ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'}`}
                           >
-                            {on && <Check size={12} />}
                             {d.short}
                           </button>
                         )

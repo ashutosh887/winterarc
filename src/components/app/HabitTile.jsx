@@ -24,7 +24,7 @@ export function HabitTile({ icon, name, desc, selected, onToggle, onRemove }) {
           {icon}
         </span>
         <span className="flex-1 min-w-0">
-          <span className={cn('text-sm font-medium block truncate', selected ? 'text-zinc-900' : 'text-zinc-200')}>
+          <span title={name} className={cn('text-sm font-medium block truncate', selected ? 'text-zinc-900' : 'text-zinc-200')}>
             {name}
           </span>
           {desc ? (
@@ -35,7 +35,7 @@ export function HabitTile({ icon, name, desc, selected, onToggle, onRemove }) {
           className={cn(
             'mt-0.5 w-5 h-5 rounded-full grid place-items-center border shrink-0',
             selected ? 'bg-zinc-900 border-zinc-900 text-white' : 'border-zinc-700 text-transparent',
-            onRemove && 'mr-7',
+            onRemove && 'mr-11',
           )}
         >
           <Check size={12} />
@@ -49,7 +49,7 @@ export function HabitTile({ icon, name, desc, selected, onToggle, onRemove }) {
           aria-label={`Remove ${name}`}
           title={`Remove ${name}`}
           className={cn(
-            'absolute top-1.5 right-1.5 w-8 h-8 grid place-items-center rounded-full transition',
+            'absolute top-1/2 -translate-y-1/2 right-1 w-11 h-11 grid place-items-center rounded-full transition',
             selected ? 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200' : 'text-zinc-600 hover:text-white hover:bg-zinc-800',
           )}
         >
