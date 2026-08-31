@@ -534,6 +534,20 @@ export default function App() {
     ] : []),
   ]
 
+  useEffect(() => {
+    const open = showOnboarding || confirmReset
+    if (!open) return
+    const onKey = e => {
+      if (e.key !== 'Escape') return
+      if (confirmReset) setConfirmReset(false)
+      else setShowOnboarding(false)
+    }
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKey)
+    return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', onKey) }
+  }, [showOnboarding, confirmReset])
+
   function copyPrompt() {
     navigator.clipboard?.writeText(llmPrompt).then(() => {
       setPromptCopied(true)
@@ -692,7 +706,7 @@ export default function App() {
 
           <section className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
             <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.6, ease: [0.22,1,0.36,1] }} className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800 bg-zinc-950">
+              <div className="flex items-center justify-between px-4 py-3 bg-zinc-950">
                 <div className="text-[11px] font-mono tracking-widest text-zinc-500">Preview</div>
                 <div className="text-[11px] font-mono text-zinc-600">Honest grid</div>
               </div>
@@ -715,7 +729,7 @@ export default function App() {
               </div>
 
               <div className="grid md:grid-cols-[280px_1fr] gap-0 mt-4">
-                <div className="p-4 border-b md:border-b-0 md:border-r border-zinc-800 bg-zinc-950/40">
+                <div className="p-4 bg-zinc-950/40">
                   <div className="text-[11px] font-mono tracking-widest text-zinc-500">Today, 3 of 5</div>
                   <div className="mt-3 space-y-1.5">
                     {[
@@ -792,7 +806,7 @@ export default function App() {
                   <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">One square a day. White is clean, grey is partial, red is a miss. You can fill in a day you forgot to log, but not one that has not happened.</p>
                   <div className="mt-4 text-xs font-mono text-zinc-600">Local only · Export JSON/CSV anytime</div>
                 </div>
-                <div className="bg-zinc-950 border-t md:border-t-0 md:border-l border-zinc-800 p-5 grid place-items-center">
+                <div className="bg-zinc-950 p-5 grid place-items-center">
                   <div className="grid grid-cols-7 sm:grid-cols-14 gap-1.5 w-full max-w-[360px]">
                     {Array.from({ length: 56 }, (_, i) => {
                       const c = i < 18 ? 'bg-white border-white' : i < 22 ? 'bg-zinc-300 border-zinc-300' : i < 24 ? 'bg-red-500/15 border-red-500/20' : 'bg-zinc-800 border-zinc-800'
@@ -802,7 +816,7 @@ export default function App() {
                 </div>
               </div>
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2 md:min-h-[280px]">
-                <div className="bg-zinc-950 border-b md:border-b-0 md:border-r border-zinc-800 p-6 grid place-items-center order-2 md:order-1">
+                <div className="bg-zinc-950 p-6 grid place-items-center order-2 md:order-1">
                   <div className="flex items-center gap-6">
                     <Ring pct={72} size={72}><span className="text-xs font-bold text-white">72%</span></Ring>
                     <div className="space-y-2">
@@ -830,7 +844,7 @@ export default function App() {
                     <span className="px-3 py-1.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs">PNG</span>
                   </div>
                 </div>
-                <div className="bg-zinc-950 border-t md:border-t-0 md:border-l border-zinc-800 p-6 grid place-items-center">
+                <div className="bg-zinc-950 p-6 grid place-items-center">
                   <div className="w-full max-w-[320px] rounded-xl border border-zinc-800 bg-zinc-950 p-4">
                     <div className="text-[11px] font-mono tracking-widest text-zinc-500">WINTERARC · Day 34/92</div>
                     <div className="mt-2 text-sm font-semibold text-white">18 perfect · 64% · streak 5</div>
@@ -1438,17 +1452,17 @@ export default function App() {
 
       <AnimatePresence>
       {showOnboarding && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={e => { overlayDown.current = e.target === e.currentTarget }} onClick={e => { if (e.target === e.currentTarget && overlayDown.current) setShowOnboarding(false) }} className="fixed inset-0 z-50 grid place-items-center p-4 sm:p-6 bg-zinc-950/80 backdrop-blur-xl" role="dialog" aria-modal="true" aria-label="Set up your arc">
-          <motion.div initial={{ opacity: 0, scale: 0.97, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 8 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} onClick={e => e.stopPropagation()} className="w-full max-w-[760px] max-h-[90dvh] overflow-y-auto overscroll-contain rounded-2xl bg-zinc-900 border border-zinc-800 p-4 sm:p-6 shadow-2xl">
-            <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={26} /><span className="font-semibold tracking-[0.16em] text-[13px] text-white">Set up your arc</span> <span className="text-xs font-mono text-zinc-500">Step {onboardStep}/2</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-11 h-11 shrink-0 grid place-items-center rounded-full bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition"><X size={14} /></button></div>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={e => { overlayDown.current = e.target === e.currentTarget }} onClick={e => { if (e.target === e.currentTarget && overlayDown.current) setShowOnboarding(false) }} className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-6 pt-4 sm:pt-6 bg-zinc-950/80 backdrop-blur-xl" role="dialog" aria-modal="true" aria-label="Set up your arc">
+          <motion.div initial={{ opacity: 0, scale: 0.97, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 8 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} onClick={e => e.stopPropagation()} className="w-full max-w-[760px] max-h-[92dvh] flex flex-col overscroll-contain rounded-2xl bg-zinc-900 border border-zinc-800 shadow-2xl">
+            <div className="shrink-0 flex items-center justify-between gap-3 px-4 sm:px-6 pt-4 sm:pt-5 pb-3 border-b border-zinc-800"><div className="flex items-center gap-2 min-w-0"><Logo size={24} /><span className="font-semibold tracking-[0.16em] text-[13px] text-white truncate">Set up your arc</span> <span className="shrink-0 text-xs font-mono text-zinc-500">Step {onboardStep}/2</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-11 h-11 shrink-0 grid place-items-center rounded-full bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition"><X size={14} /></button></div>
             {onboardStep === 1 && (
-              <div className="mt-6">
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 sm:px-6 py-5">
                 <h2 className="text-[22px] font-bold tracking-tight text-white">Name and dates</h2>
                 <p className="mt-1 text-sm text-zinc-500">Saved in this browser. No account.</p>
                 <div className="mt-5 space-y-5">
                   <div className="space-y-2">
                     <Label htmlFor="arc-name" className="text-zinc-500">Your name</Label>
-                    <Input id="arc-name" value={tmpName} onChange={e => setTmpName(e.target.value)} placeholder="Your name" className="h-11" />
+                    <Input id="arc-name" value={tmpName} onChange={e => setTmpName(e.target.value)} placeholder="Your name" className="h-11" autoComplete="off" />
                     <div className="text-xs text-zinc-500">Optional. Example: Ashutosh</div>
                   </div>
 
@@ -1463,8 +1477,9 @@ export default function App() {
                             key={preset.label}
                             type="button"
                             onClick={() => { setTmpStart(range.start); setTmpEnd(range.end) }}
-                            className={`h-11 px-4 rounded-full text-[13px] font-medium border transition ${active ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-950 text-zinc-300 border-zinc-800 hover:border-zinc-700 hover:text-white'}`}
+                            className={`h-11 px-4 rounded-full text-[13px] font-medium border transition inline-flex items-center gap-1.5 ${active ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-950 text-zinc-300 border-zinc-800 hover:border-zinc-700 hover:text-white'}`}
                           >
+                            {active && <Check size={12} />}
                             {preset.label}
                           </button>
                         )
@@ -1486,8 +1501,9 @@ export default function App() {
                             type="button"
                             aria-pressed={on}
                             onClick={() => setTmpDays(prev => on ? prev.filter(x => x !== d.i) : [...prev, d.i])}
-                            className={`h-11 flex-1 min-w-11 px-2 rounded-full text-[13px] font-medium border transition ${on ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'}`}
+                            className={`h-11 flex-1 min-w-[52px] px-2 rounded-full text-[13px] font-medium border transition inline-flex items-center justify-center gap-1 ${on ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'}`}
                           >
+                            {on && <Check size={12} />}
                             {d.short}
                           </button>
                         )
@@ -1514,20 +1530,26 @@ export default function App() {
                     </span>
                   </div>
                 </div>
-                <div className="mt-6 flex justify-end"><Button disabled={arcLength < 1 || tmpDays.length === 0} onClick={() => setOnboardStep(2)} className="h-11 px-5">Continue <ArrowRight size={14} /></Button></div>
+              </div>
+            )}
+            {onboardStep === 1 && (
+              <div className="shrink-0 border-t border-zinc-800 px-4 sm:px-6 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex justify-end">
+                <Button disabled={arcLength < 1 || tmpDays.length === 0} onClick={() => setOnboardStep(2)} className="h-11 px-5 w-full sm:w-auto">Continue <ArrowRight size={14} /></Button>
               </div>
             )}
             {onboardStep === 2 && (
-              <div className="mt-6">
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 sm:px-6 py-5">
                 <h2 className="text-[22px] font-bold tracking-tight text-white">Pick your habits</h2>
                 <p className="mt-1 text-sm text-zinc-500">Three to five is enough. Ten is the cap.</p>
                 <div className="mt-2 text-[11px] font-mono tracking-widest text-zinc-500">Selected {tmpSelected.size} {tmpSelected.size > 10 && '· over 10'}</div>
                 {['non-neg', 'extra', 'aesthetic'].map(tier => (<div key={tier} className="mt-5"><div className="text-[11px] font-mono tracking-widest text-zinc-500">{TIER_LABELS[tier]}</div><div className="mt-2 grid sm:grid-cols-2 gap-2">{PRESETS.filter(p => p.tier === tier).map(p => { const sel = tmpSelected.has(p.id); return (<button key={p.id} onClick={() => setTmpSelected(s => { const n = new Set(s); sel ? n.delete(p.id) : n.add(p.id); return n })} className={`text-left rounded-xl border p-3 flex gap-3 items-start transition ${sel ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}><span className={`w-8 h-8 rounded-full grid place-items-center border shrink-0 ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'bg-zinc-800 border-zinc-700 text-zinc-300'}`}><HabitIcon name={p.icon} size={14} /></span><span className="flex-1 min-w-0"><span className={`text-sm font-medium block ${sel ? 'text-zinc-900' : 'text-zinc-200'}`}>{p.name}</span><span className="text-xs text-zinc-500">{p.desc}</span></span><span className={`mt-1 w-5 h-5 rounded-full grid place-items-center border text-xs shrink-0 ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'border-zinc-700 text-transparent'}`}><Check size={12} /></span></button>) })}</div></div>))}
                 <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950 p-3"><div className="text-[11px] font-mono tracking-widest text-zinc-500">Custom habit</div><div className="mt-2 flex gap-2"><Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. No sugar, 3L water" onKeyDown={e => e.key === 'Enter' && addCustom()} className="h-11" /><Button variant="secondary" className="h-11 px-5" onClick={addCustom}>Add</Button></div>{customList.length > 0 && (<div className="mt-3 flex flex-wrap gap-2">{customList.map(c => (<Badge key={c.id} variant="secondary" className="gap-1.5">{c.name} <button onClick={() => { setCustomList(prev => prev.filter(x => x.id !== c.id)); setTmpSelected(s => { const n = new Set(s); n.delete(c.id); return n }) }} className="ml-1 hover:text-destructive"><X size={12} /></button></Badge>))}</div>)}</div>
-                <div className="mt-6 flex flex-wrap items-center gap-2">
-                  <Button variant="outline" className="h-11 px-5" onClick={() => setOnboardStep(1)}>Back</Button>
-                  <Button className="h-11 px-5 flex-1 sm:flex-none sm:ml-auto" onClick={completeOnboarding}>Save arc · {tmpSelected.size} habits <ArrowRight size={14} /></Button>
-                </div>
+              </div>
+            )}
+            {onboardStep === 2 && (
+              <div className="shrink-0 border-t border-zinc-800 px-4 sm:px-6 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex items-center gap-2">
+                <Button variant="outline" className="h-11 px-5" onClick={() => setOnboardStep(1)}>Back</Button>
+                <Button className="h-11 px-5 flex-1 sm:flex-none sm:ml-auto" onClick={completeOnboarding}>Save arc · {tmpSelected.size} <ArrowRight size={14} /></Button>
               </div>
             )}
           </motion.div>
