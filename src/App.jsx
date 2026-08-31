@@ -529,7 +529,7 @@ export default function App() {
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2">
                 <div className="p-6 sm:p-7 flex flex-col justify-center">
                   <div className="w-9 h-9 rounded-full bg-white text-zinc-900 grid place-items-center"><Check size={16} /></div>
-                  <h3 className="mt-3 text-[16px] font-semibold text-white">The grid does not lie</h3>
+                  <h3 className="mt-3 text-[15px] font-semibold text-white">The grid does not lie</h3>
                   <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">92 squares. White is perfect, gray is partial, red is missed. Fill any past date. No reset button. What you see is what you did.</p>
                   <div className="mt-4 text-xs font-mono text-zinc-600">Local only · Export JSON/CSV anytime</div>
                 </div>
@@ -555,7 +555,7 @@ export default function App() {
                 </div>
                 <div className="p-6 sm:p-7 flex flex-col justify-center order-1 md:order-2">
                   <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-200 grid place-items-center"><Trophy size={16} /></div>
-                  <h3 className="mt-3 text-[16px] font-semibold text-white">Rings for each habit</h3>
+                  <h3 className="mt-3 text-[15px] font-semibold text-white">Rings for each habit</h3>
                   <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">Every habit gets its own ring. You can see which one is dragging and which one runs itself.</p>
                   <div className="mt-4 text-xs font-mono text-zinc-600">Updates live as you check the day</div>
                 </div>
@@ -563,7 +563,7 @@ export default function App() {
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2">
                 <div className="p-6 sm:p-7 flex flex-col justify-center">
                   <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-200 grid place-items-center"><ExternalLink size={16} /></div>
-                  <h3 className="mt-3 text-[16px] font-semibold text-white">Share only if you want</h3>
+                  <h3 className="mt-3 text-[15px] font-semibold text-white">Share only if you want</h3>
                   <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">PNG card for X or WhatsApp, or copy a prompt for your LLM. Nothing leaves your device until you hit share.</p>
                   <div className="mt-4 flex gap-2">
                     <span className="px-3 py-1.5 rounded-full bg-white border border-white text-zinc-900 text-xs font-semibold">X Post</span>
@@ -625,7 +625,7 @@ export default function App() {
                 <motion.div variants={fadeUp} key={t.id} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col hover:border-zinc-700 transition">
                   <div className="flex items-center gap-3">
                     <span className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-300"><HabitIcon name={t.icon} size={16} /></span>
-                    <span className="font-semibold text-sm text-white">{t.name}</span>
+                    <span className="text-[15px] font-semibold text-white">{t.name}</span>
                   </div>
                   <div className="mt-2 text-[13px] leading-6 text-zinc-500">{t.desc}</div>
                   <div className="mt-3 flex flex-wrap gap-1.5 flex-1 content-start">
@@ -651,7 +651,7 @@ export default function App() {
           <div className="mt-8 grid gap-6">
             {Object.entries(resources).map(([key, cat]) => (
               <div key={key} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
-                <div className="text-sm font-semibold text-white">{cat.title}</div>
+                <div className="text-[15px] font-semibold text-white">{cat.title}</div>
                 <div className="mt-3 grid sm:grid-cols-2 gap-3">
                   {cat.items.map(it => (
                     <a key={it.name} href={it.url} target="_blank" rel="noreferrer" className="rounded-xl border border-zinc-800 bg-zinc-950 p-3 hover:border-zinc-700 transition block group">
@@ -714,10 +714,10 @@ export default function App() {
 
       {view === 'tracker' && hasData && (
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
-          <motion.div initial="hidden" animate="show" variants={stagger} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <motion.div initial="hidden" animate="show" variants={stagger} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex items-center gap-3">
               <Ring pct={Math.round((stats.dayNum / totalDays) * 100)} size={54}><span className="text-xs font-mono font-bold text-white">{stats.dayNum}/{totalDays}</span></Ring>
-              <div><div className="text-[11px] font-mono tracking-widest text-zinc-500">Day</div><div className="text-sm text-zinc-300">{stats.remaining} left</div><div className="text-xs font-mono text-zinc-500">{start} → {end}</div></div>
+              <div className="min-w-0"><div className="text-[11px] font-mono tracking-widest text-zinc-500">Day</div><div className="text-sm text-zinc-300">{stats.remaining} left</div><div className="text-[10px] font-mono text-zinc-500 truncate">{start} to {end}</div></div>
             </motion.div>
             <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex items-center gap-3">
               <Ring pct={stats.streak ? Math.min(100, (stats.streak / 7) * 100) : 0} size={54}><span className="text-zinc-300"><Flame size={18} /></span></Ring>
@@ -738,14 +738,13 @@ export default function App() {
                 <button onClick={exportJSON} className="px-3 py-1.5 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700 hover:bg-zinc-700 transition">JSON</button>
                 <button onClick={exportCSV} className="px-3 py-1.5 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700 hover:bg-zinc-700 transition">CSV</button>
               </div>
-              <canvas ref={canvasRef} className="hidden" />
             </motion.div>
           </motion.div>
 
           <div className="mt-6 grid lg:grid-cols-[360px_1fr] gap-6">
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 h-fit">
               <div className="flex items-center justify-between">
-                <div className="font-semibold text-white">Daily check-in</div>
+                <div className="text-[15px] font-semibold text-white">Daily check-in</div>
                 <Ring pct={dailyPct} size={44} stroke={3}><span className="text-[11px] font-mono font-bold text-zinc-300">{dailyPct}%</span></Ring>
               </div>
               <div className="text-xs text-zinc-500 -mt-1">Pick any past date. Rings update live.</div>
@@ -771,7 +770,7 @@ export default function App() {
             </div>
 
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-              <div className="flex items-center justify-between"><div className="font-semibold text-white">92 day grid</div><div className="text-xs font-mono text-zinc-500">Missed stays visible · No restart</div></div>
+              <div className="flex items-center justify-between"><div className="text-[15px] font-semibold text-white">92 day grid</div><div className="text-xs font-mono text-zinc-500">Missed stays visible · No restart</div></div>
               <div className="mt-4 grid grid-cols-7 sm:grid-cols-14 gap-1.5">
                 {allDates.map(d => {
                   const e = entries[d] || {}; const done = effectiveHabits.filter(h => e[h.id]).length; const perfect = effectiveHabits.length > 0 && done === effectiveHabits.length; const isToday = d === todayYMD(); const isSelected = d === selectedDate; const isFuture = d > todayYMD()
@@ -803,7 +802,7 @@ export default function App() {
           </div>
 
           <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2"><div className="font-semibold text-white">Export and LLM prompt</div><div className="flex items-center gap-2"><button onClick={() => navigator.clipboard.writeText(llmPrompt)} className="px-3 py-1.5 rounded-full bg-white text-zinc-900 text-xs font-semibold hover:bg-zinc-100 transition">Copy prompt</button><button onClick={resetAll} className="px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-xs font-semibold hover:bg-red-500/15 transition">Reset</button></div></div>
+            <div className="flex flex-wrap items-center justify-between gap-2"><div className="text-[15px] font-semibold text-white">Export and LLM prompt</div><div className="flex items-center gap-2"><button onClick={() => navigator.clipboard.writeText(llmPrompt)} className="px-3 py-1.5 rounded-full bg-white text-zinc-900 text-xs font-semibold hover:bg-zinc-100 transition">Copy prompt</button><button onClick={resetAll} className="px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-xs font-semibold hover:bg-red-500/15 transition">Reset</button></div></div>
             <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 overflow-auto"><pre className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-words font-mono">{llmPrompt}</pre></div>
             <div className="mt-2 text-xs text-zinc-500">Paste with exported JSON into your LLM. Data stays local until you paste.</div>
           </div>
@@ -815,17 +814,18 @@ export default function App() {
           <div className="grid lg:grid-cols-3 gap-4">
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col items-center">
               <div className="text-[11px] font-mono tracking-widest text-zinc-500">Overall</div>
-              <div className="mt-4 relative w-40 h-40">
-                <svg className="w-40 h-40 -rotate-90" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="#27272a" strokeWidth="10" /><circle cx="50" cy="50" r="44" fill="none" stroke="#fafafa" strokeWidth="10" strokeLinecap="round" strokeDasharray={`${stats.pct * 2.76} 276`} /></svg>
-                <div className="absolute inset-0 grid place-items-center"><div className="text-center"><div className="text-3xl font-bold text-white">{stats.pct}%</div><div className="text-xs font-mono text-zinc-400">{stats.totalChecked}/{stats.totalPossible}</div></div></div>
+              <div className="mt-4">
+                <Ring pct={stats.pct} size={160} stroke={10}>
+                  <div className="text-center"><div className="text-3xl font-bold text-white">{stats.pct}%</div><div className="text-xs font-mono text-zinc-500">{stats.totalChecked}/{stats.totalPossible}</div></div>
+                </Ring>
               </div>
               <div className="mt-4 text-sm text-zinc-300">{stats.perfect} perfect of {totalDays} · {stats.perfectPct}%</div>
-              <div className="mt-3 w-full grid grid-cols-2 gap-2">
+              <div className="mt-auto pt-4 w-full grid grid-cols-2 gap-2">
                 <button onClick={() => shareToX()} className="py-2 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Share X</button>
                 <button onClick={() => downloadImage()} className="py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">Download PNG</button>
               </div>
             </div>
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col">
               <div className="text-[11px] font-mono tracking-widest text-zinc-500">Weekly</div>
               <div className="mt-4 space-y-2">
                 {(() => { const weeks = []; for (let i = 0; i < allDates.length; i += 7)weeks.push(allDates.slice(i, i + 7)); return weeks.map((week, wi) => {
@@ -836,23 +836,23 @@ export default function App() {
                 }) })()}
               </div>
             </div>
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col">
               <div className="text-[11px] font-mono tracking-widest text-zinc-500">Quote of the day</div>
               <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950 p-4">
                 <div className="text-sm text-zinc-200">{quote.q}</div>
                 <div className="text-xs font-mono text-zinc-500 mt-1">- {quote.a}</div>
               </div>
-              <div className="mt-4 space-y-3 text-sm">
+              <div className="mt-4 flex-1 flex flex-col space-y-3 text-sm">
                 <div className="flex items-center justify-between"><span className="text-zinc-400 flex items-center gap-1.5"><User size={12} /> Name</span>
                   <span className="flex items-center gap-1.5">
-                    <input value={settings?.name ?? ''} onChange={e => setSettings(s => ({ ...s, name: e.target.value || null }))} placeholder="Add name" className="w-28 rounded-full bg-zinc-950 border border-zinc-800 px-2.5 py-1 text-xs text-white placeholder:text-zinc-500 text-right" />
-                    <button onClick={() => setShowOnboarding(true)} className="p-1.5 rounded-full bg-zinc-800 hover:bg-zinc-700 transition"><Settings size={12} className="text-zinc-400" /></button>
+                    <input value={settings?.name ?? ''} onChange={e => setSettings(s => ({ ...s, name: e.target.value || null }))} placeholder="Add name" className="w-28 h-9 rounded-full bg-zinc-950 border border-zinc-800 px-3 text-xs text-white placeholder:text-zinc-500 text-right" />
+                    <button onClick={() => setShowOnboarding(true)} className="p-2.5 rounded-full bg-zinc-800 hover:bg-zinc-700 transition"><Settings size={12} className="text-zinc-400" /></button>
                   </span>
                 </div>
                 <div className="flex justify-between"><span className="text-zinc-400">Habits</span><span className="text-white font-mono">{effectiveHabits.length}</span></div>
-                <div className="flex justify-between"><span className="text-zinc-400">Range</span><span className="text-white font-mono text-xs">{start} → {end}</span></div>
+                <div className="flex justify-between"><span className="text-zinc-400">Range</span><span className="text-white font-mono text-xs truncate ml-2">{start} to {end}</span></div>
                 <div className="flex justify-between"><span className="text-zinc-400">Best streak</span><span className="text-white font-mono">{stats.bestStreak}</span></div>
-                <div className="pt-3 flex gap-2"><button onClick={exportJSON} className="flex-1 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">JSON</button><button onClick={exportCSV} className="flex-1 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">CSV</button></div>
+                <div className="mt-auto pt-3 flex gap-2"><button onClick={exportJSON} className="flex-1 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">JSON</button><button onClick={exportCSV} className="flex-1 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">CSV</button></div>
                 <button onClick={resetAll} className="w-full py-2 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-sm hover:bg-red-500/15 transition">Reset</button>
               </div>
             </div>
@@ -860,12 +860,12 @@ export default function App() {
 
           <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
             <div className="flex items-center justify-between">
-              <div className="font-semibold text-white">Challenges</div>
+              <div className="text-[15px] font-semibold text-white">Challenges</div>
               <div className="text-xs font-mono text-zinc-500">{achievements.filter(a => a.unlock).length}/{achievements.length} unlocked</div>
             </div>
             <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {achievements.map(a => (
-                <div key={a.id} className={`rounded-2xl border p-4 flex flex-col ${a.unlock ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800'}`}>
+                <div key={a.id} className={`rounded-xl border p-4 flex flex-col ${a.unlock ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800'}`}>
                   <div className="flex items-center gap-3">
                     <Ring pct={a.pct} size={44} stroke={3} light={a.unlock}>
                       <span className={a.unlock ? 'text-zinc-900' : 'text-zinc-300'}><HabitIcon name={a.icon} size={15} /></span>
@@ -878,10 +878,10 @@ export default function App() {
                   <div className={`mt-3 text-[11px] font-mono ${a.unlock ? 'text-zinc-700' : 'text-zinc-500'}`}>
                     {a.unlock ? 'Unlocked' : `${a.value}/${a.target} · ${a.pct}%`}
                   </div>
-                  <div className="mt-3 flex gap-1.5">
-                    <button disabled={!a.unlock} onClick={() => shareToX(a)} className={`flex-1 py-1.5 rounded-full text-xs font-semibold transition ${a.unlock ? 'bg-zinc-900 text-white hover:bg-zinc-800' : 'bg-zinc-900 text-zinc-600 cursor-not-allowed'}`}>X</button>
-                    <button disabled={!a.unlock} onClick={() => shareToWhatsApp(a)} className={`flex-1 py-1.5 rounded-full text-xs transition ${a.unlock ? 'bg-zinc-800 text-white hover:bg-zinc-700' : 'bg-zinc-900 text-zinc-600 cursor-not-allowed'}`}>WhatsApp</button>
-                    <button disabled={!a.unlock} onClick={() => downloadImage(a)} className={`px-3 py-1.5 rounded-full text-xs border transition ${a.unlock ? 'bg-zinc-100 border-zinc-200 text-zinc-800 hover:bg-white' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>PNG</button>
+                  <div className="mt-auto pt-3 flex gap-1.5">
+                    <button disabled={!a.unlock} onClick={() => shareToX(a)} className={`flex-1 py-2 rounded-full text-xs font-semibold border transition ${a.unlock ? 'bg-zinc-900 border-zinc-900 text-white hover:bg-zinc-800' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>X</button>
+                    <button disabled={!a.unlock} onClick={() => shareToWhatsApp(a)} className={`flex-1 py-2 rounded-full text-xs border transition ${a.unlock ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>WhatsApp</button>
+                    <button disabled={!a.unlock} onClick={() => downloadImage(a)} className={`px-3 py-2 rounded-full text-xs border transition ${a.unlock ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>PNG</button>
                   </div>
                 </div>
               ))}
@@ -894,7 +894,7 @@ export default function App() {
       {showOnboarding && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowOnboarding(false)} className="fixed inset-0 z-50 grid place-items-center p-4 sm:p-6 bg-zinc-950/80 backdrop-blur-xl" role="dialog" aria-modal="true">
           <motion.div initial={{ opacity: 0, scale: 0.97, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 8 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} onClick={e => e.stopPropagation()} className="w-full max-w-[760px] max-h-[90dvh] overflow-y-auto overscroll-contain rounded-3xl bg-zinc-900 border border-zinc-800 p-4 sm:p-6 shadow-2xl">
-            <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={26} /><span className="font-semibold tracking-[0.16em] text-[13px] text-white">Set up your arc</span> <span className="text-xs font-mono text-zinc-500">Step {onboardStep}/2</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-8 h-8 grid place-items-center rounded-full bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition"><X size={14} /></button></div>
+            <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={26} /><span className="font-semibold tracking-[0.16em] text-[13px] text-white">Set up your arc</span> <span className="text-xs font-mono text-zinc-500">Step {onboardStep}/2</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-10 h-10 grid place-items-center rounded-full bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition"><X size={14} /></button></div>
             {onboardStep === 1 && (
               <div className="mt-6">
                 <h2 className="text-[22px] font-bold tracking-tight text-white">Name and dates</h2>
@@ -919,7 +919,7 @@ export default function App() {
                 <h2 className="text-[22px] font-bold tracking-tight text-white">Pick your habits</h2>
                 <p className="mt-1 text-sm text-zinc-500">Three to five is enough. Ten is the cap.</p>
                 <div className="mt-2 text-[11px] font-mono tracking-widest text-zinc-500">Selected {tmpSelected.size} {tmpSelected.size > 10 && '· over 10'}</div>
-                {['non-neg', 'extra', 'aesthetic'].map(tier => (<div key={tier} className="mt-5"><div className="text-[11px] font-mono tracking-widest text-zinc-500">{TIER_LABELS[tier]}</div><div className="mt-2 grid sm:grid-cols-2 gap-2">{PRESETS.filter(p => p.tier === tier).map(p => { const sel = tmpSelected.has(p.id); return (<button key={p.id} onClick={() => setTmpSelected(s => { const n = new Set(s); sel ? n.delete(p.id) : n.add(p.id); return n })} className={`text-left rounded-xl border p-3 flex gap-3 items-start transition ${sel ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}><span className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-300 shrink-0"><HabitIcon name={p.icon} size={14} /></span><span className="flex-1 min-w-0"><span className={`text-sm font-medium block ${sel ? 'text-zinc-900' : 'text-zinc-200'}`}>{p.name}</span><span className="text-xs text-zinc-500">{p.desc}</span></span><span className={`mt-1 w-5 h-5 rounded-full grid place-items-center border text-xs shrink-0 ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'border-zinc-700 text-transparent'}`}><Check size={12} /></span></button>) })}</div></div>))}
+                {['non-neg', 'extra', 'aesthetic'].map(tier => (<div key={tier} className="mt-5"><div className="text-[11px] font-mono tracking-widest text-zinc-500">{TIER_LABELS[tier]}</div><div className="mt-2 grid sm:grid-cols-2 gap-2">{PRESETS.filter(p => p.tier === tier).map(p => { const sel = tmpSelected.has(p.id); return (<button key={p.id} onClick={() => setTmpSelected(s => { const n = new Set(s); sel ? n.delete(p.id) : n.add(p.id); return n })} className={`text-left rounded-xl border p-3 flex gap-3 items-start transition ${sel ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}><span className={`w-8 h-8 rounded-full grid place-items-center border shrink-0 ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'bg-zinc-800 border-zinc-700 text-zinc-300'}`}><HabitIcon name={p.icon} size={14} /></span><span className="flex-1 min-w-0"><span className={`text-sm font-medium block ${sel ? 'text-zinc-900' : 'text-zinc-200'}`}>{p.name}</span><span className="text-xs text-zinc-500">{p.desc}</span></span><span className={`mt-1 w-5 h-5 rounded-full grid place-items-center border text-xs shrink-0 ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'border-zinc-700 text-transparent'}`}><Check size={12} /></span></button>) })}</div></div>))}
                 <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950 p-3"><div className="text-[11px] font-mono tracking-widest text-zinc-500">Custom habit</div><div className="mt-2 flex gap-2"><Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. No sugar, 3L water" onKeyDown={e => e.key === 'Enter' && addCustom()} /><Button variant="secondary" onClick={addCustom}>Add</Button></div>{customList.length > 0 && (<div className="mt-3 flex flex-wrap gap-2">{customList.map(c => (<Badge key={c.id} variant="secondary" className="gap-1.5">{c.name} <button onClick={() => { setCustomList(prev => prev.filter(x => x.id !== c.id)); setTmpSelected(s => { const n = new Set(s); n.delete(c.id); return n }) }} className="ml-1 hover:text-destructive"><X size={12} /></button></Badge>))}</div>)}</div>
                 <div className="mt-6 flex items-center justify-between"><Button variant="outline" onClick={() => setOnboardStep(1)}>Back</Button><Button onClick={completeOnboarding}>Save arc · {tmpSelected.size} habits <ArrowRight size={14} /></Button></div>
               </div>
@@ -936,6 +936,8 @@ export default function App() {
           </motion.button>
         )}
       </AnimatePresence>
+
+      <canvas ref={canvasRef} className="hidden" aria-hidden />
 
       <footer className="border-t border-zinc-800 mt-12">
         <div className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
