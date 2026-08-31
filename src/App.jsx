@@ -5,7 +5,7 @@ import {
   Footprints, Moon, Salad, Egg, Droplets, Target, Ban, Wind, NotebookPen, Sun, PhoneOff, TreePine, Coins, BrushCleaning, ShowerHead, AlarmClock,
   MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock
 } from 'lucide-react'
-import { site, resources, templates, challenges, quotes as QUOTES_CFG } from './config'
+import { resources, templates, challenges, quotes as QUOTES_CFG } from './config'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -563,9 +563,9 @@ export default function App() {
                 </motion.div>
               </div>
 
-              <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 px-5 py-4 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2 text-sm font-medium text-white"><span className="w-6 h-6 rounded-full bg-white grid place-items-center"><Check size={14} className="text-zinc-900" /></span> Free. No paywall. No pro plan.</div>
-                <div className="text-xs font-mono text-zinc-500">Open source MIT · Data stays local · Export anytime</div>
+              <div className="mt-4 rounded-full border border-zinc-800 bg-zinc-900 px-5 py-3 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-white"><span className="w-6 h-6 rounded-full bg-white grid place-items-center"><Check size={14} className="text-zinc-900" /></span> Open source. Local-first.</div>
+                <div className="text-xs font-mono text-zinc-500">Data stays on device · Export anytime</div>
               </div>
 
               <div className="mt-10 grid md:grid-cols-3 gap-8">
@@ -648,7 +648,7 @@ export default function App() {
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <div className="text-sm font-semibold text-white">Ready to lock in?</div>
-                <div className="text-sm text-zinc-500">No email. No paywall. Start in 2 minutes.</div>
+                <div className="text-sm text-zinc-500">No email. Start in 2 minutes.</div>
               </div>
               <div className="flex items-center gap-2">
                 <button onClick={startOnboarding} className="px-5 py-2.5 rounded-full bg-white text-zinc-900 font-semibold hover:bg-zinc-100 transition text-sm">Start your arc</button>
@@ -947,8 +947,8 @@ export default function App() {
       </AnimatePresence>
 
       <footer className="max-w-[1040px] mx-auto px-5 sm:px-6 py-6 border-t border-zinc-800 mt-8">
-        <div className="text-center text-[11px] font-mono text-zinc-500 leading-relaxed">
-          © 2026 WinterArc · Open source tracker Oct 1 → Dec 31 (92 days) · Local-first · PWA · No login · <a href={site.support.github} target="_blank" rel="noreferrer" className="hover:text-zinc-300 underline decoration-zinc-700">GitHub</a> · <a href="https://github.com/ashutosh887/winterarc/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer" className="hover:text-zinc-300 underline decoration-zinc-700">Contribute</a>
+        <div className="text-center text-[11px] font-mono text-zinc-500">
+          Open source WinterArc tracker — Oct 1 → Dec 31 (92 days, Jan 1 graduation). Local-first, PWA, no login.
         </div>
       </footer>
     </div>
