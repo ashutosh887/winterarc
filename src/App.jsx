@@ -1236,7 +1236,7 @@ export default function App() {
                 <div className="text-[10px] font-mono text-zinc-500">{activeDays.length < 7 ? `across ${stats.scheduled} scheduled days` : 'checks logged'}</div>
               </div>
             </motion.div>
-            <motion.div variants={fadeUp} className="col-span-2 lg:col-span-1 rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex flex-col justify-center">
+            <motion.div variants={fadeUp} className={`rounded-2xl border border-zinc-800 bg-zinc-900 p-3 ${shareOpen ? 'col-span-2 lg:col-span-4' : 'col-span-2 lg:col-span-1 flex flex-col justify-center'}`}>
               <button onClick={() => setShareOpen(v => !v)} aria-expanded={shareOpen} className="w-full flex items-center gap-2.5 text-left">
                 <IconChip icon={Share2} size={44} />
                 <span className="min-w-0">
@@ -1245,19 +1245,17 @@ export default function App() {
                 </span>
                 <ChevronDown size={15} className={`ml-auto shrink-0 text-zinc-500 transition-transform ${shareOpen ? 'rotate-180' : ''}`} />
               </button>
+              {shareOpen && (
+                <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <button onClick={() => shareToX()} className="h-11 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition inline-flex items-center justify-center gap-1.5"><Share2 size={14} /> X</button>
+                  <button onClick={() => shareToWhatsApp()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MessageCircle size={14} /> WhatsApp</button>
+                  <button onClick={() => downloadImage()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><ImageDown size={14} /> PNG</button>
+                  <button onClick={() => nativeShare()} className="h-11 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs hover:text-white hover:border-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MoreHorizontal size={14} /> More</button>
+                  <p className="col-span-2 sm:col-span-4 text-xs text-zinc-500">X and WhatsApp take text only, so the card downloads to attach. More sends the image.</p>
+                </div>
+              )}
             </motion.div>
           </motion.div>
-
-          {shareOpen && (
-            <div className="mt-2.5 rounded-2xl border border-zinc-800 bg-zinc-900 p-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <button onClick={() => shareToX()} title="Saves the card, then opens X so you can attach it" className="h-11 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition inline-flex items-center justify-center gap-1.5"><Share2 size={14} /> X</button>
-              <button onClick={() => shareToWhatsApp()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MessageCircle size={14} /> WhatsApp</button>
-              <button onClick={() => downloadImage()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><ImageDown size={14} /> PNG</button>
-              <button onClick={() => nativeShare()} title="Shares the card image where supported" className="h-11 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs hover:text-white hover:border-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MoreHorizontal size={14} /> More</button>
-              <p className="col-span-2 sm:col-span-4 text-xs text-zinc-500">X and WhatsApp only accept text from a link, so the card downloads first and you attach it. More sends the image directly where the browser supports it.</p>
-            </div>
-          )}
-
 
           <div className="mt-3 grid lg:grid-cols-[360px_1fr] gap-4 items-start">
             <div className="lg:sticky lg:top-[calc(8.5rem+env(safe-area-inset-top))] z-10">
@@ -1277,7 +1275,7 @@ export default function App() {
                 <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-4 text-center">
                   <div className="text-[34px] leading-none font-bold tabular-nums text-white">{daysToStart}</div>
                   <div className="mt-1 text-[13px] text-zinc-400">{daysToStart === 1 ? 'day until you start' : 'days until you start'}</div>
-                  <p className="mt-3 text-xs leading-5 text-zinc-500">Nothing to check yet. You can change the dates if you would rather begin now.</p>
+                  <p className="mt-3 text-xs leading-5 text-zinc-500">Nothing to check yet. Change the dates to begin now.</p>
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <button
                       onClick={() => {
@@ -1403,7 +1401,7 @@ export default function App() {
               <div className="mt-2 text-[10px] font-mono text-zinc-500">last 7 days</div>
               {streakInfo && (
                 <p className="mt-3 pt-3 border-t border-zinc-800 text-[13px] leading-6 text-zinc-500">
-                  A day counts only when every habit you picked is checked. Rest days are skipped, so they never break a streak and never count as a miss. One partial day on a scheduled day ends it. Backfilling repairs the streak, because it reads the grid rather than a stored counter.
+                  A day counts when every habit is checked. Rest days are skipped, so they never break it. One partial scheduled day ends it. Backfilling repairs it, because the streak reads the grid.
                 </p>
               )}
             </div>
@@ -1508,7 +1506,7 @@ export default function App() {
                   <button onClick={exportCSV} className="px-4 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">CSV</button>
                 </div>
                 <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 overflow-auto max-h-56"><pre className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-words font-mono">{llmPrompt}</pre></div>
-                <div className="mt-2 text-xs text-zinc-500">Paste this with your exported JSON. Nothing leaves the device until you do.</div>
+                <div className="mt-2 text-xs text-zinc-500">Paste it with your JSON export. Nothing sends itself.</div>
               </div>
             </Disclosure>
           </div>
@@ -1520,7 +1518,7 @@ export default function App() {
           <div className="rounded-2xl border border-red-500/20 bg-red-500/[0.04] p-4 flex flex-wrap items-center gap-3">
             <div className="min-w-0">
               <div className="text-[15px] font-semibold text-white">Start over</div>
-              <p className="mt-1 text-[13px] leading-5 text-zinc-500">Deletes this arc from the browser. There is no undo and no copy on a server.</p>
+              <p className="mt-1 text-[13px] leading-5 text-zinc-500">Deletes this arc from the browser. No undo.</p>
             </div>
             <button onClick={() => setConfirmReset(true)} className="ml-auto shrink-0 h-11 px-5 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-sm font-semibold hover:bg-red-500/15 transition">Reset arc</button>
           </div>
@@ -1543,7 +1541,7 @@ export default function App() {
               </p>
               <label className="mt-4 flex items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 cursor-pointer">
                 <input type="checkbox" checked={backupBeforeReset} onChange={e => setBackupBeforeReset(e.target.checked)} className="mt-0.5 accent-white w-4 h-4" />
-                <span className="text-[13px] leading-5 text-zinc-300">Download a JSON backup first<span className="block text-zinc-500">Saves the file, then clears the arc.</span></span>
+                <span className="text-[13px] leading-5 text-zinc-300">Download a JSON backup first<span className="block text-zinc-500">Saves the file, then clears.</span></span>
               </label>
               <div className="mt-5 grid grid-cols-2 gap-2">
                 <button onClick={() => setConfirmReset(false)} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-sm hover:text-white hover:border-zinc-700 transition">Keep my arc</button>
@@ -1830,7 +1828,7 @@ export default function App() {
                       Clear
                     </button>
                   </div>
-                  <p className="mt-2 text-xs text-zinc-500">A template just ticks its habits below. Add or remove any of them after.</p>
+                  <p className="mt-2 text-xs text-zinc-500">Ticks its habits below. Edit them after.</p>
                 </div>
                 <div className="mt-2 text-[11px] font-mono tracking-widest text-zinc-500">Selected {tmpSelected.size} {tmpSelected.size > 10 && '· over 10'}</div>
                 {['non-neg', 'extra', 'aesthetic', 'custom'].map(tier => {
@@ -1868,7 +1866,7 @@ export default function App() {
                     <Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. Run 5km" onKeyDown={e => e.key === 'Enter' && addCustom()} className="h-11" maxLength={60} />
                     <Button variant="secondary" className="h-11 px-5 shrink-0" onClick={addCustom}>Add</Button>
                   </div>
-                  <p className="mt-2 text-xs text-zinc-500">It joins the Custom group above, ticked and ready.</p>
+                  <p className="mt-2 text-xs text-zinc-500">Joins the Custom group above, ticked.</p>
                 </div>
               </div>
             )}
@@ -1902,7 +1900,7 @@ export default function App() {
               <span className="w-9 h-9 shrink-0 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-300"><Smartphone size={15} /></span>
               <div className="min-w-0 flex-1">
                 <div className="text-[13px] font-semibold text-white">Keep it on your home screen</div>
-                <div className="mt-0.5 text-[12px] leading-5 text-zinc-500">Installs like an app, opens offline, still no account.</div>
+                <div className="mt-0.5 text-[12px] leading-5 text-zinc-500">Works offline, still no account.</div>
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   <button onClick={runInstall} className="h-11 px-4 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">
                     {installEvent ? 'Install' : 'Show me how'}
