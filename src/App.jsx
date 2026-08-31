@@ -144,8 +144,9 @@ export default function App() {
     if (standalone || localStorage.getItem('wa_install_hint') === 'dismissed') return
     const onPrompt = e => { e.preventDefault(); setInstallEvent(e); setShowInstallHint(true) }
     window.addEventListener('beforeinstallprompt', onPrompt)
-    const t = setTimeout(() => setShowInstallHint(true), 6000)
-    return () => { window.removeEventListener('beforeinstallprompt', onPrompt); clearTimeout(t) }
+    const onScroll = () => { if (window.scrollY > 900) setShowInstallHint(true) }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => { window.removeEventListener('beforeinstallprompt', onPrompt); window.removeEventListener('scroll', onScroll) }
   }, [])
 
   useEffect(() => {
