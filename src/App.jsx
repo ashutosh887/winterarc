@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, Heart, X, User, Settings } from 'lucide-react'
+import { Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, Heart, X, User, Settings, Menu } from 'lucide-react'
 import { Canvas } from '@react-three/fiber'
 import { Float, Icosahedron } from '@react-three/drei'
-import { site, resources, templates, quotes as QUOTES_CFG } from './config'
+import { site, resources, templates, challenges, quotes as QUOTES_CFG } from './config'
 
 const DEFAULT_START = '2026-10-01'
 const DEFAULT_END = '2026-12-31'
@@ -99,6 +99,7 @@ export default function App() {
   const [habitsV2, setHabitsV2] = useLocalStorage('wa_habits_v2', null)
   const [entries, setEntries] = useLocalStorage('wa_entries', {})
   const [view, setView] = useState('tracker')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState(todayYMD())
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [onboardStep, setOnboardStep] = useState(1)
@@ -203,6 +204,8 @@ export default function App() {
   function completeOnboarding() {
     const chosen = [...PRESETS.filter(p => tmpSelected.has(p.id)), ...customList]
     if (!chosen.length) { alert('Pick at least 1 habit (recommended 3–5)'); return }
+    if (!tmpStart || !tmpEnd || isNaN(parseYMD(tmpStart).getTime()) || isNaN(parseYMD(tmpEnd).getTime())) { alert('Pick valid start and end dates'); return }
+    if (parseYMD(tmpStart) > parseYMD(tmpEnd)) { alert('Start date must be before end date'); return }
     if (chosen.length > 10 && !confirm(`You picked ${chosen.length} habits. Recommended max is 10 — continue?`)) return
     setSettings({ start: tmpStart, end: tmpEnd, name: tmpName.trim() || null })
     setHabitsV2(chosen); setHabits(chosen)
@@ -221,12 +224,13 @@ export default function App() {
     setTmpSelected(new Set(t.habitIds)); setCustomList([]); setOnboardStep(3); setShowOnboarding(true)
   }
   function exportJSON() {
-    const data = { settings: { start, end }, habits: effectiveHabits, entries, exportedAt: new Date().toISOString() }
+    const data = { settings: { start, end, name: settings?.name ?? null }, habits: effectiveHabits, entries, exportedAt: new Date().toISOString() }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `winter-arc-${start}_${end}.json`; a.click(); URL.revokeObjectURL(url)
   }
+  function csvEscape(s) { return `"${String(s).replace(/"/g, '""')}"` }
   function exportCSV() {
-    const header = ['date', ...effectiveHabits.map(h => `"${h.name}"`), 'perfect']
+    const header = ['date', ...effectiveHabits.map(h => csvEscape(h.name)), 'perfect']
     const rows = allDates.map(d => {
       const e = entries[d] || {}
       const vals = effectiveHabits.map(h => e[h.id] ? '1' : '0')
@@ -235,6 +239,11 @@ export default function App() {
     })
     const csv = [header.join(','), ...rows].join('\n')
     const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `winter-arc-${start}_${end}.csv`; a.click(); URL.revokeObjectURL(url)
+  }
+  function resetAll() {
+    if (!confirm('Reset all WinterArc data? This cannot be undone. Are you sure?')) return
+    for (const k of ['wa_settings_v2','wa_habits','wa_habits_v2','wa_entries']) localStorage.removeItem(k)
+    location.reload()
   }
   const llmPrompt = `Analyze my Winter Arc data (Oct 1 → Dec 31). Habits: ${effectiveHabits.map(h => h.name).join(', ')}. Total days: ${totalDays}. Perfect days: ${stats.perfect}/${totalDays} (${stats.perfectPct}%). Completion: ${stats.pct}%. Streak: ${stats.streak}, best: ${stats.bestStreak}. Entries: ${JSON.stringify(entries).slice(0, 4000)} ... Give: 1) patterns, 2) weekly trend, 3) 3 fixes for next 7 days, 4) motivational summary. Concise.`
 
@@ -301,17 +310,33 @@ export default function App() {
             </div>
           </button>
           <nav className="flex items-center gap-1 sm:gap-2">
+            <button onClick={() => setView('landing')} className={`hidden sm:inline-flex px-3 py-1.5 rounded-full text-[13px] font-medium ${view === 'landing' ? 'bg-zinc-900 text-white border border-zinc-800' : 'text-zinc-400 hover:text-white'}`}>Home</button>
             <button onClick={() => setView('templates')} className={`hidden sm:inline-flex px-3 py-1.5 rounded-full text-[13px] font-medium ${view === 'templates' ? 'bg-zinc-900 text-white border border-zinc-800' : 'text-zinc-400 hover:text-white'}`}>Templates</button>
+            <button onClick={() => setView('challenges')} className={`hidden sm:inline-flex px-3 py-1.5 rounded-full text-[13px] font-medium ${view === 'challenges' ? 'bg-zinc-900 text-white border border-zinc-800' : 'text-zinc-400 hover:text-white'}`}>Challenges</button>
             <button onClick={() => setView('resources')} className={`hidden sm:inline-flex px-3 py-1.5 rounded-full text-[13px] font-medium ${view === 'resources' ? 'bg-zinc-900 text-white border border-zinc-800' : 'text-zinc-400 hover:text-white'}`}>Resources</button>
             <button onClick={() => setView('feedback')} className={`hidden sm:inline-flex px-3 py-1.5 rounded-full text-[13px] font-medium ${view === 'feedback' ? 'bg-zinc-900 text-white border border-zinc-800' : 'text-zinc-400 hover:text-white'}`}>Feedback</button>
-            {hasData && (<>
-              <button onClick={() => setView('tracker')} aria-current={view === 'tracker'} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'tracker' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>Tracker</button>
-              <button onClick={() => setView('dashboard')} aria-current={view === 'dashboard'} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'dashboard' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>Dashboard</button>
-            </>)}
+            {hasData ? (<>
+              <button onClick={() => setView('tracker')} aria-current={view === 'tracker'} className={`hidden sm:inline-flex px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'tracker' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>Tracker</button>
+              <button onClick={() => setView('dashboard')} aria-current={view === 'dashboard'} className={`hidden sm:inline-flex px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'dashboard' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>Dashboard</button>
+            </>) : <button onClick={() => setView('tracker')} className="hidden sm:inline-flex px-3.5 py-1.5 rounded-full text-[13px] font-medium text-zinc-600 border border-zinc-800 opacity-60" title="Set up your arc first">Tracker</button>}
             <button onClick={startOnboarding} className="ml-1 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-zinc-900 font-semibold text-[13px] hover:bg-zinc-100 transition"><Sparkles size={14} /> {hasData ? 'Edit arc' : 'Start your arc'}</button>
+            <button onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" className="sm:hidden p-2 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300"><Menu size={18} /></button>
           </nav>
         </div>
       </header>
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="sm:hidden sticky top-[60px] z-20 bg-zinc-950 border-b border-zinc-800">
+            <div className="max-w-[980px] mx-auto px-6 py-3 grid grid-cols-2 gap-2">
+              {[
+                ['Home','landing'],['Templates','templates'],['Challenges','challenges'],['Resources','resources'],['Feedback','feedback'],['Tracker','tracker'],['Dashboard','dashboard']
+              ].map(([label, v]) => (
+                <button key={v} onClick={() => { setView(v); setMobileMenuOpen(false) }} className={`px-3 py-2.5 rounded-xl text-sm font-medium text-left border ${view===v ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-300 border-zinc-800'}`}>{label}</button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* top notification — last day record */}
       {hasData && (() => {
@@ -372,9 +397,9 @@ export default function App() {
                 A minimal, private tracker for your 90-day lock-in. No account. No cloud.<br className="hidden sm:block" /> Your data lives on your device.
               </p>
 
-              <div className="mt-8 flex items-center justify-center gap-3">
-                <button onClick={startOnboarding} className="px-6 py-3 rounded-full bg-white text-slate-900 font-semibold text-[14px] hover:bg-slate-100 transition">Start your arc →</button>
-                <button onClick={() => { if (!hasData) startOnboarding(); else setView('tracker') }} className="px-6 py-3 rounded-full border border-zinc-800 bg-transparent text-zinc-300 font-medium text-[14px] hover:bg-zinc-900 transition">View demo</button>
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button onClick={startOnboarding} className="w-full sm:w-auto justify-center px-6 py-3 rounded-full bg-white text-zinc-900 font-semibold text-[14px] hover:bg-zinc-100 transition flex items-center gap-1">Start your arc →</button>
+                <button onClick={() => { if (!hasData) startOnboarding(); else setView('tracker') }} className="w-full sm:w-auto justify-center px-6 py-3 rounded-full border border-zinc-800 bg-transparent text-zinc-300 font-medium text-[14px] hover:bg-zinc-900 transition">View demo</button>
               </div>
               <div className="mt-3 inline-flex items-center gap-2 text-[11px] font-mono tracking-wide text-zinc-600"><Shield size={12} /> Free • No paywall • Install as PWA • trywinterarc.vercel.app</div>
             </div>
@@ -407,10 +432,10 @@ export default function App() {
                 </div>
                 <div className="p-5">
                   <div className="flex items-center justify-between"><span className="text-[11px] font-mono tracking-widest text-zinc-500">OCT → DEC GRID</span><span className="text-[11px] font-mono text-zinc-600">Missed stays red • No restart</span></div>
-                  <div className="mt-4 grid grid-cols-14 gap-1.5">
+                  <div className="mt-4 grid grid-cols-7 sm:grid-cols-14 gap-1.5">
                     {Array.from({ length: 42 }, (_, i) => {
                       const v = i < 11 ? 'perfect' : i < 14 ? 'partial' : i < 16 ? 'miss' : i < 28 ? 'future' : 'empty'
-                      const cls = v === 'perfect' ? 'bg-white border-white' : v === 'partial' ? 'bg-slate-400 border-slate-400' : v === 'miss' ? 'bg-red-500/20 border-red-500/30' : 'bg-zinc-800 border-zinc-800'
+                      const cls = v === 'perfect' ? 'bg-white border-white' : v === 'partial' ? 'bg-zinc-400 border-zinc-400' : v === 'miss' ? 'bg-red-500/20 border-red-500/30' : 'bg-zinc-800 border-zinc-800'
                       return <div key={i} className={`aspect-square rounded-md border ${cls}`} />
                     })}
                   </div>
@@ -485,6 +510,33 @@ export default function App() {
           <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 flex items-center justify-between">
             <div className="text-sm text-zinc-300 flex items-center gap-2"><Heart size={14} className="text-zinc-400" /> Like it? Star the repo — it helps the community.</div>
             <a href={site.support.github} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm">Star on GitHub</a>
+          </div>
+        </main>
+      )}
+
+      {view === 'challenges' && (
+        <main id="main" className="max-w-[980px] mx-auto px-6 py-10">
+          <div className="flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Flame size={12} /> CHALLENGES • FREE</div>
+          <h1 className="mt-2 text-[28px] font-bold tracking-tight text-white">Challenges</h1>
+          <p className="mt-1 text-sm text-zinc-400">All free. Progress from your arc — no backend. Config in <code className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800">src/config.ts → challenges</code>.</p>
+          <div className="mt-6 grid sm:grid-cols-2 gap-4">
+            {challenges.map(c => {
+              const pct = c.type === 'streak' ? Math.min(100, Math.round((stats.bestStreak / c.days) * 100)) : Math.min(100, Math.round((stats.perfect % 7 / 7) * 100))
+              const unlocked = c.type === 'streak' ? stats.bestStreak >= c.days : stats.perfect >= 7
+              return (
+                <motion.div key={c.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={`rounded-2xl border p-5 card-glow shine ${unlocked ? 'bg-white border-white text-zinc-900' : 'bg-zinc-900 border-zinc-800'}`}>
+                  <div className="flex items-center gap-3">
+                    <Ring pct={pct} size={56}><span className="text-lg">{c.icon}</span></Ring>
+                    <div className="flex-1">
+                      <div className={`font-semibold flex items-center gap-2 ${unlocked ? 'text-zinc-900' : 'text-white'}`}>{c.label} <span className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-mono ${unlocked ? 'bg-zinc-900 text-white' : 'bg-white text-zinc-900'}`}>FREE</span></div>
+                      <div className={`text-xs ${unlocked ? 'text-zinc-600' : 'text-zinc-400'}`}>{c.desc}</div>
+                      <div className={`text-xs font-mono mt-1 ${unlocked ? 'text-zinc-700' : 'text-sky-400'}`}>{pct}% • {c.type === 'streak' ? `${stats.bestStreak}/${c.days} streak` : `${stats.perfect % 7}/7 week`}</div>
+                    </div>
+                  </div>
+                  <button disabled={!unlocked} onClick={() => shareToX(c)} className={`mt-3 w-full py-2 rounded-full text-xs font-semibold cursor-pointer ${unlocked ? 'bg-zinc-900 text-white hover:bg-zinc-800' : 'bg-zinc-800 text-zinc-500'}`}>{unlocked ? 'Share ✓' : '🔒 Locked'}</button>
+                </motion.div>
+              )
+            })}
           </div>
         </main>
       )}
@@ -670,7 +722,7 @@ export default function App() {
           </div>
 
           <div className="mt-6 rounded-2xl bg-zinc-900 border border-zinc-800 p-4 card-glow">
-            <div className="flex items-center justify-between gap-2"><div className="font-semibold text-white">Export & LLM prompt</div><div className="flex items-center gap-2"><button onClick={() => navigator.clipboard.writeText(llmPrompt)} className="px-3 py-1.5 rounded-full bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-semibold">Copy prompt</button><button onClick={() => { if (confirm('Reset all WinterArc data? This cannot be undone. Are you sure?')) { localStorage.clear(); location.reload() } }} className="px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-semibold">Reset</button></div></div>
+            <div className="flex items-center justify-between gap-2"><div className="font-semibold text-white">Export & LLM prompt</div><div className="flex items-center gap-2"><button onClick={() => navigator.clipboard.writeText(llmPrompt)} className="px-3 py-1.5 rounded-full bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-semibold">Copy prompt</button><button onClick={() => { resetAll() }} className="px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-semibold">Reset</button></div></div>
             <div className="mt-3 rounded-xl bg-zinc-950 border border-zinc-800 p-3 overflow-auto"><pre className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-words font-mono">{llmPrompt}</pre></div>
             <div className="mt-2 text-xs text-zinc-500">Paste with exported JSON into ChatGPT/Claude. Data never leaves device until you paste. Reset asks for confirmation.</div>
           </div>
@@ -721,7 +773,7 @@ export default function App() {
                 <div className="flex justify-between"><span className="text-zinc-400">Range</span><span className="text-white font-mono text-xs">{start} → {end}</span></div>
                 <div className="flex justify-between"><span className="text-zinc-400">Best streak</span><span className="text-amber-400 font-mono">{stats.bestStreak} 🔥</span></div>
                 <div className="pt-3 flex gap-2"><button onClick={exportJSON} className="flex-1 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm">JSON</button><button onClick={exportCSV} className="flex-1 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm">CSV</button></div>
-                <button onClick={() => { if (confirm('Reset all WinterArc data? This cannot be undone. Are you sure?')) { localStorage.clear(); location.reload() } }} className="w-full py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-sm">Reset</button>
+                <button onClick={() => { resetAll() }} className="w-full py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-sm">Reset</button>
               </div>
             </div>
           </div>
@@ -753,8 +805,8 @@ export default function App() {
 
       <AnimatePresence>
       {showOnboarding && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center p-4 bg-zinc-950/80 backdrop-blur-xl" role="dialog" aria-modal="true">
-          <motion.div initial={{ opacity: 0, scale: 0.96, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 8 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} className="w-full max-w-[760px] max-h-[90vh] overflow-auto rounded-[24px] bg-zinc-900 border border-zinc-800 p-6 shadow-2xl">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center p-4 sm:p-6 bg-zinc-950/80 backdrop-blur-xl" role="dialog" aria-modal="true">
+          <motion.div initial={{ opacity: 0, scale: 0.96, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 8 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} className="w-full max-w-[760px] max-h-[90dvh] overflow-y-auto overscroll-contain rounded-[24px] bg-zinc-900 border border-zinc-800 p-4 sm:p-6 shadow-2xl">
             <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={28} /><span className="font-semibold tracking-[0.14em] text-sm text-white">SET UP YOUR ARC</span> <span className="text-xs font-mono text-zinc-500">Step {onboardStep}/3</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-8 h-8 grid place-items-center rounded-full bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition"><X size={14} /></button></div>
             {onboardStep === 1 && (
               <div className="mt-6">

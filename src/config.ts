@@ -63,6 +63,13 @@ export const templates: { id: string; name: string; icon: string; habitIds: stri
   { id: 'minimal', name: 'Minimal (3)', icon: '❄️', habitIds: ['gym', 'sleep', 'work'], desc: 'Just 3 — perfect for starting. Add more later.' },
 ]
 
+export const challenges: { id: string; label: string; icon: string; days: number; type: 'streak' | 'week'; desc: string }[] = [
+  { id: 'streak7', label: '7-Day Streak', icon: '🔥', days: 7, type: 'streak', desc: '7 perfect days in a row' },
+  { id: 'streak14', label: '14-Day Lock', icon: '❄️', days: 14, type: 'streak', desc: '14 perfect days in a row' },
+  { id: 'streak30', label: '30-Day Forge', icon: '🧊', days: 30, type: 'streak', desc: '30 perfect days in a row' },
+  { id: 'perfectWeek', label: 'Perfect Week', icon: '⭐', days: 7, type: 'week', desc: '7/7 perfect in a calendar week' },
+]
+
 // 120 quotes — covers 92-day arc + buffer for future arcs post-Jan. Shown rotating, history + future preview available.
 export const quotes: { q: string; a: string }[] = [
   { q: 'Discipline is choosing between what you want now and what you want most.', a: 'Abraham Lincoln' },
