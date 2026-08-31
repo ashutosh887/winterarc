@@ -257,6 +257,8 @@ export default function App() {
   const allDates = useMemo(() => Array.from({ length: totalDays }, (_, i) => addDays(start, i)), [start, totalDays])
 
   const selectedIsFuture = selectedDate > today
+  const arcStarted = today >= start
+  const daysToStart = arcStarted ? 0 : daysBetween(today, start) - 1
   const isPerfectDay = useCallback(d => {
     const e = entries[d] || {}
     return effectiveHabits.length > 0 && effectiveHabits.every(h => e[h.id])
@@ -515,10 +517,20 @@ export default function App() {
     ctx.fillText('trywinterarc.vercel.app', 64, 588)
     return canvas.toDataURL('image/png')
   }
+  function shareCardBlob({ achievement } = {}) {
+    return new Promise(resolve => {
+      const canvas = canvasRef.current
+      if (!canvas) return resolve(null)
+      drawShareCard({ achievement })
+      if (typeof canvas.toBlob !== 'function') return resolve(null)
+      canvas.toBlob(b => resolve(b), 'image/png')
+    })
+  }
   function downloadImage(achievement) {
     const url = drawShareCard({ achievement }); const a = document.createElement('a'); a.href = url; a.download = achievement ? `winter-arc-${achievement.id}.png` : `winter-arc-day${stats.dayNum}.png`; a.click()
   }
   function shareToX(achievement) {
+    downloadImage(achievement)
     const text = achievement
       ? `${achievement.label}. Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done, streak ${stats.streak}.\n${site.tagline}\n`
       : `Day ${stats.dayNum}/${totalDays}. ${stats.perfect} perfect days, ${stats.pct}% done, streak ${stats.streak}.\n${site.hero}\n`
@@ -533,7 +545,19 @@ export default function App() {
   }
   async function nativeShare(achievement) {
     const text = achievement ? `${achievement.label}. ${achievement.desc}` : `Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done`
-    if (navigator.share) { try { await navigator.share({ title: 'WinterArc', text, url: location.href }) } catch {} } else { shareToX(achievement) }
+    if (!navigator.share) return shareToX(achievement)
+    const payload = { title: 'WinterArc', text, url: site.domain }
+    try {
+      const blob = await shareCardBlob({ achievement })
+      if (blob) {
+        const file = new File([blob], 'winter-arc.png', { type: 'image/png' })
+        if (navigator.canShare?.({ files: [file] })) {
+          await navigator.share({ ...payload, files: [file] })
+          return
+        }
+      }
+    } catch {}
+    try { await navigator.share(payload) } catch {}
   }
   const navLinks = [
     { label: 'Winter arc', onClick: () => goTo('about'), active: view === 'about' },
@@ -1140,10 +1164,11 @@ export default function App() {
 
           {shareOpen && (
             <div className="mt-2.5 rounded-2xl border border-zinc-800 bg-zinc-900 p-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <button onClick={() => shareToX()} className="h-11 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition inline-flex items-center justify-center gap-1.5"><Share2 size={14} /> X</button>
+              <button onClick={() => shareToX()} title="Saves the card, then opens X so you can attach it" className="h-11 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition inline-flex items-center justify-center gap-1.5"><Share2 size={14} /> X</button>
               <button onClick={() => shareToWhatsApp()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MessageCircle size={14} /> WhatsApp</button>
               <button onClick={() => downloadImage()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><ImageDown size={14} /> PNG</button>
-              <button onClick={() => nativeShare()} className="h-11 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs hover:text-white hover:border-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MoreHorizontal size={14} /> More</button>
+              <button onClick={() => nativeShare()} title="Shares the card image where supported" className="h-11 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs hover:text-white hover:border-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MoreHorizontal size={14} /> More</button>
+              <p className="col-span-2 sm:col-span-4 text-xs text-zinc-500">X and WhatsApp only accept text from a link, so the card downloads first and you attach it. More sends the image directly where the browser supports it.</p>
             </div>
           )}
 
@@ -1154,14 +1179,33 @@ export default function App() {
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <div className="text-[15px] font-semibold text-white">Daily check-in</div>
-                  {selectedIsFuture
-                    ? <div className="text-[11px] font-mono text-zinc-500">Not here yet. Come back on the day.</div>
-                    : !isActiveDay(selectedDate) && <div className="text-[11px] font-mono text-zinc-500">Rest day, nothing owed</div>}
+                  {!arcStarted
+                    ? <div className="text-[11px] font-mono text-zinc-500">Starts {start}</div>
+                    : selectedIsFuture
+                      ? <div className="text-[11px] font-mono text-zinc-500">Not here yet. Come back on the day.</div>
+                      : !isActiveDay(selectedDate) && <div className="text-[11px] font-mono text-zinc-500">Rest day, nothing owed</div>}
                 </div>
                 <Ring pct={dailyPct} size={44} stroke={3}><span className="text-[11px] font-mono font-bold text-zinc-300">{dailyPct}%</span></Ring>
               </div>
-              <input type="date" value={selectedDate} min={start} max={today < end ? today : end} onChange={e => { const v = e.target.value; if (!v) return; const cap = today < end ? today : end; setSelectedDate(v < start ? start : v > cap ? cap : v) }} className="mt-3 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 min-h-11 text-base sm:text-sm text-white" />
-              <div className="mt-4 space-y-2">
+              {!arcStarted && (
+                <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-4 text-center">
+                  <div className="text-[34px] leading-none font-bold tabular-nums text-white">{daysToStart}</div>
+                  <div className="mt-1 text-[13px] text-zinc-400">{daysToStart === 1 ? 'day until you start' : 'days until you start'}</div>
+                  <p className="mt-3 text-xs leading-5 text-zinc-500">Nothing to check yet. You can change the dates if you would rather begin now.</p>
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => {
+                        const next = { ...(settings || {}), start: today, end: addDays(today, Math.max(0, totalDays - 1)) }
+                        setSettings(next); setSelectedDate(today)
+                      }}
+                      className="h-11 px-4 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition"
+                    >Start today</button>
+                    <button onClick={startOnboarding} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">Edit dates</button>
+                  </div>
+                </div>
+              )}
+              <input type="date" value={selectedDate} min={start} max={today < end ? today : end} disabled={!arcStarted} onChange={e => { const v = e.target.value; if (!v) return; const cap = today < end ? today : end; setSelectedDate(v < start ? start : v > cap ? cap : v) }} className="mt-3 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 min-h-11 text-base sm:text-sm text-white" />
+              <div className={`mt-4 space-y-2 ${arcStarted ? '' : 'hidden'}`}>
                 {effectiveHabits.map(h => {
                   const done = !!(entries[selectedDate] || {})[h.id]
                   return (
@@ -1174,8 +1218,8 @@ export default function App() {
                   )
                 })}
               </div>
-              <div className="mt-3 flex items-center justify-between text-xs font-mono"><span className="text-zinc-400">{effectiveHabits.filter(h => (entries[selectedDate] || {})[h.id]).length}/{effectiveHabits.length} done</span>{effectiveHabits.length > 0 && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) && <span className="text-white inline-flex items-center gap-1"><Check size={12} /> Perfect day</span>}</div>
-              <div className="mt-3 flex gap-2">
+              <div className={`mt-3 flex items-center justify-between text-xs font-mono ${arcStarted ? '' : 'hidden'}`}><span className="text-zinc-400">{effectiveHabits.filter(h => (entries[selectedDate] || {})[h.id]).length}/{effectiveHabits.length} done</span>{effectiveHabits.length > 0 && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) && <span className="text-white inline-flex items-center gap-1"><Check size={12} /> Perfect day</span>}</div>
+              <div className={`mt-3 flex gap-2 ${arcStarted ? '' : 'hidden'}`}>
                 <button
                   disabled={selectedIsFuture || effectiveHabits.length === 0}
                   onClick={() => {
