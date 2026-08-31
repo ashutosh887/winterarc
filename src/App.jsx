@@ -1138,6 +1138,14 @@ export default function App() {
             A winter arc is the stretch of the year most people write off. School is grinding, work is grinding, the weather is bad, and the plan quietly becomes January. The idea is to use that window instead of waiting it out.
           </p>
 
+          <div className="mt-6 max-w-[620px] rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+            <div className="text-[11px] font-mono tracking-widest text-zinc-500">The tagline</div>
+            <p className="mt-2 text-[15px] font-semibold text-white">&ldquo;{site.tagline}&rdquo;</p>
+            <p className="mt-2 text-[13px] leading-6 text-zinc-500">
+              In plain English: work at your hardest and stay focused during the stretch when the people around you have eased off. To lock in is to commit completely and shut out distractions. To coast is to keep moving on leftover momentum without putting in effort. The end of the year is when most people coast, and that is exactly what makes it the cheapest time to get ahead.
+            </p>
+          </div>
+
           <div className="mt-8 grid md:grid-cols-2 gap-4">
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
               <div className="text-[15px] font-semibold text-white">Why the end of the year</div>
