@@ -673,7 +673,7 @@ export default function App() {
       )}
 
       {view === 'tracker' && hasData && (
-        <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-6">
+        <main className="max-w-[1040px] mx-auto px-5 sm:px-6 py-6">
           <motion.div initial="hidden" animate="show" variants={stagger} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <motion.div variants={fadeUp} className="rounded-2xl bg-zinc-900 border border-zinc-800 p-4 flex items-center gap-3">
               <Ring pct={Math.round((stats.dayNum / totalDays) * 100)} size={54}><span className="text-xs font-mono font-bold text-white">{stats.dayNum}/{totalDays}</span></Ring>
@@ -694,7 +694,7 @@ export default function App() {
                 <button onClick={() => downloadImage()} className="py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">PNG</button>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => nativeShare()} className="flex-1 py-1.5 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700 hover:bg-zinc-700 transition">Share…</button>
+                <button onClick={() => nativeShare()} className="flex-1 py-1.5 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700 hover:bg-zinc-700 transition">More</button>
                 <button onClick={exportJSON} className="px-3 py-1.5 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700 hover:bg-zinc-700 transition">JSON</button>
                 <button onClick={exportCSV} className="px-3 py-1.5 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700 hover:bg-zinc-700 transition">CSV</button>
               </div>
@@ -714,16 +714,16 @@ export default function App() {
                 {effectiveHabits.map(h => {
                   const done = !!(entries[selectedDate] || {})[h.id]
                   return (
-                    <label key={h.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 cursor-pointer transition ${done ? 'bg-emerald-500/10 border-emerald-500/25' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}>
-                      <input type="checkbox" checked={done} onChange={() => toggleHabit(selectedDate, h.id)} className="accent-emerald-500 w-4 h-4" />
-                      <span className="w-7 h-7 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-300"><HabitIcon name={h.icon} size={14} /></span>
-                      <span className={`text-sm flex-1 ${done ? 'text-emerald-200 line-through decoration-emerald-500/20' : 'text-zinc-200'}`}>{h.name}</span>
-                      {done && <span className="text-emerald-400"><Check size={14} /></span>}
+                    <label key={h.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 cursor-pointer transition ${done ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}>
+                      <input type="checkbox" checked={done} onChange={() => toggleHabit(selectedDate, h.id)} className="accent-zinc-900 w-4 h-4" />
+                      <span className={`w-7 h-7 rounded-full grid place-items-center border ${done ? 'bg-zinc-900 border-zinc-900 text-white' : 'bg-zinc-800 border-zinc-700 text-zinc-300'}`}><HabitIcon name={h.icon} size={14} /></span>
+                      <span className={`text-sm flex-1 ${done ? 'text-zinc-900 font-medium' : 'text-zinc-200'}`}>{h.name}</span>
+                      {done && <span className="text-zinc-900"><Check size={14} /></span>}
                     </label>
                   )
                 })}
               </div>
-              <div className="mt-3 flex items-center justify-between text-xs font-mono"><span className="text-zinc-400">{Object.keys(entries[selectedDate] || {}).length}/{effectiveHabits.length} done</span><span className={`${effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'text-emerald-400 inline-flex items-center gap-1' : 'text-zinc-500'}`}>{effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? <><Check size={12} /> Perfect day</> : 'keep going'}</span></div>
+              <div className="mt-3 flex items-center justify-between text-xs font-mono"><span className="text-zinc-400">{Object.keys(entries[selectedDate] || {}).length}/{effectiveHabits.length} done</span><span className={`${effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'text-white inline-flex items-center gap-1' : 'text-zinc-500'}`}>{effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? <><Check size={12} /> Perfect day</> : 'keep going'}</span></div>
               <div className="mt-3 flex gap-2">
                 <button onClick={() => { const e = entries[selectedDate] || {}; const allDone = effectiveHabits.every(h => e[h.id]); const next = {}; effectiveHabits.forEach(h => next[h.id] = !allDone ? true : false); setEntries(prev => ({ ...prev, [selectedDate]: !allDone ? next : {} })) }} className="flex-1 py-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium border border-zinc-700 transition">{effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'Clear day' : 'Mark all done'}</button>
                 <button onClick={() => setSelectedDate(todayYMD())} className="px-4 py-2 rounded-full bg-white text-zinc-950 text-sm font-semibold transition">Today</button>
@@ -771,7 +771,7 @@ export default function App() {
       )}
 
       {view === 'dashboard' && hasData && (
-        <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-6">
+        <main className="max-w-[1040px] mx-auto px-5 sm:px-6 py-6">
           <div className="grid lg:grid-cols-3 gap-4">
             <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6 flex flex-col items-center">
               <div className="text-xs font-mono tracking-widest text-zinc-400">Overall</div>
