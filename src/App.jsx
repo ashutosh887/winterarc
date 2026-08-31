@@ -357,6 +357,16 @@ export default function App() {
     const text = achievement ? `${achievement.label}. ${achievement.desc}` : `Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done`
     if (navigator.share) { try { await navigator.share({ title: 'WinterArc', text, url: location.href }) } catch {} } else { shareToX(achievement) }
   }
+  const navLinks = [
+    { label: 'How it works', onClick: () => scrollToId('how'), active: false },
+    { label: 'Templates', onClick: () => goTo('templates'), active: view === 'templates' },
+    { label: 'Resources', onClick: () => goTo('resources'), active: view === 'resources' },
+    ...(hasData ? [
+      { label: 'Tracker', onClick: () => goTo('tracker'), active: view === 'tracker' },
+      { label: 'Dashboard', onClick: () => goTo('dashboard'), active: view === 'dashboard' },
+    ] : []),
+  ]
+
   function goTo(next) {
     setView(next)
     setMobileMenuOpen(false)
@@ -371,51 +381,56 @@ export default function App() {
   return (
     <div className="min-h-screen bg-zinc-950">
       <header className="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800">
-        <div className="max-w-[1040px] mx-auto px-5 sm:px-6 h-[56px] flex items-center gap-4">
-          <button onClick={() => { setView('landing'); window.scrollTo({ top: 0, behavior: 'smooth' }) }} aria-label="WinterArc home" className="flex items-center gap-2.5 shrink-0">
-            <Logo size={28} />
+        <div className="max-w-[1040px] mx-auto px-5 sm:px-6 h-14 flex items-center justify-between gap-3">
+          <button onClick={() => goTo('landing')} aria-label="WinterArc home" className="flex items-center gap-2.5 shrink-0">
+            <Logo size={26} />
             <span className="font-semibold tracking-[0.16em] text-[13px] text-white">WINTERARC</span>
           </button>
-          <nav className="hidden lg:flex items-center gap-1 ml-auto">
-            <button onClick={() => scrollToId('how')} className="px-3 py-1.5 rounded-full text-[13px] font-medium text-zinc-400 hover:text-white transition">How it works</button>
-            <button onClick={() => goTo('templates')} className={`px-3 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'templates' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white'}`}>Templates</button>
-            <button onClick={() => goTo('resources')} className={`px-3 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'resources' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white'}`}>Resources</button>
-          </nav>
-          <div className="flex items-center gap-2 ml-auto lg:ml-2">
-            {hasData && (
-              <div className="hidden lg:flex items-center gap-1">
-                <button onClick={() => setView('tracker')} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'tracker' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white'}`}>Tracker</button>
-                <button onClick={() => setView('dashboard')} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'dashboard' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white'}`}>Dashboard</button>
-              </div>
-            )}
-            <a href={site.support.github} target="_blank" rel="noreferrer" aria-label="Star WinterArc on GitHub" className="hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-zinc-800 bg-zinc-900 text-[13px] font-medium text-zinc-400 hover:text-white hover:border-zinc-700 transition">
+
+          <div className="flex items-center gap-2">
+            <nav className="hidden lg:flex items-center gap-0.5">
+              {navLinks.map(l => (
+                <button
+                  key={l.label}
+                  onClick={l.onClick}
+                  className={`h-9 px-3 rounded-full text-[13px] font-medium transition ${l.active ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
+                >
+                  {l.label}
+                </button>
+              ))}
+            </nav>
+
+            <a href={site.support.github} target="_blank" rel="noreferrer" aria-label="Star WinterArc on GitHub" className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-zinc-800 bg-zinc-900 text-[13px] font-medium text-zinc-400 hover:text-white hover:border-zinc-700 transition">
               <Star size={13} /> {stars === null ? 'Star' : stars}
             </a>
-            <Button onClick={startOnboarding} size="sm" className="rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold px-4 h-9 text-[13px]">
-              <ArrowRight size={14} /> {hasData ? 'Edit arc' : 'Start your arc'}
-            </Button>
-            <Button variant="ghost" size="icon-sm" onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" className="lg:hidden rounded-full text-zinc-500 hover:text-white size-9">
-              <Menu size={18} />
-            </Button>
+
+            <button onClick={startOnboarding} className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold text-[13px] transition whitespace-nowrap">
+              {hasData ? 'Edit arc' : 'Start your arc'} <ArrowRight size={14} />
+            </button>
+
+            <button onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" aria-expanded={mobileMenuOpen} className="lg:hidden w-9 h-9 grid place-items-center rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
+              {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
           </div>
         </div>
       </header>
 
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="lg:hidden sticky top-[56px] z-20 bg-zinc-950 border-b border-zinc-800">
+          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="lg:hidden sticky top-14 z-20 bg-zinc-950 border-b border-zinc-800">
             <div className="max-w-[1040px] mx-auto px-5 sm:px-6 py-3 grid grid-cols-2 gap-2">
-              <button onClick={() => scrollToId('how')} className="px-4 py-2.5 rounded-full text-sm font-medium text-left border bg-zinc-900 text-zinc-200 border-zinc-800">How it works</button>
-              <button onClick={() => goTo('templates')} className={`px-4 py-2.5 rounded-full text-sm font-medium text-left border ${view === 'templates' ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-200 border-zinc-800'}`}>Templates</button>
-              <button onClick={() => goTo('resources')} className={`px-4 py-2.5 rounded-full text-sm font-medium text-left border ${view === 'resources' ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-200 border-zinc-800'}`}>Resources</button>
-              {hasData ? (
-                <>
-                  <button onClick={() => goTo('tracker')} className={`px-4 py-2.5 rounded-full text-sm font-medium text-left border ${view === 'tracker' ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-200 border-zinc-800'}`}>Tracker</button>
-                  <button onClick={() => goTo('dashboard')} className={`px-4 py-2.5 rounded-full text-sm font-medium text-left border ${view === 'dashboard' ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-200 border-zinc-800'}`}>Dashboard</button>
-                </>
-              ) : (
-                <button onClick={() => { setView('landing'); startOnboarding(); setMobileMenuOpen(false) }} className="col-span-2 px-4 py-2.5 rounded-full text-sm font-semibold text-center bg-white text-zinc-900">Start your arc</button>
-              )}
+              {navLinks.map(l => (
+                <button
+                  key={l.label}
+                  onClick={l.onClick}
+                  className={`h-11 px-4 rounded-full text-sm font-medium border transition ${l.active ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-200 border-zinc-800'}`}
+                >
+                  {l.label}
+                </button>
+              ))}
+              <a href={site.support.github} target="_blank" rel="noreferrer" className="col-span-2 h-11 px-4 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-200 text-sm font-medium inline-flex items-center justify-center gap-1.5">
+                <Star size={14} /> Star on GitHub {stars !== null && `(${stars})`}
+              </a>
             </div>
           </motion.div>
         )}
@@ -931,7 +946,7 @@ export default function App() {
 
       <AnimatePresence>
         {showScrollTop && (
-          <motion.button initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top" className="fixed bottom-6 right-6 z-40 w-10 h-10 rounded-full bg-white text-zinc-900 grid place-items-center shadow-lg hover:bg-zinc-100 transition border border-white">
+          <motion.button initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top" className="fixed right-5 z-40 w-11 h-11 rounded-full border border-zinc-800 bg-zinc-900/90 backdrop-blur text-zinc-300 grid place-items-center shadow-lg hover:bg-zinc-800 hover:text-white hover:border-zinc-700 transition" style={{ bottom: 'calc(1.25rem + env(safe-area-inset-bottom))' }}>
             <ArrowUp size={16} />
           </motion.button>
         )}
