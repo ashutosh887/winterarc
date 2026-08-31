@@ -4,6 +4,12 @@ import { Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, B
 import { Canvas } from '@react-three/fiber'
 import { Float, Icosahedron } from '@react-three/drei'
 import { site, resources, templates, challenges, quotes as QUOTES_CFG } from './config'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Label } from '@/components/ui/label'
 
 const DEFAULT_START = '2026-10-01'
 const DEFAULT_END = '2026-12-31'
@@ -310,17 +316,17 @@ export default function App() {
             </div>
           </button>
           <nav className="flex items-center gap-1 sm:gap-2">
-            <button onClick={() => setView('landing')} className={`hidden sm:inline-flex px-3 py-1.5 rounded-full text-[13px] font-medium ${view === 'landing' ? 'bg-zinc-900 text-white border border-zinc-800' : 'text-zinc-400 hover:text-white'}`}>Home</button>
-            <button onClick={() => setView('templates')} className={`hidden sm:inline-flex px-3 py-1.5 rounded-full text-[13px] font-medium ${view === 'templates' ? 'bg-zinc-900 text-white border border-zinc-800' : 'text-zinc-400 hover:text-white'}`}>Templates</button>
-            <button onClick={() => setView('challenges')} className={`hidden sm:inline-flex px-3 py-1.5 rounded-full text-[13px] font-medium ${view === 'challenges' ? 'bg-zinc-900 text-white border border-zinc-800' : 'text-zinc-400 hover:text-white'}`}>Challenges</button>
-            <button onClick={() => setView('resources')} className={`hidden sm:inline-flex px-3 py-1.5 rounded-full text-[13px] font-medium ${view === 'resources' ? 'bg-zinc-900 text-white border border-zinc-800' : 'text-zinc-400 hover:text-white'}`}>Resources</button>
-            <button onClick={() => setView('feedback')} className={`hidden sm:inline-flex px-3 py-1.5 rounded-full text-[13px] font-medium ${view === 'feedback' ? 'bg-zinc-900 text-white border border-zinc-800' : 'text-zinc-400 hover:text-white'}`}>Feedback</button>
+            <Button variant={view === 'landing' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('landing')} className="hidden sm:inline-flex rounded-full">Home</Button>
+            <Button variant={view === 'templates' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('templates')} className="hidden sm:inline-flex rounded-full">Templates</Button>
+            <Button variant={view === 'challenges' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('challenges')} className="hidden sm:inline-flex rounded-full">Challenges</Button>
+            <Button variant={view === 'resources' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('resources')} className="hidden sm:inline-flex rounded-full">Resources</Button>
+            <Button variant={view === 'feedback' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('feedback')} className="hidden sm:inline-flex rounded-full">Feedback</Button>
             {hasData ? (<>
-              <button onClick={() => setView('tracker')} aria-current={view === 'tracker'} className={`hidden sm:inline-flex px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'tracker' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>Tracker</button>
-              <button onClick={() => setView('dashboard')} aria-current={view === 'dashboard'} className={`hidden sm:inline-flex px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'dashboard' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>Dashboard</button>
-            </>) : <button onClick={() => setView('tracker')} className="hidden sm:inline-flex px-3.5 py-1.5 rounded-full text-[13px] font-medium text-zinc-600 border border-zinc-800 opacity-60" title="Set up your arc first">Tracker</button>}
-            <button onClick={startOnboarding} className="ml-1 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-zinc-900 font-semibold text-[13px] hover:bg-zinc-100 transition"><Sparkles size={14} /> {hasData ? 'Edit arc' : 'Start your arc'}</button>
-            <button onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" className="sm:hidden p-2 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300"><Menu size={18} /></button>
+              <Button variant={view === 'tracker' ? 'default' : 'ghost'} size="sm" onClick={() => setView('tracker')} aria-current={view === 'tracker'} className="hidden sm:inline-flex rounded-full">Tracker</Button>
+              <Button variant={view === 'dashboard' ? 'default' : 'ghost'} size="sm" onClick={() => setView('dashboard')} aria-current={view === 'dashboard'} className="hidden sm:inline-flex rounded-full">Dashboard</Button>
+            </>) : <Button variant="outline" size="sm" onClick={() => setView('tracker')} className="hidden sm:inline-flex rounded-full opacity-60" title="Set up your arc first">Tracker</Button>}
+            <Button onClick={startOnboarding} size="sm" className="ml-1 rounded-full"><Sparkles size={14} /> {hasData ? 'Edit arc' : 'Start your arc'}</Button>
+            <Button variant="outline" size="icon-sm" onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" className="sm:hidden rounded-full"><Menu size={18} /></Button>
           </nav>
         </div>
       </header>
@@ -812,18 +818,24 @@ export default function App() {
               <div className="mt-6">
                 <h2 className="text-xl font-bold text-white">What should we call you?</h2>
                 <p className="text-sm text-zinc-400 mt-1">Personalises your arc. Stored locally only.</p>
-                <input value={tmpName} onChange={e => setTmpName(e.target.value)} placeholder="e.g., Ashutosh" className="mt-4 w-full rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-3 text-white placeholder:text-zinc-500" autoFocus />
+                <div className="mt-4 space-y-2">
+                  <Label htmlFor="arc-name" className="text-zinc-400">Name</Label>
+                  <Input id="arc-name" value={tmpName} onChange={e => setTmpName(e.target.value)} placeholder="e.g., Ashutosh" autoFocus />
+                </div>
                 <div className="mt-3 text-xs font-mono text-zinc-500">You can skip — we’ll just say “your arc”.</div>
-                <div className="mt-6 flex justify-end"><button onClick={() => setOnboardStep(2)} className="px-6 py-2.5 rounded-full bg-white text-zinc-900 font-semibold">Continue →</button></div>
+                <div className="mt-6 flex justify-end"><Button onClick={() => setOnboardStep(2)}>Continue →</Button></div>
               </div>
             )}
             {onboardStep === 2 && (
               <div className="mt-6">
                 <h2 className="text-xl font-bold text-white">When is your Winter Arc?</h2>
                 <p className="text-sm text-zinc-400 mt-1">Defaults Oct 1 → Dec 31 (92 days). Adjust if late — finish stays Dec 31. Jan 1 graduation.</p>
-                <div className="mt-4 grid sm:grid-cols-2 gap-4"><label className="space-y-1"><span className="text-xs font-mono text-zinc-400">START</span><input type="date" value={tmpStart} onChange={e => setTmpStart(e.target.value)} className="w-full rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-2.5 text-white" /></label><label className="space-y-1"><span className="text-xs font-mono text-zinc-400">END</span><input type="date" value={tmpEnd} onChange={e => setTmpEnd(e.target.value)} className="w-full rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-2.5 text-white" /></label></div>
-                <div className="mt-3 rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-2 flex items-center justify-between"><span className="text-sm text-zinc-300">Duration</span><span className="font-mono text-white">{daysBetween(tmpStart, tmpEnd)} days</span></div>
-                <div className="mt-6 flex items-center justify-between"><button onClick={() => setOnboardStep(1)} className="px-5 py-2.5 rounded-full bg-zinc-800 text-zinc-200 border border-zinc-700">← Back</button><button onClick={() => setOnboardStep(3)} className="px-6 py-2.5 rounded-full bg-white text-zinc-900 font-semibold">Next — pick habits →</button></div>
+                <div className="mt-4 grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5"><Label htmlFor="arc-start" className="text-zinc-400">START</Label><Input id="arc-start" type="date" value={tmpStart} onChange={e => setTmpStart(e.target.value)} /></div>
+                  <div className="space-y-1.5"><Label htmlFor="arc-end" className="text-zinc-400">END</Label><Input id="arc-end" type="date" value={tmpEnd} onChange={e => setTmpEnd(e.target.value)} /></div>
+                </div>
+                <div className="mt-3 rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-2 flex items-center justify-between"><span className="text-sm text-zinc-300">Duration</span><Badge variant="secondary">{daysBetween(tmpStart, tmpEnd)} days</Badge></div>
+                <div className="mt-6 flex items-center justify-between"><Button variant="outline" onClick={() => setOnboardStep(1)}>← Back</Button><Button onClick={() => setOnboardStep(3)}>Next — pick habits →</Button></div>
               </div>
             )}
             {onboardStep === 3 && (
@@ -832,8 +844,8 @@ export default function App() {
                 <p className="text-sm text-zinc-400 mt-1">Choose 3–10 max. Shown in 3 tiers. Free.</p>
                 <div className="mt-2 text-xs font-mono text-amber-300">Selected: {tmpSelected.size} {tmpSelected.size > 10 && '⚠ over 10'}</div>
                 {['non-neg', 'extra', 'aesthetic'].map(tier => (<div key={tier} className="mt-5"><div className="text-[11px] font-mono tracking-widest text-zinc-400">{TIER_LABELS[tier]}</div><div className="mt-2 grid sm:grid-cols-2 gap-2">{PRESETS.filter(p => p.tier === tier).map(p => { const sel = tmpSelected.has(p.id); return (<button key={p.id} onClick={() => setTmpSelected(s => { const n = new Set(s); sel ? n.delete(p.id) : n.add(p.id); return n })} className={`text-left rounded-xl border p-3 flex gap-3 items-start transition ${sel ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}><span className="text-lg">{p.icon}</span><span className="flex-1"><span className={`text-sm font-medium block ${sel ? 'text-zinc-900' : 'text-zinc-200'}`}>{p.name}</span><span className="text-xs text-zinc-500">{p.desc}</span></span><span className={`mt-1 w-5 h-5 rounded-full grid place-items-center border text-xs ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'border-zinc-600 text-transparent'}`}><Check size={12} /></span></button>) })}</div></div>))}
-                <div className="mt-6 rounded-xl bg-zinc-950 border border-zinc-800 p-3"><div className="text-xs font-mono tracking-widest text-zinc-400">CUSTOM HABIT</div><div className="mt-2 flex gap-2"><input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g., No sugar, 3L water" className="flex-1 rounded-xl bg-zinc-900 border border-zinc-800 px-3 py-2 text-sm text-white placeholder:text-zinc-500" onKeyDown={e => e.key === 'Enter' && addCustom()} /><button onClick={addCustom} className="px-4 py-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium border border-zinc-700">Add</button></div>{customList.length > 0 && (<div className="mt-3 flex flex-wrap gap-2">{customList.map(c => (<span key={c.id} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-zinc-200 text-sm text-zinc-900">{c.name} <button onClick={() => { setCustomList(prev => prev.filter(x => x.id !== c.id)); setTmpSelected(s => { const n = new Set(s); n.delete(c.id); return n }) }} className="text-zinc-500">✕</button></span>))}</div>)}</div>
-                <div className="mt-6 flex items-center justify-between"><button onClick={() => setOnboardStep(2)} className="px-5 py-2.5 rounded-full bg-zinc-800 text-zinc-200 border border-zinc-700">← Back</button><button onClick={completeOnboarding} className="px-6 py-2.5 rounded-full bg-white text-zinc-900 font-bold">Save Arc • {tmpSelected.size} habits</button></div>
+                <div className="mt-6 rounded-xl bg-zinc-950 border border-zinc-800 p-3"><div className="text-xs font-mono tracking-widest text-zinc-400">CUSTOM HABIT</div><div className="mt-2 flex gap-2"><Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g., No sugar, 3L water" onKeyDown={e => e.key === 'Enter' && addCustom()} /><Button variant="secondary" onClick={addCustom}>Add</Button></div>{customList.length > 0 && (<div className="mt-3 flex flex-wrap gap-2">{customList.map(c => (<Badge key={c.id} variant="secondary" className="gap-1.5">{c.name} <button onClick={() => { setCustomList(prev => prev.filter(x => x.id !== c.id)); setTmpSelected(s => { const n = new Set(s); n.delete(c.id); return n }) }} className="ml-1 hover:text-destructive"><X size={12} /></button></Badge>))}</div>)}</div>
+                <div className="mt-6 flex items-center justify-between"><Button variant="outline" onClick={() => setOnboardStep(2)}>← Back</Button><Button onClick={completeOnboarding}>Save Arc • {tmpSelected.size} habits</Button></div>
               </div>
             )}
           </motion.div>
