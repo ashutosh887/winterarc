@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Check, Flame, Trophy, ExternalLink, Flag, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, Settings, Menu, LayoutGrid, Compass,
   Footprints, Moon, Salad, Egg, Droplets, Target, Ban, Wind, NotebookPen, Sun, PhoneOff, TreePine, Coins, BrushCleaning, ShowerHead, AlarmClock,
-  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone, Copy, ChevronDown, Share2, MessageCircle, ImageDown, MoreHorizontal, Info
+  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone, Copy, ChevronDown, ChevronLeft, ChevronRight, Share2, MessageCircle, ImageDown, MoreHorizontal, Info
 } from 'lucide-react'
 import { site, resources, templates, challenges, quotes as QUOTES_CFG } from './config'
 import { Button } from '@/components/ui/button'
@@ -257,6 +257,7 @@ export default function App() {
   const isActiveDay = useCallback(d => activeDays.includes(weekdayOf(d)), [activeDays])
   const allDates = useMemo(() => Array.from({ length: totalDays }, (_, i) => addDays(start, i)), [start, totalDays])
 
+  const [undo, setUndo] = useState(null)
   const selectedIsFuture = selectedDate > today
   const arcStarted = today >= start
   const daysToStart = arcStarted ? 0 : daysBetween(today, start) - 1
@@ -611,6 +612,25 @@ export default function App() {
   ]
 
   useEffect(() => {
+    if (view !== 'tracker' || !hasData || showOnboarding || confirmReset) return
+    const onKey = e => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      const tag = document.activeElement?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      if (e.key === 'ArrowLeft') { e.preventDefault(); stepDay(-1); return }
+      if (e.key === 'ArrowRight') { e.preventDefault(); stepDay(1); return }
+      if (e.key === 't' || e.key === 'T') { setSelectedDate(today < end ? today : end); return }
+      const i = Number(e.key)
+      if (Number.isInteger(i) && i >= 1 && i <= Math.min(9, effectiveHabits.length)) {
+        e.preventDefault()
+        toggleHabit(selectedDate, effectiveHabits[i - 1].id)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
+
+  useEffect(() => {
     const open = showOnboarding || confirmReset
     if (!open) return
     const onKey = e => {
@@ -623,6 +643,31 @@ export default function App() {
     window.addEventListener('keydown', onKey)
     return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', onKey) }
   }, [showOnboarding, confirmReset])
+
+  const dayFmt = useMemo(() => new Intl.DateTimeFormat('en', { weekday: 'long', day: 'numeric', month: 'short' }), [])
+  function dayLabel(d) {
+    if (d === today) return 'Today'
+    if (d === addDays(today, -1)) return 'Yesterday'
+    return dayFmt.format(parseYMD(d))
+  }
+  function stepDay(delta) {
+    const cap = today < end ? today : end
+    const next = addDays(selectedDate, delta)
+    if (next < start || next > cap) return
+    setSelectedDate(next)
+    setUndo(null)
+  }
+  const habitStreak = useCallback(id => {
+    let count = 0
+    for (let i = allDates.length - 1; i >= 0; i--) {
+      const d = allDates[i]
+      if (d > today) continue
+      if (!isActiveDay(d)) continue
+      if ((entries[d] || {})[id]) count++
+      else if (d < today) break
+    }
+    return count
+  }, [allDates, entries, isActiveDay, today])
 
   function copyPrompt() {
     navigator.clipboard?.writeText(llmPrompt).then(() => {
@@ -1245,20 +1290,61 @@ export default function App() {
                   </div>
                 </div>
               )}
-              <input type="date" value={selectedDate} min={start} max={today < end ? today : end} disabled={!arcStarted} onChange={e => { const v = e.target.value; if (!v) return; const cap = today < end ? today : end; setSelectedDate(v < start ? start : v > cap ? cap : v) }} className="mt-3 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 min-h-11 text-base sm:text-sm text-white" />
+              <div className={`mt-3 flex items-center gap-2 ${arcStarted ? '' : 'hidden'}`}>
+                <button
+                  onClick={() => stepDay(-1)}
+                  disabled={selectedDate <= start}
+                  aria-label="Previous day"
+                  className="w-11 h-11 shrink-0 grid place-items-center rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white hover:border-zinc-700 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                ><ChevronLeft size={16} /></button>
+                <div className="flex-1 min-w-0 text-center">
+                  <div className="text-sm font-medium text-white">{dayLabel(selectedDate)}</div>
+                  <div className="text-[11px] font-mono text-zinc-500 tabular-nums">{selectedDate}</div>
+                </div>
+                <button
+                  onClick={() => stepDay(1)}
+                  disabled={selectedDate >= (today < end ? today : end)}
+                  aria-label="Next day"
+                  className="w-11 h-11 shrink-0 grid place-items-center rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white hover:border-zinc-700 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                ><ChevronRight size={16} /></button>
+              </div>
+              <input type="date" value={selectedDate} min={start} max={today < end ? today : end} disabled={!arcStarted} onChange={e => { const v = e.target.value; if (!v) return; const cap = today < end ? today : end; setSelectedDate(v < start ? start : v > cap ? cap : v) }} className="mt-2 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 min-h-11 text-base sm:text-sm text-zinc-400" />
               <div className={`mt-4 space-y-2 ${arcStarted ? '' : 'hidden'}`}>
-                {effectiveHabits.map(h => {
+                {effectiveHabits.map((h, hi) => {
                   const done = !!(entries[selectedDate] || {})[h.id]
                   return (
                     <label key={h.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition ${selectedIsFuture ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'} ${done ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}>
                       <input type="checkbox" checked={done} disabled={selectedIsFuture} onChange={() => toggleHabit(selectedDate, h.id)} className="accent-zinc-900 w-4 h-4 disabled:cursor-not-allowed" />
                       <span className={`w-7 h-7 rounded-full grid place-items-center border ${done ? 'bg-zinc-900 border-zinc-900 text-white' : 'bg-zinc-800 border-zinc-700 text-zinc-300'}`}><HabitIcon name={h.icon} size={14} /></span>
                       <span className={`text-sm flex-1 ${done ? 'text-zinc-900 font-medium' : 'text-zinc-200'}`}>{h.name}</span>
+                      {hi < 9 && <span className={`hidden lg:grid w-5 h-5 shrink-0 place-items-center rounded border text-[10px] font-mono ${done ? 'border-zinc-300 text-zinc-500' : 'border-zinc-800 text-zinc-600'}`}>{hi + 1}</span>}
                       {done && <span className="text-zinc-900"><Check size={14} /></span>}
                     </label>
                   )
                 })}
               </div>
+              <div className="hidden lg:flex mt-2 items-center gap-2 text-[10px] font-mono text-zinc-600">
+                <kbd className="px-1.5 py-0.5 rounded border border-zinc-800 bg-zinc-950">&larr;</kbd>
+                <kbd className="px-1.5 py-0.5 rounded border border-zinc-800 bg-zinc-950">&rarr;</kbd>
+                <span>day</span>
+                <kbd className="px-1.5 py-0.5 rounded border border-zinc-800 bg-zinc-950">T</kbd>
+                <span>today</span>
+                {effectiveHabits.length > 0 && (
+                  <>
+                    <kbd className="px-1.5 py-0.5 rounded border border-zinc-800 bg-zinc-950">1</kbd>
+                    <span>toggle</span>
+                  </>
+                )}
+              </div>
+              {undo && undo.date === selectedDate && (
+                <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 flex items-center gap-2">
+                  <span className="text-xs text-zinc-400">Day cleared.</span>
+                  <button
+                    onClick={() => { setEntries(prev => ({ ...prev, [undo.date]: undo.entry })); setUndo(null) }}
+                    className="ml-auto h-8 px-3 rounded-full border border-zinc-700 bg-zinc-800 text-xs text-white hover:bg-zinc-700 transition"
+                  >Undo</button>
+                </div>
+              )}
               <div className={`mt-3 flex items-center justify-between text-xs font-mono ${arcStarted ? '' : 'hidden'}`}><span className="text-zinc-400">{effectiveHabits.filter(h => (entries[selectedDate] || {})[h.id]).length}/{effectiveHabits.length} done</span>{effectiveHabits.length > 0 && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) && <span className="text-white inline-flex items-center gap-1"><Check size={12} /> Perfect day</span>}</div>
               <div className={`mt-3 flex gap-2 ${arcStarted ? '' : 'hidden'}`}>
                 <button
@@ -1267,6 +1353,7 @@ export default function App() {
                     if (selectedIsFuture) return
                     const e = entries[selectedDate] || {}
                     const allDone = effectiveHabits.length > 0 && effectiveHabits.every(h => e[h.id])
+                    if (allDone) setUndo({ date: selectedDate, entry: { ...(entries[selectedDate] || {}) } })
                     setEntries(prev => {
                       const kept = { ...(prev[selectedDate] || {}) }
                       effectiveHabits.forEach(h => { if (allDone) delete kept[h.id]; else kept[h.id] = true })
@@ -1402,6 +1489,7 @@ export default function App() {
                       <div key={h.id} className="rounded-xl border border-zinc-800 bg-zinc-950 p-2.5 flex flex-col items-center gap-1.5">
                         <Ring pct={pct} size={56} stroke={4}><span className="text-zinc-200"><HabitIcon name={h.icon} size={16} /></span></Ring>
                         <div className="text-[11px] text-center leading-tight text-zinc-200 line-clamp-2" title={h.name}>{h.name}</div>
+                        <div className="text-[10px] font-mono text-white tabular-nums">{habitStreak(h.id)}{habitStreak(h.id) === 1 ? ' day' : ' days'}</div>
                         <div className="text-[11px] font-mono text-zinc-400">{pct}% · {hits}/{totalDays}</div>
                       </div>
                     )
