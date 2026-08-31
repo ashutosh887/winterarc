@@ -632,12 +632,14 @@ export default function App() {
       </AnimatePresence>
 
       {hasData && view === 'tracker' && (
-        <div className="max-w-[1040px] mx-auto px-5 sm:px-6 pt-4">
-          <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 flex items-center gap-3">
+        <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-20 bg-zinc-950/95 backdrop-blur-xl">
+          <div className="max-w-[1040px] mx-auto px-5 sm:px-6 py-3">
+          <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 flex items-center gap-3">
             <span className="w-7 h-7 shrink-0 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-400"><Snowflake size={13} /></span>
             <span className="text-sm text-zinc-400 line-clamp-2 sm:truncate">{quote}</span>
-            <span className="ml-auto hidden md:inline shrink-0 text-[11px] font-mono text-zinc-500">{Math.round((stats.dayNum / totalDays) * 100)}% through</span>
+            <span className="ml-auto hidden sm:inline shrink-0 text-[11px] font-mono text-zinc-500 tabular-nums">Day {stats.dayNum} / {totalDays} · {Math.round((stats.dayNum / totalDays) * 100)}%</span>
           </motion.div>
+          </div>
         </div>
       )}
 
@@ -1031,95 +1033,56 @@ export default function App() {
 
       {view === 'tracker' && hasData && (
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
-          <motion.div initial="hidden" animate="show" variants={stagger} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex items-center gap-3">
-              <Ring pct={Math.round((stats.dayNum / totalDays) * 100)} size={56}><span className="text-[11px] font-mono font-bold tabular-nums text-white">{Math.round((stats.dayNum / totalDays) * 100)}%</span></Ring>
+          <motion.div initial="hidden" animate="show" variants={stagger} className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+            <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex items-center gap-2.5">
+              <Ring pct={Math.round((stats.dayNum / totalDays) * 100)} size={44} stroke={3}><span className="text-[11px] font-mono font-bold tabular-nums text-white">{Math.round((stats.dayNum / totalDays) * 100)}%</span></Ring>
               <div className="min-w-0">
                 <div className="text-[11px] font-mono tracking-widest text-zinc-500">Day</div>
-                <div className="text-lg font-bold text-white">{stats.remaining} left</div>
-                <div className="text-[10px] font-mono text-zinc-500 truncate">{start} to {end}</div>
+                <div className="text-[17px] font-bold text-white leading-tight tabular-nums">Day {stats.dayNum}</div>
+                <div className="text-[10px] font-mono text-zinc-500 truncate">{stats.remaining} left</div>
               </div>
             </motion.div>
-            <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex items-center gap-3">
-              <Ring pct={stats.perfectPct} size={56}><span className="text-zinc-300"><Flame size={18} /></span></Ring>
+            <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex items-center gap-2.5">
+              <Ring pct={stats.perfectPct} size={44} stroke={3}><span className="text-zinc-300"><Flame size={18} /></span></Ring>
               <div className="min-w-0">
                 <div className="text-[11px] font-mono tracking-widest text-zinc-500">Perfect days</div>
-                <div className="text-lg font-bold text-white">{stats.perfect}<span className="text-xs font-mono text-zinc-500">/{stats.scheduled}</span></div>
+                <div className="text-[17px] font-bold text-white leading-tight">{stats.perfect}<span className="text-xs font-mono text-zinc-500">/{stats.scheduled}</span></div>
                 <div className="text-[10px] font-mono text-zinc-500">{stats.perfectPct}% of scheduled</div>
               </div>
             </motion.div>
-            <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex items-center gap-3">
-              <Ring pct={stats.pct} size={56}><span className="text-xs font-bold tabular-nums text-white">{stats.pct}%</span></Ring>
+            <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex items-center gap-2.5">
+              <Ring pct={stats.pct} size={44} stroke={3}><span className="text-xs font-bold tabular-nums text-white">{stats.pct}%</span></Ring>
               <div className="min-w-0">
                 <div className="text-[11px] font-mono tracking-widest text-zinc-500">Completion</div>
-                <div className="text-lg font-bold text-white">{stats.totalChecked}<span className="text-xs font-mono text-zinc-500">/{stats.totalPossible}</span></div>
+                <div className="text-[17px] font-bold text-white leading-tight">{stats.totalChecked}<span className="text-xs font-mono text-zinc-500">/{stats.totalPossible}</span></div>
                 <div className="text-[10px] font-mono text-zinc-500">{activeDays.length < 7 ? `across ${stats.scheduled} scheduled days` : 'checks logged'}</div>
               </div>
             </motion.div>
+            <motion.div variants={fadeUp} className="col-span-2 lg:col-span-1 rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex flex-col justify-center">
+              <button onClick={() => setShareOpen(v => !v)} aria-expanded={shareOpen} className="w-full flex items-center gap-2.5 text-left">
+                <IconChip icon={Share2} size={44} />
+                <span className="min-w-0">
+                  <span className="block text-[11px] font-mono tracking-widest text-zinc-500">Share</span>
+                  <span className="block text-[13px] font-semibold text-white">Post your grid</span>
+                </span>
+                <ChevronDown size={15} className={`ml-auto shrink-0 text-zinc-500 transition-transform ${shareOpen ? 'rotate-180' : ''}`} />
+              </button>
+            </motion.div>
           </motion.div>
 
-          <div className="mt-3 rounded-2xl border border-zinc-800 bg-zinc-900 p-3">
-            <Disclosure
-              open={shareOpen}
-              onToggle={() => setShareOpen(v => !v)}
-              title="Share your progress"
-              lead={<IconChip icon={Share2} size={36} />}
-            >
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <button onClick={() => shareToX()} title="Share on X" className="h-11 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition inline-flex items-center justify-center gap-1.5"><Share2 size={14} /> X</button>
-                <button onClick={() => shareToWhatsApp()} title="Share on WhatsApp" className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MessageCircle size={14} /> WhatsApp</button>
-                <button onClick={() => downloadImage()} title="Download a PNG card" className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><ImageDown size={14} /> PNG</button>
-                <button onClick={() => nativeShare()} title="More share options" className="h-11 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs hover:text-white hover:border-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MoreHorizontal size={14} /> More</button>
-              </div>
-            </Disclosure>
-          </div>
-
-          <div className="mt-3">
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono tracking-widest text-zinc-500">Current streak</span>
-                <button
-                  type="button"
-                  onClick={() => setStreakInfo(v => !v)}
-                  aria-label="How streaks are counted"
-                  aria-expanded={streakInfo}
-                  className="w-6 h-6 grid place-items-center rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition"
-                >
-                  <Info size={13} />
-                </button>
-              </div>
-              <div className="mt-2 flex items-end gap-3">
-                <span className="text-[40px] leading-none font-bold tabular-nums text-white">{stats.streak}</span>
-                <span className="pb-1 text-sm text-zinc-500">{stats.streak === 1 ? 'day' : 'days'} in a row</span>
-                <span className="ml-auto pb-1 text-xs font-mono text-zinc-500">best {stats.bestStreak}</span>
-              </div>
-              <div className="mt-3 flex gap-1">
-                {Array.from({ length: 7 }, (_, i) => {
-                  const d = addDays(today, i - 6)
-                  const e = entries[d] || {}
-                  const full = effectiveHabits.length > 0 && effectiveHabits.every(h => e[h.id])
-                  const some = Object.values(e).some(Boolean)
-                  const inArc = d >= start && d <= end
-                  return (
-                    <div
-                      key={d}
-                      title={d}
-                      className={`flex-1 h-8 rounded-md border ${!inArc || !isActiveDay(d) ? 'bg-zinc-950 border-zinc-800' : full ? 'bg-white border-white' : some ? 'bg-zinc-500 border-zinc-500' : 'bg-zinc-800 border-zinc-700'}`}
-                    />
-                  )
-                })}
-              </div>
-              <div className="mt-2 text-[10px] font-mono text-zinc-500">last 7 days</div>
-              {streakInfo && (
-                <p className="mt-3 pt-3 border-t border-zinc-800 text-[13px] leading-6 text-zinc-500">
-                  A day counts only when every habit you picked is checked. Rest days are skipped, so they never break a streak and never count as a miss. One partial day on a scheduled day ends it. Backfilling repairs the streak, because it reads the grid rather than a stored counter.
-                </p>
-              )}
+          {shareOpen && (
+            <div className="mt-2.5 rounded-2xl border border-zinc-800 bg-zinc-900 p-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button onClick={() => shareToX()} className="h-11 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition inline-flex items-center justify-center gap-1.5"><Share2 size={14} /> X</button>
+              <button onClick={() => shareToWhatsApp()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MessageCircle size={14} /> WhatsApp</button>
+              <button onClick={() => downloadImage()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><ImageDown size={14} /> PNG</button>
+              <button onClick={() => nativeShare()} className="h-11 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs hover:text-white hover:border-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MoreHorizontal size={14} /> More</button>
             </div>
-          </div>
+          )}
 
-          <div className="mt-6 grid lg:grid-cols-[360px_1fr] gap-6 items-start">
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 h-fit lg:sticky lg:top-[calc(4.5rem+env(safe-area-inset-top))]">
+
+          <div className="mt-3 grid lg:grid-cols-[360px_1fr] gap-4 items-start">
+            <div className="lg:sticky lg:top-[calc(8.5rem+env(safe-area-inset-top))] z-10">
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <div className="text-[15px] font-semibold text-white">Daily check-in</div>
@@ -1162,6 +1125,49 @@ export default function App() {
                 <button onClick={() => setSelectedDate(today)} className="px-5 h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Today</button>
   
             </div>
+            </div>
+              <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-mono tracking-widest text-zinc-500">Current streak</span>
+                <button
+                  type="button"
+                  onClick={() => setStreakInfo(v => !v)}
+                  aria-label="How streaks are counted"
+                  aria-expanded={streakInfo}
+                  className="w-6 h-6 grid place-items-center rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition"
+                >
+                  <Info size={13} />
+                </button>
+              </div>
+              <div className="mt-2 flex items-end gap-3">
+                <span className="text-[40px] leading-none font-bold tabular-nums text-white">{stats.streak}</span>
+                <span className="pb-1 text-sm text-zinc-500">{stats.streak === 1 ? 'day' : 'days'} in a row</span>
+                <span className="ml-auto pb-1 text-xs font-mono text-zinc-500">best {stats.bestStreak}</span>
+              </div>
+              <div className="mt-3 flex gap-1">
+                {Array.from({ length: 7 }, (_, i) => {
+                  const d = addDays(today, i - 6)
+                  const e = entries[d] || {}
+                  const full = effectiveHabits.length > 0 && effectiveHabits.every(h => e[h.id])
+                  const some = Object.values(e).some(Boolean)
+                  const inArc = d >= start && d <= end
+                  return (
+                    <div
+                      key={d}
+                      title={d}
+                      className={`flex-1 h-8 rounded-md border ${!inArc || !isActiveDay(d) ? 'bg-zinc-950 border-zinc-800' : full ? 'bg-white border-white' : some ? 'bg-zinc-500 border-zinc-500' : 'bg-zinc-800 border-zinc-700'}`}
+                    />
+                  )
+                })}
+              </div>
+              <div className="mt-2 text-[10px] font-mono text-zinc-500">last 7 days</div>
+              {streakInfo && (
+                <p className="mt-3 pt-3 border-t border-zinc-800 text-[13px] leading-6 text-zinc-500">
+                  A day counts only when every habit you picked is checked. Rest days are skipped, so they never break a streak and never count as a miss. One partial day on a scheduled day ends it. Backfilling repairs the streak, because it reads the grid rather than a stored counter.
+                </p>
+              )}
+            </div>
+
             </div>
 
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 sm:p-4">
