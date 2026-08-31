@@ -44,7 +44,7 @@ const ROUTES = {
   '/dashboard': 'dashboard',
 }
 const PATHS = Object.fromEntries(Object.entries(ROUTES).map(([path, view]) => [view, path]))
-const viewForPath = path => ROUTES[path.replace(/\/+$/, '') || '/'] ?? 'landing'
+const viewForPath = path => ROUTES[path.replace(/\/+$/, '') || '/'] ?? null
 
 const getDefaultArc = () => {
   const y = new Date().getFullYear()
@@ -133,7 +133,7 @@ export default function App() {
   const [habits, setHabits] = useLocalStorage('wa_habits', [])
   const [habitsV2, setHabitsV2] = useLocalStorage('wa_habits_v2', null)
   const [entries, setEntries] = useLocalStorage('wa_entries', {})
-  const [view, setView] = useState(() => viewForPath(window.location.pathname))
+  const [view, setView] = useState(() => viewForPath(window.location.pathname) ?? 'landing')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState(todayYMD())
   const [showOnboarding, setShowOnboarding] = useState(false)
@@ -209,7 +209,7 @@ export default function App() {
   const allDates = useMemo(() => Array.from({ length: totalDays }, (_, i) => addDays(start, i)), [start, totalDays])
 
   useEffect(() => {
-    const onPop = () => setView(viewForPath(window.location.pathname))
+    const onPop = () => setView(viewForPath(window.location.pathname) ?? 'landing')
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
   }, [])
@@ -219,7 +219,8 @@ export default function App() {
   useEffect(() => {
     if (routedOnce.current) return
     routedOnce.current = true
-    if (hasData && viewForPath(window.location.pathname) === 'landing') {
+    if (viewForPath(window.location.pathname) === null) window.history.replaceState({}, '', '/')
+    if (hasData && (viewForPath(window.location.pathname) ?? 'landing') === 'landing') {
       setView('tracker')
       window.history.replaceState({}, '', PATHS.tracker)
     }
