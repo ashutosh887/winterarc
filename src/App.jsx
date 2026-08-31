@@ -13,6 +13,7 @@ import { Eyebrow, PageHeading, IconChip } from '@/components/app/Surface'
 import { Disclosure } from '@/components/app/Disclosure'
 import { HabitTile } from '@/components/app/HabitTile'
 import QuietBoundary from '@/components/app/QuietBoundary'
+import { customHabitId } from '@/lib/habits'
 const ThreeHero = lazy(() => import('./ThreeHero'))
 
 const ICON_MAP = {
@@ -426,9 +427,12 @@ export default function App() {
     setShowOnboarding(false); goTo('tracker'); setSelectedDate(tmpStart)
   }
   function addCustom() {
-    if (!customName.trim()) return
-    const id = 'custom_' + Date.now()
-    setCustomList(prev => [...prev, { id, name: customName.trim(), icon: 'flag', tier: 'custom', desc: '' }])
+    const name = customName.trim()
+    if (!name) return
+    // id comes from the name, not the clock, so removing a habit and adding it
+    // back under the same name reunites it with its own history
+    const id = customHabitId(name, [...PRESETS.map(p => p.id), ...customList.map(h => h.id)])
+    setCustomList(prev => [...prev, { id, name, icon: 'flag', tier: 'custom', desc: '' }])
     setTmpSelected(s => new Set([...s, id])); setCustomName('')
   }
   function applyTemplate(tid) {
