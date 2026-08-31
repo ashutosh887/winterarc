@@ -3,13 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, User, Settings, Menu, LayoutGrid, Compass,
   Footprints, Moon, Salad, Egg, Droplets, Target, Ban, Wind, NotebookPen, Sun, PhoneOff, TreePine, Coins, BrushCleaning, ShowerHead, AlarmClock,
-  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone, Copy, ChevronDown, Share2, MessageCircle, ImageDown, MoreHorizontal, Info
+  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone, Copy, Share2, MessageCircle, ImageDown, MoreHorizontal, Info
 } from 'lucide-react'
 import { site, resources, templates, challenges, quotes as QUOTES_CFG } from './config'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
+import { Eyebrow, PageHeading, IconChip } from '@/components/app/Surface'
+import { Disclosure } from '@/components/app/Disclosure'
 const ThreeHero = lazy(() => import('./ThreeHero'))
 
 const ICON_MAP = {
@@ -642,7 +644,7 @@ export default function App() {
           </section>
 
           <section id="features" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-[calc(3.5rem+env(safe-area-inset-top))]">
-            <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><LayoutGrid size={12} /> Features</div>
+            <Eyebrow icon={LayoutGrid}>Features</Eyebrow>
             <h2 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Stay honest.</h2>
             <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">Three things, and none of them nag you.</p>
 
@@ -731,9 +733,7 @@ export default function App() {
       {view === 'templates' && (
         <main id="main">
           <section className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
-            <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><BookOpen size={12} /> Templates</div>
-            <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Start from a template</h1>
-            <p className="mt-1.5 text-sm text-zinc-500">Pick one, then edit it in setup.</p>
+            <PageHeading icon={BookOpen} eyebrow="Templates" title="Start from a template" subtitle="Pick one, then edit it in setup." />
             <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={stagger} className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {templates.map(t => (
                 <motion.div variants={fadeUp} key={t.id} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col hover:border-zinc-700 transition">
@@ -758,9 +758,7 @@ export default function App() {
 
       {view === 'resources' && (
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
-          <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Compass size={12} /> Resources</div>
-          <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Tools worth using</h1>
-          <p className="mt-1.5 text-sm text-zinc-500">Everything here is usable without paying. No affiliate links.</p>
+          <PageHeading icon={Compass} eyebrow="Resources" title="Tools worth using" subtitle="Everything here is usable without paying. No affiliate links." />
           <div className="mt-8 space-y-6">
             {Object.entries(resources).map(([key, cat]) => (
               <div key={key} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
@@ -788,7 +786,7 @@ export default function App() {
 
       {view === 'about' && (
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
-          <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Snowflake size={12} /> The idea</div>
+          <Eyebrow icon={Snowflake}>The idea</Eyebrow>
           <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">What a winter arc actually is</h1>
           <p className="mt-2 text-sm leading-6 text-zinc-500 max-w-[620px]">
             A winter arc is the stretch of the year most people write off. School is grinding, work is grinding, the weather is bad, and the plan quietly becomes January. The idea is to use that window instead of waiting it out.
@@ -840,7 +838,7 @@ export default function App() {
 
       {view === 'install' && (
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
-          <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Smartphone size={12} /> Install</div>
+          <Eyebrow icon={Smartphone}>Install</Eyebrow>
           <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Put it on your home screen</h1>
           <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">WinterArc is a web app that installs like a native one. It opens without browser chrome, works offline, and your data stays in the same place it already is.</p>
 
@@ -904,7 +902,7 @@ export default function App() {
 
       {view === 'feedback' && (
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
-          <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><NotebookPen size={12} /> Feedback</div>
+          <Eyebrow icon={NotebookPen}>Feedback</Eyebrow>
           <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Found a bug, want a feature</h1>
           <p className="mt-1 text-sm text-zinc-500 max-w-[560px]">There is no form here and no analytics. Everything goes through GitHub or X, so you can see what happened to your report.</p>
           <div className="mt-8 grid sm:grid-cols-3 gap-4">
@@ -970,19 +968,19 @@ export default function App() {
           </motion.div>
 
           <div className="mt-3 rounded-2xl border border-zinc-800 bg-zinc-900 p-3">
-            <button onClick={() => setShareOpen(v => !v)} aria-expanded={shareOpen} aria-controls="share-actions" className="w-full flex items-center gap-2 text-left">
-              <span className="w-9 h-9 shrink-0 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-300"><Share2 size={15} /></span>
-              <span className="text-[15px] font-semibold text-white">Share your progress</span>
-              <ChevronDown size={16} className={`ml-auto shrink-0 text-zinc-500 transition-transform ${shareOpen ? 'rotate-180' : ''}`} />
-            </button>
-            {shareOpen && (
-              <div id="share-actions" className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <Disclosure
+              open={shareOpen}
+              onToggle={() => setShareOpen(v => !v)}
+              title="Share your progress"
+              lead={<IconChip icon={Share2} size={36} />}
+            >
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <button onClick={() => shareToX()} title="Share on X" className="h-11 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition inline-flex items-center justify-center gap-1.5"><Share2 size={14} /> X</button>
                 <button onClick={() => shareToWhatsApp()} title="Share on WhatsApp" className="h-11 rounded-full bg-emerald-500 text-white font-semibold text-xs hover:bg-emerald-600 transition inline-flex items-center justify-center gap-1.5"><MessageCircle size={14} /> WhatsApp</button>
                 <button onClick={() => downloadImage()} title="Download a PNG card" className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><ImageDown size={14} /> PNG</button>
                 <button onClick={() => nativeShare()} title="More share options" className="h-11 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs hover:text-white hover:border-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MoreHorizontal size={14} /> More</button>
               </div>
-            )}
+            </Disclosure>
           </div>
 
           <div className="mt-6 grid lg:grid-cols-[360px_1fr] gap-6 items-start">
@@ -1091,14 +1089,8 @@ export default function App() {
           </div>
 
           <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-            <button onClick={() => setPromptOpen(v => !v)} aria-expanded={promptOpen} aria-controls="llm-panel" className="w-full min-h-11 flex items-center justify-between gap-3 text-left">
-              <span className="text-[15px] font-semibold text-white">Export and LLM prompt</span>
-              <span className="shrink-0 inline-flex items-center gap-1.5 text-xs font-mono text-zinc-500">
-                {promptOpen ? 'Hide' : 'Show'} <ChevronDown size={14} className={`transition-transform ${promptOpen ? 'rotate-180' : ''}`} />
-              </span>
-            </button>
-            {promptOpen && (
-              <div id="llm-panel" className="mt-4">
+            <Disclosure open={promptOpen} onToggle={() => setPromptOpen(v => !v)} title="Export and LLM prompt">
+              <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <button onClick={copyPrompt} className="px-4 h-9 rounded-full bg-white text-zinc-900 text-xs font-semibold hover:bg-zinc-100 transition">{promptCopied ? 'Copied' : 'Copy prompt'}</button>
                   <button onClick={exportJSON} className="px-4 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">JSON</button>
@@ -1108,7 +1100,7 @@ export default function App() {
                 <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 overflow-auto max-h-56"><pre className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-words font-mono">{llmPrompt}</pre></div>
                 <div className="mt-2 text-xs text-zinc-500">Paste this with your exported JSON. Nothing leaves the device until you do.</div>
               </div>
-            )}
+            </Disclosure>
           </div>
         </main>
       )}
