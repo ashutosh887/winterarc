@@ -40,14 +40,14 @@ const PRESETS = [
   { id: 'sleep', name: 'Sleep 7.5h / In bed 22:30', icon: 'moon', tier: 'non-neg', desc: 'No snoozing. Up when alarm rings.' },
   { id: 'nutrition', name: 'No sugar & junk', icon: 'salad', tier: 'non-neg', desc: 'No / low sugar, no junk food.' },
   { id: 'protein', name: 'Protein target', icon: 'egg', tier: 'non-neg', desc: 'Track grams per day.' },
-  { id: 'water', name: 'Water 2–3L', icon: 'droplets', tier: 'non-neg', desc: 'Spread through day.' },
+  { id: 'water', name: 'Water 2 to 3L', icon: 'droplets', tier: 'non-neg', desc: 'Spread through day.' },
   { id: 'work', name: 'Deep work 90m', icon: 'target', tier: 'non-neg', desc: 'Before email, phone away.' },
   { id: 'no-alcohol', name: 'No alcohol', icon: 'ban', tier: 'non-neg', desc: 'Binary until Jan 1.' },
   { id: 'reading', name: 'Reading 10 pages', icon: 'bookopen', tier: 'extra', desc: 'Non-fiction preferred.' },
-  { id: 'meditation', name: 'Meditation 10m', icon: 'wind', tier: 'extra', desc: '5–15 min.' },
+  { id: 'meditation', name: 'Meditation 10m', icon: 'wind', tier: 'extra', desc: '5 to 15 min.' },
   { id: 'journaling', name: 'Journaling', icon: 'notebookpen', tier: 'extra', desc: 'Thoughts / gratitude.' },
   { id: 'sunlight', name: 'Morning sunlight', icon: 'sun', tier: 'extra', desc: 'Outside shortly after waking.' },
-  { id: 'phone-am', name: 'No phone 60m AM', icon: 'phoneoff', tier: 'extra', desc: 'First 30–60 min.' },
+  { id: 'phone-am', name: 'No phone 60m AM', icon: 'phoneoff', tier: 'extra', desc: 'First 30 to 60 min.' },
   { id: 'phone-pm', name: 'No phone before bed', icon: 'moon', tier: 'extra', desc: 'Phone down by 21:00.' },
   { id: 'outside', name: 'Outside 20m', icon: 'treepine', tier: 'extra', desc: 'Survives cold. Indoor alt ok.' },
   { id: 'money', name: 'No unnecessary spend', icon: 'coins', tier: 'extra', desc: 'Track spend / no-buy.' },
@@ -230,7 +230,7 @@ export default function App() {
   }
   function completeOnboarding() {
     const chosen = [...PRESETS.filter(p => tmpSelected.has(p.id)), ...customList]
-    if (!chosen.length) { alert('Pick at least 1 habit (recommended 3–5)'); return }
+    if (!chosen.length) { alert('Pick at least one habit. Three to five works well.'); return }
     if (!tmpStart || !tmpEnd || isNaN(parseYMD(tmpStart).getTime()) || isNaN(parseYMD(tmpEnd).getTime())) { alert('Pick valid start and end dates'); return }
     if (parseYMD(tmpStart) > parseYMD(tmpEnd)) { alert('Start date must be before end date'); return }
     if (chosen.length > 10 && !confirm(`You picked ${chosen.length} habits. Recommended max is 10. Continue?`)) return
@@ -384,8 +384,7 @@ export default function App() {
       {hasData && view === 'tracker' && (
         <div className="max-w-[1040px] mx-auto px-5 sm:px-6 pt-4">
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-3 flex items-center gap-3">
-            <span className="text-zinc-600 text-lg leading-none">“</span>
-            <span className="text-sm text-zinc-300 truncate">“{quote.q}”</span>
+            <span className="text-sm text-zinc-300 truncate">{quote.q}</span>
             <span className="hidden sm:inline text-xs font-mono text-zinc-500 whitespace-nowrap">- {quote.a}</span>
             <span className="ml-auto hidden md:inline text-[11px] font-mono text-zinc-500">Day {stats.dayNum}/{totalDays}</span>
           </motion.div>
@@ -484,7 +483,7 @@ export default function App() {
           <section id="features" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-16">
             <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><LayoutGrid size={12} /> Features</div>
             <h2 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Stay honest.</h2>
-            <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">A grid, a ring, and a share card if you want one.</p>
+            <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">A grid that stays honest, a ring per habit, and a share card you can ignore.</p>
 
             <div className="mt-8 space-y-6">
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2">
@@ -517,7 +516,7 @@ export default function App() {
                 <div className="p-6 sm:p-7 flex flex-col justify-center order-1 md:order-2">
                   <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-200 grid place-items-center"><Trophy size={16} /></div>
                   <h3 className="mt-3 text-[16px] font-semibold text-white">Rings for each habit</h3>
-                  <p className="mt-1.5 text-[13.5px] leading-6 text-zinc-500">Not just one big percent. See which habit is dragging you down and which one is on autopilot.</p>
+                  <p className="mt-1.5 text-[13.5px] leading-6 text-zinc-500">Every habit gets its own ring. You can see which one is dragging and which one runs itself.</p>
                   <div className="mt-4 text-xs font-mono text-zinc-600">Updates live as you check the day</div>
                 </div>
               </div>
@@ -607,7 +606,7 @@ export default function App() {
       {view === 'resources' && (
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
           <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Compass size={12} /> Resources</div>
-          <h1 className="mt-2 text-[26px] font-bold tracking-tight text-white">Resources that help</h1>
+          <h1 className="mt-2 text-[26px] font-bold tracking-tight text-white">Tools worth using</h1>
           <p className="mt-1 text-sm text-zinc-500">Everything here is usable without paying. No affiliate links.</p>
           <div className="mt-8 grid gap-6">
             {Object.entries(resources).map(([key, cat]) => (
@@ -764,7 +763,7 @@ export default function App() {
           </div>
 
           <div className="mt-6 rounded-2xl bg-zinc-900 border border-zinc-800 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2"><div className="font-semibold text-white">Export & LLM prompt</div><div className="flex items-center gap-2"><button onClick={() => navigator.clipboard.writeText(llmPrompt)} className="px-3 py-1.5 rounded-full bg-white text-zinc-950 text-xs font-semibold transition">Copy prompt</button><button onClick={resetAll} className="px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-xs font-semibold hover:bg-red-500/15 transition">Reset</button></div></div>
+            <div className="flex flex-wrap items-center justify-between gap-2"><div className="font-semibold text-white">Export and LLM prompt</div><div className="flex items-center gap-2"><button onClick={() => navigator.clipboard.writeText(llmPrompt)} className="px-3 py-1.5 rounded-full bg-white text-zinc-950 text-xs font-semibold transition">Copy prompt</button><button onClick={resetAll} className="px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-xs font-semibold hover:bg-red-500/15 transition">Reset</button></div></div>
             <div className="mt-3 rounded-xl bg-zinc-950 border border-zinc-800 p-3 overflow-auto"><pre className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-words font-mono">{llmPrompt}</pre></div>
             <div className="mt-2 text-xs text-zinc-500">Paste with exported JSON into your LLM. Data stays local until you paste.</div>
           </div>
@@ -798,10 +797,9 @@ export default function App() {
               </div>
             </div>
             <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6">
-              <div className="text-xs font-mono tracking-widest text-zinc-400">Today’s quote</div>
+              <div className="text-xs font-mono tracking-widest text-zinc-400">Quote of the day</div>
               <div className="mt-4 rounded-xl bg-zinc-950 border border-zinc-800 p-4">
-                <div className="text-zinc-400 text-lg leading-none">“</div>
-                <div className="text-sm text-zinc-200 italic">“{quote.q}”</div>
+                <div className="text-sm text-zinc-200">{quote.q}</div>
                 <div className="text-xs font-mono text-zinc-500 mt-1">- {quote.a}</div>
               </div>
               <div className="mt-4 space-y-3 text-sm">
@@ -879,7 +877,7 @@ export default function App() {
             {onboardStep === 2 && (
               <div className="mt-6">
                 <h2 className="text-xl font-bold text-white">Pick your habits</h2>
-                <p className="text-sm text-zinc-400 mt-1">Choose 3–10. Three tiers.</p>
+                <p className="text-sm text-zinc-400 mt-1">Three to five is enough. Ten is the cap.</p>
                 <div className="mt-2 text-xs font-mono text-zinc-400">Selected {tmpSelected.size} {tmpSelected.size > 10 && '· over 10'}</div>
                 {['non-neg', 'extra', 'aesthetic'].map(tier => (<div key={tier} className="mt-5"><div className="text-[11px] font-mono tracking-widest text-zinc-400">{TIER_LABELS[tier]}</div><div className="mt-2 grid sm:grid-cols-2 gap-2">{PRESETS.filter(p => p.tier === tier).map(p => { const sel = tmpSelected.has(p.id); return (<button key={p.id} onClick={() => setTmpSelected(s => { const n = new Set(s); sel ? n.delete(p.id) : n.add(p.id); return n })} className={`text-left rounded-xl border p-3 flex gap-3 items-start transition ${sel ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}><span className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-300 shrink-0"><HabitIcon name={p.icon} size={14} /></span><span className="flex-1 min-w-0"><span className={`text-sm font-medium block ${sel ? 'text-zinc-900' : 'text-zinc-200'}`}>{p.name}</span><span className="text-xs text-zinc-500">{p.desc}</span></span><span className={`mt-1 w-5 h-5 rounded-full grid place-items-center border text-xs shrink-0 ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'border-zinc-600 text-transparent'}`}><Check size={12} /></span></button>) })}</div></div>))}
                 <div className="mt-6 rounded-xl bg-zinc-950 border border-zinc-800 p-3"><div className="text-xs font-mono tracking-widest text-zinc-400">Custom habit</div><div className="mt-2 flex gap-2"><Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. No sugar, 3L water" onKeyDown={e => e.key === 'Enter' && addCustom()} /><Button variant="secondary" onClick={addCustom}>Add</Button></div>{customList.length > 0 && (<div className="mt-3 flex flex-wrap gap-2">{customList.map(c => (<Badge key={c.id} variant="secondary" className="gap-1.5">{c.name} <button onClick={() => { setCustomList(prev => prev.filter(x => x.id !== c.id)); setTmpSelected(s => { const n = new Set(s); n.delete(c.id); return n }) }} className="ml-1 hover:text-destructive"><X size={12} /></button></Badge>))}</div>)}</div>
