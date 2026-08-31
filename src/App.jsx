@@ -5,9 +5,9 @@ import {
   Footprints, Moon, Salad, Egg, Droplets, Target, Ban, Wind, NotebookPen, Sun, PhoneOff, TreePine, Coins, BrushCleaning, ShowerHead, AlarmClock,
   MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock
 } from 'lucide-react'
-import { Canvas } from '@react-three/fiber'
-import { Float, Icosahedron } from '@react-three/drei'
+import { lazy } from 'react'
 import { site, resources, templates, challenges, quotes as QUOTES_CFG } from './config'
+const ThreeHero = lazy(() => import('./ThreeHero'))
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -92,26 +92,14 @@ function Ring({ pct, size = 44, stroke = 4, children }) {
   )
 }
 
-function ThreeHero() {
-  return (
-    <div className="absolute inset-0 -z-10 opacity-[0.05] pointer-events-none">
-      <Canvas camera={{ position: [0, 0, 6], fov: 45 }}>
-        <ambientLight intensity={0.9} />
-        <directionalLight position={[4, 4, 4]} intensity={1} />
-        <Float speed={0.8} rotationIntensity={0.3} floatIntensity={0.6}>
-          <Icosahedron args={[1.6, 1]}><meshStandardMaterial color="#e4e4e7" wireframe transparent opacity={0.7} /></Icosahedron>
-        </Float>
-      </Canvas>
-    </div>
-  )
-}
+
 
 function Logo({ size = 32 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden>
-      <rect width="64" height="64" rx="14" fill="#fafafa" />
-      <path d="M14 44 L24 20 L32 32 L40 20 L50 44" fill="none" stroke="#09090b" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M24 44 L32 32 L40 44" fill="none" stroke="#09090b" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" opacity="0.18" />
+      <rect width="64" height="64" rx="14" fill="#18181b" stroke="#27272a" strokeWidth="1.2" />
+      <path d="M14 44 L24 20 L32 32 L40 20 L50 44" fill="none" stroke="#fafafa" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M24 44 L32 32 L40 44" fill="none" stroke="#fafafa" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" opacity="0.2" />
     </svg>
   )
 }
@@ -230,7 +218,7 @@ export default function App() {
     if (!chosen.length) { alert('Pick at least 1 habit (recommended 3–5)'); return }
     if (!tmpStart || !tmpEnd || isNaN(parseYMD(tmpStart).getTime()) || isNaN(parseYMD(tmpEnd).getTime())) { alert('Pick valid start and end dates'); return }
     if (parseYMD(tmpStart) > parseYMD(tmpEnd)) { alert('Start date must be before end date'); return }
-    if (chosen.length > 10 && !confirm(`You picked ${chosen.length} habits. Recommended max is 10 — continue?`)) return
+    if (chosen.length > 10 && !confirm(`You picked ${chosen.length} habits. Recommended max is 10. Continue?`)) return
     setSettings({ start: tmpStart, end: tmpEnd, name: tmpName.trim() || null })
     setHabitsV2(chosen); setHabits(chosen)
     setShowOnboarding(false); setView('tracker'); setSelectedDate(tmpStart)
@@ -279,7 +267,7 @@ export default function App() {
     ctx.fillStyle = g; ctx.fillRect(0, 0, 1200, 675)
     ctx.fillStyle = 'rgba(255,255,255,0.06)'; for (let i = 0; i < 60; i++) { ctx.beginPath(); ctx.arc(Math.random() * 1200, Math.random() * 675, Math.random() * 1.2, 0, Math.PI * 2); ctx.fill() }
     ctx.fillStyle = '#e0f2fe'; ctx.font = '700 34px ui-sans-serif,system-ui'
-    ctx.fillText('WINTERARC  —  Lock in while they coast.', 60, 80)
+    ctx.fillText('WINTERARC · Lock in while they coast.', 60, 80)
     if (achievement) {
       ctx.font = '700 56px ui-sans-serif,system-ui'; ctx.fillStyle = '#38bdf8'; ctx.fillText(achievement.label, 60, 190)
       ctx.font = '400 22px ui-sans-serif,system-ui'; ctx.fillStyle = '#cbd5e1'; ctx.fillText(achievement.desc, 60, 230)
@@ -290,7 +278,7 @@ export default function App() {
       ctx.font = '500 15px ui-monospace,monospace'; ctx.fillStyle = '#94a3b8'; ctx.fillText(effectiveHabits.map(h => h.name).join('  •  ').slice(0, 110), 60, 270)
     }
     ctx.fillStyle = '#1e293b'; ctx.fillRect(60, 330, 1080, 16); ctx.fillStyle = '#38bdf8'; ctx.fillRect(60, 330, 1080 * (stats.pct / 100), 16)
-    ctx.fillStyle = '#cbd5e1'; ctx.font = 'italic 18px ui-sans-serif,system-ui'; const q = achievement ? `"${quote.q}" — ${quote.a}` : `"${quote.q}"`; ctx.fillText(q.slice(0, 84), 60, 400)
+    ctx.fillStyle = '#cbd5e1'; ctx.font = 'italic 18px ui-sans-serif,system-ui'; const q = achievement ? `"${quote.q}" - ${quote.a}` : `"${quote.q}"`; ctx.fillText(q.slice(0, 84), 60, 400)
     ctx.fillStyle = '#475569'; ctx.font = '500 13px ui-sans-serif,system-ui'; ctx.fillText('trywinterarc.vercel.app  •  100% local  •  no login  •  open source', 60, 625)
     return canvas.toDataURL('image/png')
   }
@@ -299,15 +287,15 @@ export default function App() {
   }
   function shareToX(achievement) {
     const text = achievement
-      ? `${achievement.label} — Day ${stats.dayNum}/${totalDays} • ${stats.pct}% • streak ${stats.streak}\nLock in while they coast.\n`
+      ? `${achievement.label} - Day ${stats.dayNum}/${totalDays} • ${stats.pct}% • streak ${stats.streak}\nLock in while they coast.\n`
       : `Day ${stats.dayNum}/${totalDays} • ${stats.perfect} perfect • ${stats.pct}% • streak ${stats.streak}\nDisappear for 90 days. Come back unrecognizable.\n`
     const url = 'https://trywinterarc.vercel.app'
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'width=600,height=400')
   }
   function shareToWhatsApp(achievement) {
     const text = achievement
-      ? `${achievement.label} unlocked! Day ${stats.dayNum}/${totalDays} • ${stats.pct}% • streak ${stats.streak} — trywinterarc.vercel.app`
-      : `Winter Arc Day ${stats.dayNum}/${totalDays}: ${stats.pct}% • streak ${stats.streak} — trywinterarc.vercel.app — Lock in while they coast.`
+      ? `${achievement.label} unlocked! Day ${stats.dayNum}/${totalDays} • ${stats.pct}% • streak ${stats.streak} - trywinterarc.vercel.app`
+      : `Winter Arc Day ${stats.dayNum}/${totalDays}: ${stats.pct}% • streak ${stats.streak} - trywinterarc.vercel.app - Lock in while they coast.`
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
   }
   async function nativeShare(achievement) {
@@ -396,7 +384,7 @@ export default function App() {
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-3 flex items-center gap-3">
             <span className="text-zinc-600 text-lg leading-none">“</span>
             <span className="text-sm text-zinc-300 truncate">“{quote.q}”</span>
-            <span className="hidden sm:inline text-xs font-mono text-zinc-500 whitespace-nowrap">— {quote.a}</span>
+            <span className="hidden sm:inline text-xs font-mono text-zinc-500 whitespace-nowrap">- {quote.a}</span>
             <span className="ml-auto hidden md:inline text-[11px] font-mono text-zinc-500">Day {stats.dayNum}/{totalDays}</span>
           </motion.div>
         </div>
@@ -582,7 +570,7 @@ export default function App() {
             <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={stagger}>
               <motion.div variants={fadeUp} className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Zap size={12} /> How it works</motion.div>
               <motion.h2 variants={fadeUp} className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Pick habits. Check daily. Jan 1 you’ll know.</motion.h2>
-              <motion.p variants={fadeUp} className="mt-2 text-sm text-zinc-500 max-w-[620px]">Three tiers keep you honest. Choose 3–5 to start. Every habit is binary — yes or no each day. No partial credit games.</motion.p>
+              <motion.p variants={fadeUp} className="mt-2 text-sm text-zinc-500 max-w-[620px]">Three tiers keep you honest. Choose 3 to 5 to start. Every habit is binary. Yes or no each day. No partial credit games.</motion.p>
 
               <div className="mt-8 grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-zinc-800 border border-zinc-800 rounded-2xl overflow-hidden bg-zinc-900/40">
                 <motion.div variants={fadeUp} className="p-6">
@@ -708,47 +696,33 @@ export default function App() {
             {/* quotes — compact */}
             <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
               <div className="flex items-center justify-between"><h3 className="font-semibold text-white flex items-center gap-2"><Star size={14} /> Daily quotes</h3><span className="text-xs font-mono text-zinc-500">Day {stats.dayNum || 1} · Rotates daily</span></div>
-              <p className="text-xs text-zinc-500 mt-1">“{quote.q}” — <span className="text-zinc-400">{quote.a}</span></p>
+              <p className="text-xs text-zinc-500 mt-1">"{quote.q}" - <span className="text-zinc-400">{quote.a}</span></p>
               <div className="mt-4 grid sm:grid-cols-2 gap-2 max-h-[320px] overflow-auto pr-1">
                 {QUOTES.slice(0, 12).map((qq, i) => (
                   <div key={i} className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
                     <div className="text-[11px] font-mono text-zinc-500">Day {i + 1}</div>
                     <div className="text-sm mt-1 text-zinc-300 italic">“{qq.q}”</div>
-                    <div className="text-xs text-zinc-500">— {qq.a}</div>
+                    <div className="text-xs text-zinc-500">- {qq.a}</div>
                   </div>
                 ))}
               </div>
-              <div className="mt-3 text-xs font-mono text-zinc-600 text-center">Full 120 quotes rotate automatically. Past & future preview stays in app.</div>
+              <div className="mt-3 text-xs font-mono text-zinc-600 text-center">92 quotes. One per day. Rotates automatically.</div>
             </div>
           </section>
 
-          {/* FINAL CTA */}
-          <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pb-12">
-            <div className="rounded-[24px] border border-zinc-800 bg-zinc-900 p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          {/* FINAL CTA — single row, feedback via CONTRIBUTING.md only */}
+          <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pb-8">
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
-                <div className="text-[11px] font-mono tracking-widest text-zinc-500">Ready to lock in?</div>
-                <div className="mt-1 text-xl font-bold text-white">Your arc is 2 minutes away.</div>
-                <div className="mt-1 text-sm text-zinc-400">No email. No paywall. Just pick habits and start today.</div>
+                <div className="text-sm font-semibold text-white">Ready to lock in?</div>
+                <div className="text-sm text-zinc-500">No email. No paywall. Start in 2 minutes.</div>
               </div>
-              <div className="flex flex-wrap gap-3">
-                <button onClick={startOnboarding} className="px-6 py-3 rounded-full bg-white text-zinc-900 font-semibold hover:bg-zinc-100 transition">Start your arc</button>
-                <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="px-5 py-3 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 hover:bg-zinc-800 transition text-sm">Talk to us on X</a>
+              <div className="flex items-center gap-2">
+                <button onClick={startOnboarding} className="px-5 py-2.5 rounded-full bg-white text-zinc-900 font-semibold hover:bg-zinc-100 transition text-sm">Start your arc</button>
+                <a href="https://github.com/ashutosh887/winterarc/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer" className="px-4 py-2.5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 hover:bg-zinc-800 transition text-sm inline-flex items-center gap-1.5">Contribute <ExternalLink size={12} /></a>
               </div>
             </div>
-
-            {/* feedback compact */}
-            <div className="mt-6 grid sm:grid-cols-2 gap-4">
-              <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 hover:border-zinc-700 transition block">
-                <div className="text-sm font-semibold text-white flex items-center gap-2">Reach on X <ExternalLink size={12} className="text-zinc-500" /></div>
-                <div className="text-sm text-zinc-400 mt-1">DM or tag @ashutosh887_. Fastest response.</div>
-                <div className="mt-2 text-xs font-mono text-zinc-500">x.com/ashutosh887_</div>
-              </a>
-              <a href="https://linkedin.com/in/ashutosh887" target="_blank" rel="noreferrer" className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 hover:border-zinc-700 transition block">
-                <div className="text-sm font-semibold text-white flex items-center gap-2">Reach on LinkedIn <ExternalLink size={12} className="text-zinc-500" /></div>
-                <div className="text-sm text-zinc-400 mt-1">Connect and message. We read every suggestion.</div>
-                <div className="mt-2 text-xs font-mono text-zinc-500">linkedin.com/in/ashutosh887</div>
-              </a>
-            </div>
+            <div className="mt-3 text-center text-xs font-mono text-zinc-600">Feedback or feature idea? Open a PR via <a href="https://github.com/ashutosh887/winterarc/blob/main/CONTRIBUTING.md" className="underline decoration-zinc-700 hover:text-zinc-400">CONTRIBUTING.md</a> or DM <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="underline decoration-zinc-700 hover:text-zinc-400">@ashutosh887_</a> on X.</div>
           </section>
         </main>
       )}
@@ -781,7 +755,7 @@ export default function App() {
             </motion.div>
             <motion.div variants={fadeUp} className="rounded-2xl bg-zinc-900 border border-zinc-800 p-4 flex flex-col justify-center gap-2">
               <div className="grid grid-cols-3 gap-1.5">
-                <button onClick={() => shareToX()} className="py-2 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition">𝕏 Post</button>
+                <button onClick={() => shareToX()} className="py-2 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition">X Post</button>
                 <button onClick={() => shareToWhatsApp()} className="py-2 rounded-full bg-emerald-500 text-white font-semibold text-xs hover:bg-emerald-600 transition">WhatsApp</button>
                 <button onClick={() => downloadImage()} className="py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">PNG</button>
               </div>
@@ -815,7 +789,7 @@ export default function App() {
                   )
                 })}
               </div>
-              <div className="mt-3 flex items-center justify-between text-xs font-mono"><span className="text-zinc-400">{Object.keys(entries[selectedDate] || {}).length}/{effectiveHabits.length} done</span><span className={`${effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'text-emerald-400' : 'text-zinc-500'}`}>{effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'PERFECT DAY ✓' : 'keep going'}</span></div>
+              <div className="mt-3 flex items-center justify-between text-xs font-mono"><span className="text-zinc-400">{Object.keys(entries[selectedDate] || {}).length}/{effectiveHabits.length} done</span><span className={`${effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'text-emerald-400 inline-flex items-center gap-1' : 'text-zinc-500'}`}>{effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? <><Check size={12} /> Perfect day</> : 'keep going'}</span></div>
               <div className="mt-3 flex gap-2">
                 <button onClick={() => { const e = entries[selectedDate] || {}; const allDone = effectiveHabits.every(h => e[h.id]); const next = {}; effectiveHabits.forEach(h => next[h.id] = !allDone ? true : false); setEntries(prev => ({ ...prev, [selectedDate]: !allDone ? next : {} })) }} className="flex-1 py-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium border border-zinc-700 transition">{effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'Clear day' : 'Mark all done'}</button>
                 <button onClick={() => setSelectedDate(todayYMD())} className="px-4 py-2 rounded-full bg-sky-500 hover:bg-sky-400 text-zinc-950 text-sm font-semibold transition">Today</button>
@@ -866,7 +840,7 @@ export default function App() {
                   <div className={`text-[11px] leading-tight ${a.unlock ? 'text-zinc-600' : 'text-zinc-500'}`}>{a.desc}</div>
                   {a.unlock ? (
                     <div className="flex gap-1 mt-1">
-                      <button onClick={() => shareToX(a)} className="flex-1 py-1 rounded-full bg-zinc-900 text-white text-[11px] font-semibold hover:bg-zinc-800 transition">𝕏</button>
+                      <button onClick={() => shareToX(a)} className="flex-1 py-1 rounded-full bg-zinc-900 text-white text-[11px] font-semibold hover:bg-zinc-800 transition">X</button>
                       <button onClick={() => shareToWhatsApp(a)} className="flex-1 py-1 rounded-full bg-emerald-500 text-white text-[11px] hover:bg-emerald-600 transition">WA</button>
                       <button onClick={() => downloadImage(a)} className="px-2 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-700 text-[11px] hover:bg-white transition">PNG</button>
                     </div>
@@ -897,7 +871,7 @@ export default function App() {
               </div>
               <div className="mt-4 text-sm text-zinc-300">{stats.perfect} perfect of {totalDays} · {stats.perfectPct}%</div>
               <div className="mt-3 w-full grid grid-cols-2 gap-2">
-                <button onClick={() => shareToX()} className="py-2 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Share 𝕏</button>
+                <button onClick={() => shareToX()} className="py-2 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Share X</button>
                 <button onClick={() => downloadImage()} className="py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">Download PNG</button>
               </div>
             </div>
@@ -917,7 +891,7 @@ export default function App() {
               <div className="mt-4 rounded-xl bg-zinc-950 border border-zinc-800 p-4">
                 <div className="text-sky-400 text-lg leading-none">“</div>
                 <div className="text-sm text-zinc-200 italic">“{quote.q}”</div>
-                <div className="text-xs font-mono text-zinc-500 mt-1">— {quote.a}</div>
+                <div className="text-xs font-mono text-zinc-500 mt-1">- {quote.a}</div>
               </div>
               <div className="mt-4 space-y-3 text-sm">
                 <div className="flex items-center justify-between"><span className="text-zinc-400 flex items-center gap-1.5"><User size={12} /> Name</span>
@@ -944,7 +918,7 @@ export default function App() {
                   <div className="flex items-center gap-2"><span className={`w-8 h-8 rounded-full grid place-items-center border ${a.unlock ? 'bg-zinc-900 border-zinc-900 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-500'}`}><HabitIcon name={a.icon} size={14} /></span><span className={`text-sm font-semibold ${a.unlock ? 'text-zinc-900' : 'text-zinc-400'}`}>{a.label}</span>{a.unlock && <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500 text-white font-mono">UNLOCKED</span>}</div>
                   <div className="text-xs text-zinc-500 mt-1">{a.desc}</div>
                   <div className="mt-2 flex gap-1.5">
-                    <button disabled={!a.unlock} onClick={() => shareToX(a)} className={`flex-1 py-1.5 rounded-full text-xs font-semibold transition ${a.unlock ? 'bg-zinc-900 text-white hover:bg-zinc-800' : 'bg-zinc-800 text-zinc-500'}`}>𝕏</button>
+                    <button disabled={!a.unlock} onClick={() => shareToX(a)} className={`flex-1 py-1.5 rounded-full text-xs font-semibold transition ${a.unlock ? 'bg-zinc-900 text-white hover:bg-zinc-800' : 'bg-zinc-800 text-zinc-500'}`}>X</button>
                     <button disabled={!a.unlock} onClick={() => shareToWhatsApp(a)} className={`flex-1 py-1.5 rounded-full text-xs transition ${a.unlock ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-zinc-800 text-zinc-500'}`}>WA</button>
                     <button disabled={!a.unlock} onClick={() => downloadImage(a)} className={`px-2 py-1.5 rounded-full border text-xs transition ${a.unlock ? 'bg-zinc-100 border-zinc-200 text-zinc-700 hover:bg-white' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>PNG</button>
                   </div>
@@ -999,10 +973,9 @@ export default function App() {
       )}
       </AnimatePresence>
 
-      <footer className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8 border-t border-zinc-800 mt-12">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] font-mono text-zinc-500">
-          <span>© 2026 WinterArc · <a href={site.author.url} target="_blank" rel="noreferrer" className="hover:text-zinc-300 transition">{site.author.name}</a> · <a href={site.support.github} target="_blank" rel="noreferrer" className="hover:text-zinc-300 transition">GitHub</a></span>
-          <span className="flex items-center gap-2"><span>Local first · No tracking</span><span className="opacity-30">·</span><a href="https://github.com/ashutosh887/winterarc/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer" className="hover:text-zinc-300">Contribute</a></span>
+      <footer className="max-w-[1040px] mx-auto px-5 sm:px-6 py-6 border-t border-zinc-800 mt-8">
+        <div className="text-center text-[11px] font-mono text-zinc-500 leading-relaxed">
+          © 2026 WinterArc · Open source tracker Oct 1 → Dec 31 (92 days) · Local-first · PWA · No login · <a href={site.support.github} target="_blank" rel="noreferrer" className="hover:text-zinc-300 underline decoration-zinc-700">GitHub</a> · <a href="https://github.com/ashutosh887/winterarc/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer" className="hover:text-zinc-300 underline decoration-zinc-700">Contribute</a>
         </div>
       </footer>
     </div>
