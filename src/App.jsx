@@ -1304,9 +1304,9 @@ export default function App() {
                 <input type="checkbox" checked={backupBeforeReset} onChange={e => setBackupBeforeReset(e.target.checked)} className="mt-0.5 accent-white w-4 h-4" />
                 <span className="text-[13px] leading-5 text-zinc-300">Download a JSON backup first<span className="block text-zinc-500">Saves the file, then clears the arc.</span></span>
               </label>
-              <div className="mt-5 flex flex-wrap gap-2 justify-end">
-                <button onClick={() => setConfirmReset(false)} className="h-11 px-5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-sm hover:text-white hover:border-zinc-700 transition">Keep my arc</button>
-                <button onClick={resetAll} className="h-11 px-5 rounded-full bg-red-500/15 border border-red-500/25 text-red-200 text-sm font-semibold hover:bg-red-500/25 transition">Reset everything</button>
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                <button onClick={() => setConfirmReset(false)} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-sm hover:text-white hover:border-zinc-700 transition">Keep my arc</button>
+                <button onClick={resetAll} className="h-11 px-4 rounded-full bg-red-500/15 border border-red-500/25 text-red-200 text-sm font-semibold hover:bg-red-500/25 transition">Reset everything</button>
               </div>
             </motion.div>
           </motion.div>
@@ -1481,7 +1481,10 @@ export default function App() {
                 <div className="mt-2 text-[11px] font-mono tracking-widest text-zinc-500">Selected {tmpSelected.size} {tmpSelected.size > 10 && '· over 10'}</div>
                 {['non-neg', 'extra', 'aesthetic'].map(tier => (<div key={tier} className="mt-5"><div className="text-[11px] font-mono tracking-widest text-zinc-500">{TIER_LABELS[tier]}</div><div className="mt-2 grid sm:grid-cols-2 gap-2">{PRESETS.filter(p => p.tier === tier).map(p => { const sel = tmpSelected.has(p.id); return (<button key={p.id} onClick={() => setTmpSelected(s => { const n = new Set(s); sel ? n.delete(p.id) : n.add(p.id); return n })} className={`text-left rounded-xl border p-3 flex gap-3 items-start transition ${sel ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}><span className={`w-8 h-8 rounded-full grid place-items-center border shrink-0 ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'bg-zinc-800 border-zinc-700 text-zinc-300'}`}><HabitIcon name={p.icon} size={14} /></span><span className="flex-1 min-w-0"><span className={`text-sm font-medium block ${sel ? 'text-zinc-900' : 'text-zinc-200'}`}>{p.name}</span><span className="text-xs text-zinc-500">{p.desc}</span></span><span className={`mt-1 w-5 h-5 rounded-full grid place-items-center border text-xs shrink-0 ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'border-zinc-700 text-transparent'}`}><Check size={12} /></span></button>) })}</div></div>))}
                 <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950 p-3"><div className="text-[11px] font-mono tracking-widest text-zinc-500">Custom habit</div><div className="mt-2 flex gap-2"><Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. No sugar, 3L water" onKeyDown={e => e.key === 'Enter' && addCustom()} className="h-11" /><Button variant="secondary" className="h-11 px-5" onClick={addCustom}>Add</Button></div>{customList.length > 0 && (<div className="mt-3 flex flex-wrap gap-2">{customList.map(c => (<Badge key={c.id} variant="secondary" className="gap-1.5">{c.name} <button onClick={() => { setCustomList(prev => prev.filter(x => x.id !== c.id)); setTmpSelected(s => { const n = new Set(s); n.delete(c.id); return n }) }} className="ml-1 hover:text-destructive"><X size={12} /></button></Badge>))}</div>)}</div>
-                <div className="mt-6 flex items-center justify-between"><Button variant="outline" className="h-11 px-5" onClick={() => setOnboardStep(1)}>Back</Button><Button className="h-11 px-5" onClick={completeOnboarding}>Save arc · {tmpSelected.size} habits <ArrowRight size={14} /></Button></div>
+                <div className="mt-6 flex flex-wrap items-center gap-2">
+                  <Button variant="outline" className="h-11 px-5" onClick={() => setOnboardStep(1)}>Back</Button>
+                  <Button className="h-11 px-5 flex-1 sm:flex-none sm:ml-auto" onClick={completeOnboarding}>Save arc · {tmpSelected.size} habits <ArrowRight size={14} /></Button>
+                </div>
               </div>
             )}
           </motion.div>
@@ -1509,11 +1512,11 @@ export default function App() {
               <div className="min-w-0 flex-1">
                 <div className="text-[13px] font-semibold text-white">Keep it on your home screen</div>
                 <div className="mt-0.5 text-[12px] leading-5 text-zinc-500">Installs like an app, opens offline, still no account.</div>
-                <div className="mt-3 flex gap-2">
-                  <button onClick={runInstall} className="h-11 px-5 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">
-                    {installEvent ? 'Install' : 'How'}
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button onClick={runInstall} className="h-11 px-4 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">
+                    {installEvent ? 'Install' : 'Show me how'}
                   </button>
-                  <button onClick={dismissInstallHint} className="h-11 px-5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 text-[13px] hover:text-white transition">Not now</button>
+                  <button onClick={dismissInstallHint} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 text-[13px] hover:text-white hover:border-zinc-700 transition">Not now</button>
                 </div>
               </div>
               <button onClick={dismissInstallHint} aria-label="Dismiss" className="w-10 h-10 shrink-0 grid place-items-center rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition"><X size={14} /></button>
