@@ -9,4 +9,3 @@ Open backlog. Nothing here is committed to.
 - [ ] Per day notes on a habit
 - [ ] Local web notifications for a daily reminder
 - [ ] Light theme toggle
-- [ ] Lazy load the Three.js canvas to cut the main bundle
