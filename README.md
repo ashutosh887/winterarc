@@ -8,7 +8,7 @@ Live: https://trywinterarc.vercel.app
 
 ## Stack
 
-React, Vite, Tailwind CSS, shadcn/ui.
+React, TypeScript, Vite, Tailwind CSS, shadcn/ui.
 
 ## Run locally
 
@@ -17,6 +17,7 @@ npm install
 npm run dev
 npm run build
 npm run lint
+npm run typecheck
 ```
 
 ## Environment
@@ -26,7 +27,10 @@ Copy `.env.example` to `.env.local`. It runs fine empty. `VITE_CLARITY_ID` enabl
 ## Where things live
 
 - `src/config.ts` is the source of truth for content: templates, resources, quotes, challenges.
-- `src/App.jsx` holds the views and the tracker logic.
+- `src/lib/types.ts` holds the domain types every other module is written against.
+- `src/hooks/useArc.ts` holds all arc state, the derived stats and the actions. Views read one `arc` object from it.
+- `src/views/` holds one component per route; `src/App.tsx` is the shell, nav and dialogs.
+- `src/lib/` holds dates, routes, storage, presets and habit ids.
 - `src/components/ui/` holds the shadcn components.
 - `public/` holds the icons, OG image, robots.txt and sitemap.xml.
 

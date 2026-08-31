@@ -12,8 +12,9 @@ npm run dev
 ## Before you push
 
 ```bash
-npm run lint    # oxlint, must report 0 errors and 0 warnings
-npm run build   # must pass
+npm run lint       # oxlint, must report 0 errors and 0 warnings
+npm run typecheck  # tsc --noEmit, strict, must report 0 errors
+npm run build      # must pass
 ```
 
 ## Environment
