@@ -306,6 +306,11 @@ export default function App() {
     const text = achievement ? `${achievement.label}: ${achievement.desc}` : `Day ${stats.dayNum}/${totalDays} • ${stats.pct}%`
     if (navigator.share) { try { await navigator.share({ title: 'WinterArc', text, url: location.href }) } catch {} } else { shareToX(achievement) }
   }
+  function goTo(next) {
+    setView(next)
+    setMobileMenuOpen(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
   function scrollToId(id) {
     if (view !== 'landing') { setView('landing'); setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80) }
     else document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -315,27 +320,19 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#09090b]">
       <header className="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/80">
-        <div className="max-w-[1040px] mx-auto px-5 sm:px-6 h-[56px] flex items-center gap-6">
+        <div className="max-w-[1040px] mx-auto px-5 sm:px-6 h-[56px] flex items-center gap-4">
           <button onClick={() => { setView('landing'); window.scrollTo({ top: 0, behavior: 'smooth' }) }} aria-label="WinterArc home" className="flex items-center gap-2.5 shrink-0">
             <Logo size={28} />
             <span className="font-semibold tracking-[0.16em] text-[13px] text-white">WINTERARC</span>
           </button>
-          <nav className="hidden lg:flex items-center gap-1 ml-6">
-            {view === 'landing' ? (
-              <>
-                <button onClick={() => scrollToId('how')} className="px-3.5 py-1.5 rounded-full text-[13px] font-medium text-zinc-500 hover:text-white transition">How it works</button>
-                <button onClick={() => scrollToId('templates')} className="px-3.5 py-1.5 rounded-full text-[13px] font-medium text-zinc-500 hover:text-white transition">Templates</button>
-                <button onClick={() => setView('resources')} className="px-3.5 py-1.5 rounded-full text-[13px] font-medium text-zinc-500 hover:text-white transition">Resources</button>
-              </>
-            ) : view === 'resources' ? (
-              <button onClick={() => setView('landing')} className="px-3.5 py-1.5 rounded-full text-[13px] text-zinc-400 hover:text-white transition inline-flex items-center gap-1.5"><ArrowRight size={14} className="rotate-180" /> Back</button>
-            ) : (
-              <button onClick={() => setView('landing')} className="px-3.5 py-1.5 rounded-full text-[13px] text-zinc-400 hover:text-white transition inline-flex items-center gap-1.5"><ArrowRight size={14} className="rotate-180" /> Back</button>
-            )}
+          <nav className="hidden lg:flex items-center gap-1 ml-auto">
+            <button onClick={() => scrollToId('how')} className="px-3 py-1.5 rounded-full text-[13px] font-medium text-zinc-400 hover:text-white transition">How it works</button>
+            <button onClick={() => goTo('templates')} className={`px-3 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'templates' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white'}`}>Templates</button>
+            <button onClick={() => goTo('resources')} className={`px-3 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'resources' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white'}`}>Resources</button>
           </nav>
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-2 ml-auto lg:ml-2">
             {hasData && (
-              <div className="hidden lg:flex items-center gap-1 mr-1">
+              <div className="hidden lg:flex items-center gap-1">
                 <button onClick={() => setView('tracker')} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'tracker' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white'}`}>Tracker</button>
                 <button onClick={() => setView('dashboard')} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'dashboard' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white'}`}>Dashboard</button>
               </div>
@@ -355,12 +352,12 @@ export default function App() {
           <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="lg:hidden sticky top-[56px] z-20 bg-zinc-950 border-b border-zinc-800">
             <div className="max-w-[1040px] mx-auto px-5 py-3 grid grid-cols-2 gap-2">
               <button onClick={() => scrollToId('how')} className="px-3 py-2.5 rounded-xl text-sm font-medium text-left border bg-zinc-900 text-zinc-200 border-zinc-800">How it works</button>
-              <button onClick={() => scrollToId('templates')} className="px-3 py-2.5 rounded-xl text-sm font-medium text-left border bg-zinc-900 text-zinc-200 border-zinc-800">Templates</button>
-              <button onClick={() => { setView('resources'); setMobileMenuOpen(false) }} className={`px-3 py-2.5 rounded-xl text-sm font-medium text-left border ${view === 'resources' ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-200 border-zinc-800'}`}>Resources</button>
+              <button onClick={() => goTo('templates')} className={`px-3 py-2.5 rounded-xl text-sm font-medium text-left border ${view === 'templates' ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-200 border-zinc-800'}`}>Templates</button>
+              <button onClick={() => goTo('resources')} className={`px-3 py-2.5 rounded-xl text-sm font-medium text-left border ${view === 'resources' ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-200 border-zinc-800'}`}>Resources</button>
               {hasData ? (
                 <>
-                  <button onClick={() => { setView('tracker'); setMobileMenuOpen(false) }} className={`px-3 py-2.5 rounded-xl text-sm font-medium text-left border ${view === 'tracker' ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-300 border-zinc-800'}`}>Tracker</button>
-                  <button onClick={() => { setView('dashboard'); setMobileMenuOpen(false) }} className={`px-3 py-2.5 rounded-xl text-sm font-medium text-left border ${view === 'dashboard' ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-300 border-zinc-800'}`}>Dashboard</button>
+                  <button onClick={() => goTo('tracker')} className={`px-3 py-2.5 rounded-xl text-sm font-medium text-left border ${view === 'tracker' ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-300 border-zinc-800'}`}>Tracker</button>
+                  <button onClick={() => goTo('dashboard')} className={`px-3 py-2.5 rounded-xl text-sm font-medium text-left border ${view === 'dashboard' ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-300 border-zinc-800'}`}>Dashboard</button>
                 </>
               ) : (
                 <button onClick={() => { setView('landing'); startOnboarding(); setMobileMenuOpen(false) }} className="col-span-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-center bg-white text-zinc-900">Start your arc</button>
@@ -411,11 +408,6 @@ export default function App() {
               <motion.p variants={fadeUp} className="mt-4 text-[16px] sm:text-[18px] font-medium text-zinc-500 max-w-[520px] mx-auto">
                 Disappear for 90 days. Come back unrecognizable.
               </motion.p>
-              {todayYMD() < DEFAULT_START && (
-                <motion.div variants={fadeUp} className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-400">
-                  September is prep. {daysBetween(todayYMD(), DEFAULT_START)} days to Oct 1
-                </motion.div>
-              )}
               <motion.p variants={fadeUp} className="mt-5 max-w-[560px] mx-auto text-[14.5px] leading-6 text-zinc-500">
                 A private tracker for your 90-day lock-in. Pick 3–5 habits. Check daily. No account, no cloud. Data stays on your device.
               </motion.p>
@@ -432,9 +424,8 @@ export default function App() {
 
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.6, ease: [0.22,1,0.36,1] }} className="mt-12 rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800 bg-zinc-950">
-                <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-zinc-800" /><span className="w-2.5 h-2.5 rounded-full bg-zinc-800" /><span className="w-2.5 h-2.5 rounded-full bg-zinc-800" /></div>
                 <div className="text-[11px] font-mono tracking-widest text-zinc-500">Preview</div>
-                <div className="text-[11px] font-mono text-zinc-600 hidden sm:block">Honest grid</div>
+                <div className="text-[11px] font-mono text-zinc-600">Honest grid</div>
               </div>
               <div className="grid md:grid-cols-[300px_1fr] gap-0">
                 <div className="p-5 border-r border-zinc-800 bg-zinc-950/40">
@@ -575,7 +566,7 @@ export default function App() {
                   { n: '03', t: 'Share & export', d: 'Download a PNG for social. Export CSV/JSON. Copy a prompt for your LLM.' },
                 ].map(s => (
                   <motion.div variants={fadeUp} key={s.n} className="flex gap-4">
-                    <div className="text-[13px] font-mono tracking-widest text-sky-400 pt-0.5">{s.n}</div>
+                    <div className="text-[13px] font-mono tracking-widest text-zinc-400 pt-0.5">{s.n}</div>
                     <div><div className="text-[14px] font-semibold text-white">{s.t}</div><div className="mt-1 text-[13px] leading-5 text-zinc-500">{s.d}</div></div>
                   </motion.div>
                 ))}
@@ -583,7 +574,30 @@ export default function App() {
             </motion.div>
           </section>
 
-          <section id="templates" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-16">
+          <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pb-8">
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <div className="text-sm font-semibold text-white">Ready to lock in?</div>
+                <div className="text-sm text-zinc-500">No email. Start in 2 minutes.</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={startOnboarding} className="px-5 py-2.5 rounded-full bg-white text-zinc-900 font-semibold hover:bg-zinc-100 transition text-sm">Start your arc</button>
+                <a href="https://github.com/ashutosh887/winterarc/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer" className="px-4 py-2.5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 hover:bg-zinc-800 transition text-sm inline-flex items-center gap-1.5">Contribute <ExternalLink size={12} /></a>
+              </div>
+            </div>
+            <div className="mt-3 text-center text-xs font-mono text-zinc-600">Feedback or feature idea? Open a PR via <a href="https://github.com/ashutosh887/winterarc/blob/main/CONTRIBUTING.md" className="underline decoration-zinc-700 hover:text-zinc-400">CONTRIBUTING.md</a> or DM <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="underline decoration-zinc-700 hover:text-zinc-400">@ashutosh887_</a> on X.</div>
+          </section>
+        </main>
+      )}
+
+      {view === 'templates' && (
+        <main id="main">
+          <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pt-12 pb-2">
+            <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><BookOpen size={12} /> Templates</div>
+            <h1 className="mt-2 text-[26px] font-bold tracking-tight text-white">Start from a template</h1>
+            <p className="mt-1 text-sm text-zinc-500">Pick one, then edit it in setup.</p>
+          </section>
+          <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pb-12">
             <div className="flex items-end justify-between gap-4">
               <div>
                 <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><BookOpen size={12} /> Templates</div>
@@ -615,7 +629,7 @@ export default function App() {
             </div>
           </section>
 
-          <section id="challenges" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-16">
+          <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pb-12">
             <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Flame size={12} /> Challenges</div>
             <h2 className="mt-2 text-[22px] font-bold tracking-tight text-white">Stay in the game</h2>
             <p className="mt-1 text-sm text-zinc-500">Progress comes from your arc.</p>
@@ -644,19 +658,6 @@ export default function App() {
             </motion.div>
           </section>
 
-          <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pb-8">
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div>
-                <div className="text-sm font-semibold text-white">Ready to lock in?</div>
-                <div className="text-sm text-zinc-500">No email. Start in 2 minutes.</div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button onClick={startOnboarding} className="px-5 py-2.5 rounded-full bg-white text-zinc-900 font-semibold hover:bg-zinc-100 transition text-sm">Start your arc</button>
-                <a href="https://github.com/ashutosh887/winterarc/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer" className="px-4 py-2.5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 hover:bg-zinc-800 transition text-sm inline-flex items-center gap-1.5">Contribute <ExternalLink size={12} /></a>
-              </div>
-            </div>
-            <div className="mt-3 text-center text-xs font-mono text-zinc-600">Feedback or feature idea? Open a PR via <a href="https://github.com/ashutosh887/winterarc/blob/main/CONTRIBUTING.md" className="underline decoration-zinc-700 hover:text-zinc-400">CONTRIBUTING.md</a> or DM <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="underline decoration-zinc-700 hover:text-zinc-400">@ashutosh887_</a> on X.</div>
-          </section>
         </main>
       )}
 
@@ -720,8 +721,8 @@ export default function App() {
               <div><div className="text-[11px] font-mono tracking-widest text-zinc-400">Streak</div><div className="text-lg font-black text-white">{stats.streak} <span className="text-xs font-mono text-zinc-500">best {stats.bestStreak}</span></div><div className="text-xs text-zinc-500">{stats.perfect} perfect ({stats.perfectPct}%)</div></div>
             </motion.div>
             <motion.div variants={fadeUp} className="rounded-2xl bg-zinc-900 border border-zinc-800 p-4 flex items-center gap-3">
-              <Ring pct={stats.pct} size={54}><span className="text-xs font-bold text-sky-400">{stats.pct}%</span></Ring>
-              <div><div className="text-[11px] font-mono tracking-widest text-zinc-400">Completion</div><div className="text-xs text-zinc-500">{stats.totalChecked}/{stats.totalPossible} checks</div><div className="w-20 h-1.5 bg-zinc-800 rounded-full mt-1"><div className="h-1.5 bg-sky-500 rounded-full transition-all" style={{ width: `${stats.pct}%` }} /></div></div>
+              <Ring pct={stats.pct} size={54}><span className="text-xs font-bold text-zinc-400">{stats.pct}%</span></Ring>
+              <div><div className="text-[11px] font-mono tracking-widest text-zinc-400">Completion</div><div className="text-xs text-zinc-500">{stats.totalChecked}/{stats.totalPossible} checks</div><div className="w-20 h-1.5 bg-zinc-800 rounded-full mt-1"><div className="h-1.5 bg-white rounded-full transition-all" style={{ width: `${stats.pct}%` }} /></div></div>
             </motion.div>
             <motion.div variants={fadeUp} className="rounded-2xl bg-zinc-900 border border-zinc-800 p-4 flex flex-col justify-center gap-2">
               <div className="grid grid-cols-3 gap-1.5">
@@ -742,7 +743,7 @@ export default function App() {
             <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-4 h-fit">
               <div className="flex items-center justify-between">
                 <div className="font-semibold text-white">Daily check-in</div>
-                <Ring pct={dailyPct} size={44} stroke={3}><span className="text-[11px] font-mono font-bold text-sky-300">{dailyPct}%</span></Ring>
+                <Ring pct={dailyPct} size={44} stroke={3}><span className="text-[11px] font-mono font-bold text-zinc-300">{dailyPct}%</span></Ring>
               </div>
               <div className="text-xs text-zinc-500 -mt-1">Pick any past date. Rings update live.</div>
               <input type="date" value={selectedDate} min={start} max={end} onChange={e => setSelectedDate(e.target.value)} className="mt-3 w-full rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-2 text-sm text-white" />
@@ -762,7 +763,7 @@ export default function App() {
               <div className="mt-3 flex items-center justify-between text-xs font-mono"><span className="text-zinc-400">{Object.keys(entries[selectedDate] || {}).length}/{effectiveHabits.length} done</span><span className={`${effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'text-emerald-400 inline-flex items-center gap-1' : 'text-zinc-500'}`}>{effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? <><Check size={12} /> Perfect day</> : 'keep going'}</span></div>
               <div className="mt-3 flex gap-2">
                 <button onClick={() => { const e = entries[selectedDate] || {}; const allDone = effectiveHabits.every(h => e[h.id]); const next = {}; effectiveHabits.forEach(h => next[h.id] = !allDone ? true : false); setEntries(prev => ({ ...prev, [selectedDate]: !allDone ? next : {} })) }} className="flex-1 py-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium border border-zinc-700 transition">{effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'Clear day' : 'Mark all done'}</button>
-                <button onClick={() => setSelectedDate(todayYMD())} className="px-4 py-2 rounded-full bg-sky-500 hover:bg-sky-400 text-zinc-950 text-sm font-semibold transition">Today</button>
+                <button onClick={() => setSelectedDate(todayYMD())} className="px-4 py-2 rounded-full bg-white hover:bg-sky-400 text-zinc-950 text-sm font-semibold transition">Today</button>
               </div>
             </div>
 
@@ -776,7 +777,7 @@ export default function App() {
                   else if (perfect) bg = 'bg-white border-white'
                   else if (done > 0) bg = 'bg-zinc-300 border-zinc-300'
                   else if (d < todayYMD()) bg = 'bg-red-500/15 border-red-500/20'
-                  return (<button key={d} onClick={() => setSelectedDate(d)} className={`relative aspect-square rounded-lg border flex flex-col items-center justify-center transition hover:scale-[1.04] ${bg} ${isSelected ? 'ring-2 ring-sky-400 ring-offset-2 ring-offset-zinc-900' : ''}`} title={`${d} - ${done}/${effectiveHabits.length}`}><span className={`text-[10px] font-mono ${perfect ? 'text-zinc-900' : done > 0 ? 'text-zinc-900' : d < todayYMD() ? 'text-red-300' : 'text-zinc-500'}`}>{d.slice(8, 10)}</span><span className={`text-[9px] font-mono ${perfect ? 'text-zinc-700' : 'text-zinc-500'}`}>{done}/{effectiveHabits.length}</span>{isToday && <span className="absolute -top-1 -right-1 w-2 h-2 bg-sky-500 rounded-full border border-zinc-900" />}</button>)
+                  return (<button key={d} onClick={() => setSelectedDate(d)} className={`relative aspect-square rounded-lg border flex flex-col items-center justify-center transition hover:scale-[1.04] ${bg} ${isSelected ? 'ring-2 ring-sky-400 ring-offset-2 ring-offset-zinc-900' : ''}`} title={`${d} - ${done}/${effectiveHabits.length}`}><span className={`text-[10px] font-mono ${perfect ? 'text-zinc-900' : done > 0 ? 'text-zinc-900' : d < todayYMD() ? 'text-red-300' : 'text-zinc-500'}`}>{d.slice(8, 10)}</span><span className={`text-[9px] font-mono ${perfect ? 'text-zinc-700' : 'text-zinc-500'}`}>{done}/{effectiveHabits.length}</span>{isToday && <span className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full border border-zinc-900" />}</button>)
                 })}
               </div>
               <div className="mt-6">
@@ -789,7 +790,7 @@ export default function App() {
                       <div key={h.id} className="rounded-xl bg-zinc-950 border border-zinc-800 p-2.5 flex flex-col items-center gap-1.5 hover:border-zinc-700 transition">
                         <Ring pct={pct} size={56} stroke={4}><span className="text-zinc-200"><HabitIcon name={h.icon} size={16} /></span></Ring>
                         <div className="text-[11px] text-center leading-tight text-zinc-200 line-clamp-2">{h.name}</div>
-                        <div className="text-[11px] font-mono text-sky-400">{pct}% · {hits}/{totalDays}</div>
+                        <div className="text-[11px] font-mono text-zinc-400">{pct}% · {hits}/{totalDays}</div>
                       </div>
                     )
                   })}
@@ -823,7 +824,7 @@ export default function App() {
           </div>
 
           <div className="mt-6 rounded-2xl bg-zinc-900 border border-zinc-800 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2"><div className="font-semibold text-white">Export & LLM prompt</div><div className="flex items-center gap-2"><button onClick={() => navigator.clipboard.writeText(llmPrompt)} className="px-3 py-1.5 rounded-full bg-sky-500 hover:bg-sky-400 text-zinc-950 text-xs font-semibold transition">Copy prompt</button><button onClick={resetAll} className="px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-xs font-semibold hover:bg-red-500/15 transition">Reset</button></div></div>
+            <div className="flex flex-wrap items-center justify-between gap-2"><div className="font-semibold text-white">Export & LLM prompt</div><div className="flex items-center gap-2"><button onClick={() => navigator.clipboard.writeText(llmPrompt)} className="px-3 py-1.5 rounded-full bg-white hover:bg-sky-400 text-zinc-950 text-xs font-semibold transition">Copy prompt</button><button onClick={resetAll} className="px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-xs font-semibold hover:bg-red-500/15 transition">Reset</button></div></div>
             <div className="mt-3 rounded-xl bg-zinc-950 border border-zinc-800 p-3 overflow-auto"><pre className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-words font-mono">{llmPrompt}</pre></div>
             <div className="mt-2 text-xs text-zinc-500">Paste with exported JSON into your LLM. Data stays local until you paste.</div>
           </div>
@@ -852,14 +853,14 @@ export default function App() {
                   const perfectInWeek = week.filter(d => effectiveHabits.length && effectiveHabits.every(h => (entries[d] || {})[h.id])).length
                   const checks = week.reduce((acc, d) => acc + effectiveHabits.filter(h => (entries[d] || {})[h.id]).length, 0)
                   const pct = week.length * effectiveHabits.length ? Math.round((checks / (week.length * effectiveHabits.length)) * 100) : 0
-                  return (<div key={wi} className="rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-2 flex items-center gap-3"><span className="text-xs font-mono text-zinc-500 w-14">W{wi + 1}</span><span className="text-xs text-zinc-400 flex-1">{week[0]?.slice(5)} → {week[week.length - 1]?.slice(5)}</span><span className="text-xs font-mono text-emerald-400">{perfectInWeek}/7</span><span className="text-xs font-mono text-sky-400 w-10 text-right">{pct}%</span></div>)
+                  return (<div key={wi} className="rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-2 flex items-center gap-3"><span className="text-xs font-mono text-zinc-500 w-14">W{wi + 1}</span><span className="text-xs text-zinc-400 flex-1">{week[0]?.slice(5)} → {week[week.length - 1]?.slice(5)}</span><span className="text-xs font-mono text-emerald-400">{perfectInWeek}/7</span><span className="text-xs font-mono text-zinc-400 w-10 text-right">{pct}%</span></div>)
                 }) })()}
               </div>
             </div>
             <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6">
               <div className="text-xs font-mono tracking-widest text-zinc-400">Today’s quote</div>
               <div className="mt-4 rounded-xl bg-zinc-950 border border-zinc-800 p-4">
-                <div className="text-sky-400 text-lg leading-none">“</div>
+                <div className="text-zinc-400 text-lg leading-none">“</div>
                 <div className="text-sm text-zinc-200 italic">“{quote.q}”</div>
                 <div className="text-xs font-mono text-zinc-500 mt-1">- {quote.a}</div>
               </div>
