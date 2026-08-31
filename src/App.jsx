@@ -127,7 +127,16 @@ export default function App() {
   const [customList, setCustomList] = useState([])
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [stars, setStars] = useState(null)
+  const [heroReady, setHeroReady] = useState(false)
   const canvasRef = useRef(null)
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (window.innerWidth < 768) return
+    const idle = window.requestIdleCallback || (cb => setTimeout(cb, 1200))
+    const id = idle(() => setHeroReady(true))
+    return () => (window.cancelIdleCallback || clearTimeout)(id)
+  }, [])
 
   useEffect(() => {
     const DAY = 86400000
@@ -411,7 +420,7 @@ export default function App() {
       {view === 'landing' && (
         <main id="main">
           <section className="relative overflow-hidden aurora border-b border-zinc-800">
-            <Suspense fallback={null}><ThreeHero /></Suspense>
+            {heroReady && <Suspense fallback={null}><ThreeHero /></Suspense>}
             <div className="max-w-[1040px] mx-auto px-5 sm:px-6 pt-16 sm:pt-24 pb-12">
             <motion.div variants={stagger} initial="hidden" animate="show" className="text-center">
               <motion.h1 variants={fadeUp} className="font-[800] tracking-[-0.04em] leading-[0.92] text-[40px] sm:text-[60px] text-white">
