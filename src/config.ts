@@ -9,45 +9,45 @@ export const site = {
   support: { cta: 'Star on GitHub. It helps', github: 'https://github.com/ashutosh887/winterarc' },
 }
 
-export const resources: Record<string, { title: string; items: { name: string; url: string; desc: string; free: boolean }[] }> = {
+export const resources: Record<string, { title: string; items: { name: string; url: string; desc: string }[] }> = {
   workout: {
     title: 'Workout',
     items: [
-      { name: 'workout.lol', url: 'https://workout.lol/', desc: 'Generate workout plans', free: true },
-      { name: 'DAREBEE', url: 'https://darebee.com/', desc: '1000 plus no equipment workouts', free: true },
-      { name: 'Hevy', url: 'https://www.hevy.com/', desc: 'Track lifts. Free plan', free: true },
-      { name: 'NerdFitness bodyweight', url: 'https://www.nerdfitness.com/blog/a-beginners-guide-to-bodyweight-workouts/', desc: 'Beginner bodyweight guide', free: true },
+      { name: 'workout.lol', url: 'https://workout.lol/', desc: 'Build a routine from the muscles you pick' },
+      { name: 'DAREBEE', url: 'https://darebee.com/', desc: 'No equipment workouts, no ads' },
+      { name: 'Hevy', url: 'https://hevy.com/', desc: 'Log lifts and track volume' },
+      { name: 'NerdFitness', url: 'https://www.nerdfitness.com/blog/beginner-body-weight-workout-burn-fat-build-muscle/', desc: '20 minute beginner bodyweight routine' },
     ],
   },
   nutrition: {
     title: 'Nutrition',
     items: [
-      { name: 'MyFitnessPal', url: 'https://www.myfitnesspal.com/', desc: 'Track protein and calories', free: true },
-      { name: 'Cronometer', url: 'https://cronometer.com/', desc: 'Micronutrient tracker', free: true },
-      { name: 'EatThisMuch', url: 'https://www.eatthismuch.com/', desc: 'Meal planner', free: true },
+      { name: 'Cronometer', url: 'https://cronometer.com/', desc: 'Calories and micronutrients' },
+      { name: 'MyFitnessPal', url: 'https://www.myfitnesspal.com/', desc: 'Protein and calorie logging' },
+      { name: 'EatingWell meal plans', url: 'https://www.eatingwell.com/category/4288/meal-plans/', desc: 'Weekly meal plans, no account' },
     ],
   },
   focus: {
     title: 'Focus and work',
     items: [
-      { name: 'Pomofocus', url: 'https://pomofocus.io/', desc: 'Pomodoro timer', free: true },
-      { name: 'Flow', url: 'https://flow.app/', desc: 'Minimal focus timer', free: true },
-      { name: 'Notion', url: 'https://www.notion.so/', desc: 'Workspace for arcs', free: true },
+      { name: 'Pomofocus', url: 'https://pomofocus.io/', desc: 'Pomodoro timer in the browser' },
+      { name: 'Flow', url: 'https://flow.app/', desc: 'Minimal focus timer for Mac and iOS' },
+      { name: 'Notion', url: 'https://www.notion.so/', desc: 'Somewhere to keep the plan' },
     ],
   },
   mind: {
     title: 'Mind',
     items: [
-      { name: 'Insight Timer', url: 'https://insighttimer.com/', desc: 'Meditation library', free: true },
-      { name: 'Waking Up intro', url: 'https://www.wakingup.com/', desc: 'Intro meditations', free: true },
-      { name: '5 min journal', url: 'https://www.intelligentchange.com/blogs/news/free-printable-journal', desc: 'Gratitude templates', free: true },
+      { name: 'Insight Timer', url: 'https://insighttimer.com/', desc: 'Large library of guided meditations' },
+      { name: 'UCLA Mindful', url: 'https://www.uclahealth.org/uclamindful/free-guided-meditations', desc: 'Guided meditations from UCLA Health' },
+      { name: 'Greater Good gratitude', url: 'https://ggia.berkeley.edu/practice/gratitude_journal', desc: 'Berkeley gratitude journal practice' },
     ],
   },
   sleep: {
     title: 'Sleep',
     items: [
-      { name: 'Sleep Foundation guides', url: 'https://www.sleepfoundation.org/how-sleep-works', desc: 'Sleep hygiene guides', free: true },
-      { name: 'Huberman sleep toolkit', url: 'https://www.hubermanlab.com/newsletter', desc: 'Newsletter toolkit', free: true },
+      { name: 'Sleep Foundation', url: 'https://www.sleepfoundation.org/how-sleep-works', desc: 'How sleep actually works' },
+      { name: 'Huberman sleep toolkit', url: 'https://www.hubermanlab.com/newsletter/toolkit-for-sleep', desc: 'Protocol for falling and staying asleep' },
     ],
   },
 }
@@ -60,11 +60,18 @@ export const templates: { id: string; name: string; icon: string; habitIds: stri
   { id: 'minimal', name: 'Minimal', icon: 'snowflake', habitIds: ['gym', 'sleep', 'work'], desc: 'Just three. Good place to start. Add more later.' },
 ]
 
-export const challenges: { id: string; label: string; icon: string; days: number; type: 'streak' | 'week'; desc: string }[] = [
-  { id: 'streak7', label: '7-Day Streak', icon: 'flame', days: 7, type: 'streak', desc: '7 perfect days in a row' },
-  { id: 'streak14', label: '14-Day Lock', icon: 'snowflake', days: 14, type: 'streak', desc: '14 perfect days in a row' },
-  { id: 'streak30', label: '30-Day Forge', icon: 'gem', days: 30, type: 'streak', desc: '30 perfect days in a row' },
-  { id: 'perfectWeek', label: 'Perfect Week', icon: 'star', days: 7, type: 'week', desc: '7/7 perfect in a calendar week' },
+export const challenges: { id: string; label: string; icon: string; desc: string; metric: 'checks' | 'perfect' | 'streak' | 'pct'; target: number }[] = [
+  { id: 'first', label: 'First check', icon: 'check', desc: 'Log one habit', metric: 'checks', target: 1 },
+  { id: 'perfect1', label: 'Perfect day', icon: 'star', desc: 'Every habit in one day', metric: 'perfect', target: 1 },
+  { id: 'streak3', label: '3 day streak', icon: 'flame', desc: 'Three perfect days in a row', metric: 'streak', target: 3 },
+  { id: 'streak7', label: '7 day streak', icon: 'mountainSnow', desc: 'Seven perfect days in a row', metric: 'streak', target: 7 },
+  { id: 'perfect10', label: '10 perfect', icon: 'gem', desc: 'Ten perfect days total', metric: 'perfect', target: 10 },
+  { id: 'streak14', label: '14 day lock', icon: 'snowflake', desc: 'Fourteen perfect days in a row', metric: 'streak', target: 14 },
+  { id: 'half', label: 'Halfway', icon: 'hourglass', desc: 'Half of all checks done', metric: 'pct', target: 50 },
+  { id: 'streak30', label: '30 day forge', icon: 'gem', desc: 'Thirty perfect days in a row', metric: 'streak', target: 30 },
+  { id: 'perfect30', label: '30 perfect', icon: 'crown', desc: 'Thirty perfect days total', metric: 'perfect', target: 30 },
+  { id: 'complete75', label: '75 percent', icon: 'rocket', desc: 'Three quarters of all checks', metric: 'pct', target: 75 },
+  { id: 'graduate', label: 'Graduation', icon: 'graduationcap', desc: 'Every day perfect. Jan 1', metric: 'perfect', target: 92 },
 ]
 
 export const quotes: { q: string; a: string }[] = [

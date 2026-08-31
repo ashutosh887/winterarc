@@ -72,15 +72,15 @@ function daysBetween(a, b) { return Math.round((parseYMD(b) - parseYMD(a)) / 864
 function addDays(s, n) { const d = parseYMD(s); d.setDate(d.getDate() + n); return ymd(d) }
 function todayYMD() { return ymd(new Date()) }
 
-function Ring({ pct, size = 44, stroke = 4, children }) {
+function Ring({ pct, size = 44, stroke = 4, light = false, children }) {
   const r = (size - stroke) / 2
   const c = 2 * Math.PI * r
   return (
     <div className="relative grid place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#27272a" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={light ? '#d4d4d8' : '#27272a'} strokeWidth={stroke} />
         <motion.circle
-          cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#fafafa" strokeWidth={stroke} strokeLinecap="round"
+          cx={size / 2} cy={size / 2} r={r} fill="none" stroke={light ? '#18181b' : '#fafafa'} strokeWidth={stroke} strokeLinecap="round"
           strokeDasharray={c} initial={{ strokeDashoffset: c }} animate={{ strokeDashoffset: c - (pct / 100) * c }} transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
         />
       </svg>
@@ -186,22 +186,14 @@ export default function App() {
 
   const quote = useMemo(() => QUOTES[stats.dayNum % QUOTES.length], [stats.dayNum])
 
-  const achievements = useMemo(() => {
-    const defs = [
-      { id: 'first', label: 'First Check', icon: 'check', desc: 'Log your first habit', unlock: stats.totalChecked >= 1 },
-      { id: 'perfect1', label: 'Perfect Day', icon: 'star', desc: '1 perfect day', unlock: stats.perfect >= 1 },
-      { id: 'streak3', label: '3-Day Streak', icon: 'flame', desc: '3 perfect days in a row', unlock: stats.bestStreak >= 3 },
-      { id: 'streak7', label: 'Week Warrior', icon: 'mountainSnow', desc: '7-day streak', unlock: stats.bestStreak >= 7 },
-      { id: 'streak14', label: 'Fortnight', icon: 'snowflake', desc: '14-day streak', unlock: stats.bestStreak >= 14 },
-      { id: 'streak30', label: '30 Days Locked', icon: 'gem', desc: '30-day streak', unlock: stats.bestStreak >= 30 },
-      { id: 'half', label: 'Halfway', icon: 'hourglass', desc: 'Reach 50% completion', unlock: stats.pct >= 50 },
-      { id: 'perfect10', label: '10 Perfect', icon: 'gem', desc: '10 perfect days', unlock: stats.perfect >= 10 },
-      { id: 'perfect30', label: '30 Perfect', icon: 'crown', desc: '30 perfect days', unlock: stats.perfect >= 30 },
-      { id: 'complete75', label: '75% Done', icon: 'rocket', desc: '75% habits checked', unlock: stats.pct >= 75 },
-      { id: 'finish', label: 'Graduation', icon: 'graduationcap', desc: '92/92 perfect. Jan 1', unlock: stats.perfect >= totalDays },
-    ]
-    return defs
-  }, [stats, totalDays])
+  const achievements = useMemo(() => challenges.map(c => {
+    const value = c.metric === 'checks' ? stats.totalChecked
+      : c.metric === 'perfect' ? stats.perfect
+      : c.metric === 'streak' ? stats.bestStreak
+      : stats.pct
+    const target = c.metric === 'perfect' && c.id === 'graduate' ? totalDays : c.target
+    return { ...c, value, target, unlock: value >= target, pct: Math.min(100, Math.round((value / target) * 100)) }
+  }), [stats, totalDays])
 
   function toggleHabit(date, habitId) {
     setEntries(prev => {
@@ -589,35 +581,6 @@ export default function App() {
             </motion.div>
           </section>
 
-          <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pb-12">
-            <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Flame size={12} /> Challenges</div>
-            <h2 className="mt-2 text-[22px] font-bold tracking-tight text-white">Stay in the game</h2>
-            <p className="mt-1 text-sm text-zinc-500">Progress comes from your arc.</p>
-            <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={stagger} className="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {challenges.map(c => {
-                const pct = c.type === 'streak'
-                  ? Math.min(100, Math.round((stats.bestStreak / c.days) * 100))
-                  : Math.min(100, Math.round(((stats.perfect % 7) / 7) * 100))
-                const unlocked = c.type === 'streak' ? stats.bestStreak >= c.days : stats.perfect >= 7
-                return (
-                  <motion.div variants={fadeUp} key={c.id} className={`rounded-2xl border p-5 flex flex-col ${unlocked ? 'bg-white border-white' : 'bg-zinc-900 border-zinc-800'}`}>
-                    <div className="flex items-center gap-3">
-                      <Ring pct={hasData ? pct : 0} size={52}><span className={unlocked ? 'text-zinc-900' : 'text-zinc-300'}><HabitIcon name={c.icon} size={18} className={unlocked ? 'text-zinc-900' : 'text-white'} /></span></Ring>
-                      <div className="flex-1 min-w-0">
-                        <div className={`font-semibold text-sm flex items-center gap-2 ${unlocked ? 'text-zinc-900' : 'text-white'}`}>{c.label}</div>
-                        <div className={`text-xs ${unlocked ? 'text-zinc-600' : 'text-zinc-400'}`}>{c.desc}</div>
-                        <div className={`text-xs font-mono mt-1 ${unlocked ? 'text-zinc-700' : 'text-zinc-500'}`}>{hasData ? `${pct}% · ${c.type === 'streak' ? `${stats.bestStreak}/${c.days}` : `${stats.perfect % 7}/7`}` : 'Start your arc to track'}</div>
-                      </div>
-                    </div>
-                    <div className={`mt-4 text-xs font-mono px-2.5 py-1 rounded-full self-start border ${unlocked ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-zinc-800 text-zinc-400 border-zinc-700'}`}>
-                      {unlocked ? 'Unlocked' : hasData ? 'In progress' : 'Not started'}
-                    </div>
-                  </motion.div>
-                )
-              })}
-            </motion.div>
-          </section>
-
         </main>
       )}
 
@@ -723,7 +686,7 @@ export default function App() {
               <div className="mt-3 flex items-center justify-between text-xs font-mono"><span className="text-zinc-400">{Object.keys(entries[selectedDate] || {}).length}/{effectiveHabits.length} done</span><span className={`${effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'text-emerald-400 inline-flex items-center gap-1' : 'text-zinc-500'}`}>{effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? <><Check size={12} /> Perfect day</> : 'keep going'}</span></div>
               <div className="mt-3 flex gap-2">
                 <button onClick={() => { const e = entries[selectedDate] || {}; const allDone = effectiveHabits.every(h => e[h.id]); const next = {}; effectiveHabits.forEach(h => next[h.id] = !allDone ? true : false); setEntries(prev => ({ ...prev, [selectedDate]: !allDone ? next : {} })) }} className="flex-1 py-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium border border-zinc-700 transition">{effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'Clear day' : 'Mark all done'}</button>
-                <button onClick={() => setSelectedDate(todayYMD())} className="px-4 py-2 rounded-full bg-white hover:bg-sky-400 text-zinc-950 text-sm font-semibold transition">Today</button>
+                <button onClick={() => setSelectedDate(todayYMD())} className="px-4 py-2 rounded-full bg-white text-zinc-950 text-sm font-semibold transition">Today</button>
               </div>
             </div>
 
@@ -760,31 +723,7 @@ export default function App() {
           </div>
 
           <div className="mt-6 rounded-2xl bg-zinc-900 border border-zinc-800 p-4">
-            <div className="flex items-center justify-between"><div className="font-semibold text-white">Achievements</div><div className="text-xs font-mono text-zinc-500">{achievements.filter(a => a.unlock).length}/{achievements.length} unlocked</div></div>
-            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-              {achievements.map(a => (
-                <div key={a.id} className={`rounded-xl border p-3 flex flex-col gap-2 ${a.unlock ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800'}`}>
-                  <div className="flex items-center gap-2">
-                    <span className={`w-7 h-7 rounded-full grid place-items-center border ${a.unlock ? 'bg-zinc-900 border-zinc-900 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-500'}`}><HabitIcon name={a.icon} size={13} /></span>
-                    <span className={`text-xs font-semibold leading-tight ${a.unlock ? 'text-zinc-900' : 'text-zinc-400'}`}>{a.label}</span>
-                  </div>
-                  <div className={`text-[11px] leading-tight ${a.unlock ? 'text-zinc-600' : 'text-zinc-500'}`}>{a.desc}</div>
-                  {a.unlock ? (
-                    <div className="flex gap-1 mt-1">
-                      <button onClick={() => shareToX(a)} className="flex-1 py-1 rounded-full bg-zinc-900 text-white text-[11px] font-semibold hover:bg-zinc-800 transition">X</button>
-                      <button onClick={() => shareToWhatsApp(a)} className="flex-1 py-1 rounded-full bg-emerald-500 text-white text-[11px] hover:bg-emerald-600 transition">WA</button>
-                      <button onClick={() => downloadImage(a)} className="px-2 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-700 text-[11px] hover:bg-white transition">PNG</button>
-                    </div>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-mono text-zinc-500 border border-zinc-800 px-2 py-0.5 rounded-full"><Lock size={10} /> In progress</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-6 rounded-2xl bg-zinc-900 border border-zinc-800 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2"><div className="font-semibold text-white">Export & LLM prompt</div><div className="flex items-center gap-2"><button onClick={() => navigator.clipboard.writeText(llmPrompt)} className="px-3 py-1.5 rounded-full bg-white hover:bg-sky-400 text-zinc-950 text-xs font-semibold transition">Copy prompt</button><button onClick={resetAll} className="px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-xs font-semibold hover:bg-red-500/15 transition">Reset</button></div></div>
+            <div className="flex flex-wrap items-center justify-between gap-2"><div className="font-semibold text-white">Export & LLM prompt</div><div className="flex items-center gap-2"><button onClick={() => navigator.clipboard.writeText(llmPrompt)} className="px-3 py-1.5 rounded-full bg-white text-zinc-950 text-xs font-semibold transition">Copy prompt</button><button onClick={resetAll} className="px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-xs font-semibold hover:bg-red-500/15 transition">Reset</button></div></div>
             <div className="mt-3 rounded-xl bg-zinc-950 border border-zinc-800 p-3 overflow-auto"><pre className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-words font-mono">{llmPrompt}</pre></div>
             <div className="mt-2 text-xs text-zinc-500">Paste with exported JSON into your LLM. Data stays local until you paste.</div>
           </div>
@@ -797,7 +736,7 @@ export default function App() {
             <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6 flex flex-col items-center">
               <div className="text-xs font-mono tracking-widest text-zinc-400">Overall</div>
               <div className="mt-4 relative w-40 h-40">
-                <svg className="w-40 h-40 -rotate-90" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="#27272a" strokeWidth="10" /><circle cx="50" cy="50" r="44" fill="none" stroke="#38bdf8" strokeWidth="10" strokeLinecap="round" strokeDasharray={`${stats.pct * 2.76} 276`} /></svg>
+                <svg className="w-40 h-40 -rotate-90" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="#27272a" strokeWidth="10" /><circle cx="50" cy="50" r="44" fill="none" stroke="#fafafa" strokeWidth="10" strokeLinecap="round" strokeDasharray={`${stats.pct * 2.76} 276`} /></svg>
                 <div className="absolute inset-0 grid place-items-center"><div className="text-center"><div className="text-3xl font-black text-white">{stats.pct}%</div><div className="text-xs font-mono text-zinc-400">{stats.totalChecked}/{stats.totalPossible}</div></div></div>
               </div>
               <div className="mt-4 text-sm text-zinc-300">{stats.perfect} perfect of {totalDays} · {stats.perfectPct}%</div>
@@ -813,7 +752,7 @@ export default function App() {
                   const perfectInWeek = week.filter(d => effectiveHabits.length && effectiveHabits.every(h => (entries[d] || {})[h.id])).length
                   const checks = week.reduce((acc, d) => acc + effectiveHabits.filter(h => (entries[d] || {})[h.id]).length, 0)
                   const pct = week.length * effectiveHabits.length ? Math.round((checks / (week.length * effectiveHabits.length)) * 100) : 0
-                  return (<div key={wi} className="rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-2 flex items-center gap-3"><span className="text-xs font-mono text-zinc-500 w-14">W{wi + 1}</span><span className="text-xs text-zinc-400 flex-1">{week[0]?.slice(5)} → {week[week.length - 1]?.slice(5)}</span><span className="text-xs font-mono text-emerald-400">{perfectInWeek}/7</span><span className="text-xs font-mono text-zinc-400 w-10 text-right">{pct}%</span></div>)
+                  return (<div key={wi} className="rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-2 flex items-center gap-3"><span className="text-xs font-mono text-zinc-500 w-14">W{wi + 1}</span><span className="text-xs text-zinc-400 flex-1">{week[0]?.slice(5)} → {week[week.length - 1]?.slice(5)}</span><span className="text-xs font-mono text-white">{perfectInWeek}/7</span><span className="text-xs font-mono text-zinc-400 w-10 text-right">{pct}%</span></div>)
                 }) })()}
               </div>
             </div>
@@ -833,25 +772,37 @@ export default function App() {
                 </div>
                 <div className="flex justify-between"><span className="text-zinc-400">Habits</span><span className="text-white font-mono">{effectiveHabits.length}</span></div>
                 <div className="flex justify-between"><span className="text-zinc-400">Range</span><span className="text-white font-mono text-xs">{start} → {end}</span></div>
-                <div className="flex justify-between"><span className="text-zinc-400">Best streak</span><span className="text-amber-400 font-mono">{stats.bestStreak}</span></div>
+                <div className="flex justify-between"><span className="text-zinc-400">Best streak</span><span className="text-white font-mono">{stats.bestStreak}</span></div>
                 <div className="pt-3 flex gap-2"><button onClick={exportJSON} className="flex-1 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">JSON</button><button onClick={exportCSV} className="flex-1 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">CSV</button></div>
                 <button onClick={resetAll} className="w-full py-2 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-sm hover:bg-red-500/15 transition">Reset</button>
               </div>
             </div>
           </div>
 
-          <div className="mt-6 rounded-2xl bg-zinc-900 border border-zinc-800 p-4">
-            <div className="font-semibold text-white">All achievements</div>
-            <div className="text-xs text-zinc-500 mt-1">Progress is live. Share any unlocked badge.</div>
-            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+          <div className="mt-6 rounded-2xl bg-zinc-900 border border-zinc-800 p-5">
+            <div className="flex items-center justify-between">
+              <div className="font-semibold text-white">Challenges</div>
+              <div className="text-xs font-mono text-zinc-500">{achievements.filter(a => a.unlock).length}/{achievements.length} unlocked</div>
+            </div>
+            <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {achievements.map(a => (
-                <div key={a.id} className={`rounded-xl border p-3 ${a.unlock ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800'}`}>
-                  <div className="flex items-center gap-2"><span className={`w-8 h-8 rounded-full grid place-items-center border ${a.unlock ? 'bg-zinc-900 border-zinc-900 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-500'}`}><HabitIcon name={a.icon} size={14} /></span><span className={`text-sm font-semibold ${a.unlock ? 'text-zinc-900' : 'text-zinc-400'}`}>{a.label}</span>{a.unlock && <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500 text-white font-mono">UNLOCKED</span>}</div>
-                  <div className="text-xs text-zinc-500 mt-1">{a.desc}</div>
-                  <div className="mt-2 flex gap-1.5">
-                    <button disabled={!a.unlock} onClick={() => shareToX(a)} className={`flex-1 py-1.5 rounded-full text-xs font-semibold transition ${a.unlock ? 'bg-zinc-900 text-white hover:bg-zinc-800' : 'bg-zinc-800 text-zinc-500'}`}>X</button>
-                    <button disabled={!a.unlock} onClick={() => shareToWhatsApp(a)} className={`flex-1 py-1.5 rounded-full text-xs transition ${a.unlock ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-zinc-800 text-zinc-500'}`}>WA</button>
-                    <button disabled={!a.unlock} onClick={() => downloadImage(a)} className={`px-2 py-1.5 rounded-full border text-xs transition ${a.unlock ? 'bg-zinc-100 border-zinc-200 text-zinc-700 hover:bg-white' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>PNG</button>
+                <div key={a.id} className={`rounded-2xl border p-4 flex flex-col ${a.unlock ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800'}`}>
+                  <div className="flex items-center gap-3">
+                    <Ring pct={a.pct} size={44} stroke={3} light={a.unlock}>
+                      <span className={a.unlock ? 'text-zinc-900' : 'text-zinc-300'}><HabitIcon name={a.icon} size={15} /></span>
+                    </Ring>
+                    <div className="min-w-0 flex-1">
+                      <div className={`text-sm font-semibold truncate ${a.unlock ? 'text-zinc-900' : 'text-white'}`}>{a.label}</div>
+                      <div className={`text-xs truncate ${a.unlock ? 'text-zinc-600' : 'text-zinc-500'}`}>{a.desc}</div>
+                    </div>
+                  </div>
+                  <div className={`mt-3 text-[11px] font-mono ${a.unlock ? 'text-zinc-700' : 'text-zinc-500'}`}>
+                    {a.unlock ? 'Unlocked' : `${a.value}/${a.target} · ${a.pct}%`}
+                  </div>
+                  <div className="mt-3 flex gap-1.5">
+                    <button disabled={!a.unlock} onClick={() => shareToX(a)} className={`flex-1 py-1.5 rounded-full text-xs font-semibold transition ${a.unlock ? 'bg-zinc-900 text-white hover:bg-zinc-800' : 'bg-zinc-900 text-zinc-600 cursor-not-allowed'}`}>X</button>
+                    <button disabled={!a.unlock} onClick={() => shareToWhatsApp(a)} className={`flex-1 py-1.5 rounded-full text-xs transition ${a.unlock ? 'bg-zinc-800 text-white hover:bg-zinc-700' : 'bg-zinc-900 text-zinc-600 cursor-not-allowed'}`}>WhatsApp</button>
+                    <button disabled={!a.unlock} onClick={() => downloadImage(a)} className={`px-3 py-1.5 rounded-full text-xs border transition ${a.unlock ? 'bg-zinc-100 border-zinc-200 text-zinc-800 hover:bg-white' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>PNG</button>
                   </div>
                 </div>
               ))}
