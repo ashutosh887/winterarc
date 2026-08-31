@@ -281,29 +281,60 @@ export default function App() {
     for (const k of ['wa_settings_v2','wa_habits','wa_habits_v2','wa_entries']) localStorage.removeItem(k)
     location.reload()
   }
-  const llmPrompt = `Analyze my Winter Arc data (Oct 1 -> Dec 31). Habits: ${effectiveHabits.map(h => h.name).join(', ')}. Total days: ${totalDays}. Perfect days: ${stats.perfect}/${totalDays} (${stats.perfectPct}%). Completion: ${stats.pct}%. Streak: ${stats.streak}, best: ${stats.bestStreak}. Entries: ${JSON.stringify(entries).slice(0, 4000)} ... Give: 1) patterns, 2) weekly trend, 3) 3 fixes for next 7 days, 4) motivational summary. Concise.`
+  const llmPrompt = `Here is my habit data from ${start} to ${end}. Habits: ${effectiveHabits.map(h => h.name).join(', ')}. Days elapsed: ${stats.dayNum} of ${totalDays}. Perfect days: ${stats.perfect} (${stats.perfectPct}%). Checks completed: ${stats.pct}%. Current streak: ${stats.streak}, best ${stats.bestStreak}.\nRaw entries: ${JSON.stringify(entries).slice(0, 4000)}\n\nTell me which habit I miss most and on which weekdays. Then give me one change to make this week. Keep it under 150 words and skip the pep talk.`
 
   function drawShareCard({ achievement } = {}) {
     const canvas = canvasRef.current; if (!canvas) return
     const ctx = canvas.getContext('2d')
-    canvas.width = 1200; canvas.height = 675
-    const g = ctx.createLinearGradient(0, 0, 1200, 675); g.addColorStop(0, '#020617'); g.addColorStop(1, '#0f172a')
-    ctx.fillStyle = g; ctx.fillRect(0, 0, 1200, 675)
-    ctx.fillStyle = 'rgba(255,255,255,0.06)'; for (let i = 0; i < 60; i++) { ctx.beginPath(); ctx.arc(Math.random() * 1200, Math.random() * 675, Math.random() * 1.2, 0, Math.PI * 2); ctx.fill() }
-    ctx.fillStyle = '#e0f2fe'; ctx.font = '700 34px ui-sans-serif,system-ui'
-    ctx.fillText('WINTERARC · Lock in while they coast.', 60, 80)
+    const W = 1200, H = 630
+    canvas.width = W; canvas.height = H
+    ctx.fillStyle = '#09090b'; ctx.fillRect(0, 0, W, H)
+    ctx.strokeStyle = '#27272a'; ctx.lineWidth = 2; ctx.strokeRect(1, 1, W - 2, H - 2)
+
+    ctx.fillStyle = '#fafafa'; ctx.font = '700 22px ui-sans-serif,system-ui'
+    ctx.fillText('WINTERARC', 64, 78)
+    ctx.fillStyle = '#71717a'; ctx.font = '400 18px ui-monospace,monospace'
+    ctx.fillText(site.tagline, 210, 78)
+
     if (achievement) {
-      ctx.font = '700 56px ui-sans-serif,system-ui'; ctx.fillStyle = '#38bdf8'; ctx.fillText(achievement.label, 60, 190)
-      ctx.font = '400 22px ui-sans-serif,system-ui'; ctx.fillStyle = '#cbd5e1'; ctx.fillText(achievement.desc, 60, 230)
-      ctx.font = '400 20px ui-sans-serif,system-ui'; ctx.fillStyle = '#94a3b8'; ctx.fillText(`Day ${stats.dayNum}/${totalDays}  •  ${stats.perfect} perfect  •  ${stats.pct}%  •  streak ${stats.streak}`, 60, 280)
+      ctx.fillStyle = '#fafafa'; ctx.font = '800 62px ui-sans-serif,system-ui'
+      ctx.fillText(achievement.label, 64, 176)
+      ctx.fillStyle = '#a1a1aa'; ctx.font = '400 24px ui-sans-serif,system-ui'
+      ctx.fillText(achievement.desc, 64, 214)
     } else {
-      ctx.font = '700 58px ui-sans-serif,system-ui'; ctx.fillStyle = '#38bdf8'; ctx.fillText(`Day ${stats.dayNum} / ${totalDays}`, 60, 180)
-      ctx.font = '400 24px ui-sans-serif,system-ui'; ctx.fillStyle = '#cbd5e1'; ctx.fillText(`${stats.perfect} perfect days  •  ${stats.pct}% completion  •  streak ${stats.streak}`, 60, 225)
-      ctx.font = '500 15px ui-monospace,monospace'; ctx.fillStyle = '#94a3b8'; ctx.fillText(effectiveHabits.map(h => h.name).join('  •  ').slice(0, 110), 60, 270)
+      ctx.fillStyle = '#fafafa'; ctx.font = '800 62px ui-sans-serif,system-ui'
+      ctx.fillText(`Day ${stats.dayNum} of ${totalDays}`, 64, 176)
+      ctx.fillStyle = '#a1a1aa'; ctx.font = '400 24px ui-sans-serif,system-ui'
+      ctx.fillText(effectiveHabits.map(h => h.name).join(', ').slice(0, 78), 64, 214)
     }
-    ctx.fillStyle = '#1e293b'; ctx.fillRect(60, 330, 1080, 16); ctx.fillStyle = '#38bdf8'; ctx.fillRect(60, 330, 1080 * (stats.pct / 100), 16)
-    ctx.fillStyle = '#cbd5e1'; ctx.font = 'italic 18px ui-sans-serif,system-ui'; const q = achievement ? `"${quote.q}" - ${quote.a}` : `"${quote.q}"`; ctx.fillText(q.slice(0, 84), 60, 400)
-    ctx.fillStyle = '#475569'; ctx.font = '500 13px ui-sans-serif,system-ui'; ctx.fillText('trywinterarc.vercel.app  •  100% local  •  no login  •  open source', 60, 625)
+
+    const stat = (label, value, x) => {
+      ctx.fillStyle = '#71717a'; ctx.font = '500 14px ui-monospace,monospace'
+      ctx.fillText(label.toUpperCase(), x, 268)
+      ctx.fillStyle = '#fafafa'; ctx.font = '700 38px ui-sans-serif,system-ui'
+      ctx.fillText(value, x, 310)
+    }
+    stat('perfect days', `${stats.perfect}`, 64)
+    stat('completion', `${stats.pct}%`, 304)
+    stat('streak', `${stats.streak}`, 544)
+    stat('best streak', `${stats.bestStreak}`, 784)
+
+    const cols = 31, cell = 26, gap = 8, gx = 64, gy = 358
+    allDates.forEach((d, i) => {
+      const e = entries[d] || {}
+      const done = effectiveHabits.filter(h => e[h.id]).length
+      const future = d > todayYMD()
+      const color = future ? '#18181b' : done === 0 ? '#3f1d1d' : done === effectiveHabits.length ? '#fafafa' : '#a1a1aa'
+      const x = gx + (i % cols) * (cell + gap)
+      const y = gy + Math.floor(i / cols) * (cell + gap)
+      ctx.fillStyle = color
+      ctx.beginPath(); ctx.roundRect(x, y, cell, cell, 6); ctx.fill()
+    })
+
+    ctx.fillStyle = '#a1a1aa'; ctx.font = 'italic 19px ui-sans-serif,system-ui'
+    ctx.fillText(quote.q.slice(0, 76), 64, 552)
+    ctx.fillStyle = '#52525b'; ctx.font = '500 15px ui-monospace,monospace'
+    ctx.fillText('trywinterarc.vercel.app', 64, 588)
     return canvas.toDataURL('image/png')
   }
   function downloadImage(achievement) {
@@ -313,7 +344,7 @@ export default function App() {
     const text = achievement
       ? `${achievement.label} - Day ${stats.dayNum}/${totalDays} • ${stats.pct}% • streak ${stats.streak}\nLock in while they coast.\n`
       : `Day ${stats.dayNum}/${totalDays} • ${stats.perfect} perfect • ${stats.pct}% • streak ${stats.streak}\nDisappear for 90 days. Come back unrecognizable.\n`
-    const url = 'https://trywinterarc.vercel.app'
+    const url = site.domain
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'width=600,height=400')
   }
   function shareToWhatsApp(achievement) {
