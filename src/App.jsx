@@ -226,7 +226,7 @@ export default function App() {
       : c.metric === 'perfect' ? stats.perfect
       : c.metric === 'streak' ? stats.bestStreak
       : stats.pct
-    const target = c.metric === 'perfect' && c.id === 'graduate' ? totalDays : c.target
+    const target = c.target || totalDays
     return { ...c, value, target, unlock: value >= target, pct: Math.min(100, Math.round((value / target) * 100)) }
   }), [stats, totalDays])
 
@@ -421,12 +421,12 @@ export default function App() {
             </a>
 
             <button onClick={startOnboarding} className="inline-flex shrink-0 items-center gap-1.5 h-9 px-3 sm:px-4 rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold text-[13px] transition whitespace-nowrap">
-              <span className="sm:hidden">{hasData ? 'Edit' : 'Start'}</span>
-              <span className="hidden sm:inline">{hasData ? 'Edit arc' : 'Start your arc'}</span>
+              <span className="sm:hidden">{hasData ? 'Edit' : 'Set up'}</span>
+              <span className="hidden sm:inline">{hasData ? 'Edit arc' : 'Set up your arc'}</span>
               <ArrowRight size={14} />
             </button>
 
-            <button onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" aria-expanded={mobileMenuOpen} className="lg:hidden shrink-0 w-11 h-11 grid place-items-center rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
+            <button onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" aria-expanded={mobileMenuOpen} className="lg:hidden shrink-0 w-9 h-9 grid place-items-center rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
               {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
@@ -533,7 +533,7 @@ export default function App() {
                   <div className="mt-4 flex items-center justify-between text-[11px] font-mono"><span className="text-zinc-500">3 of 5</span><span className="text-zinc-400">60%</span></div>
                 </div>
                 <div className="p-5">
-                  <div className="flex items-center justify-between"><span className="text-[11px] font-mono tracking-widest text-zinc-500">Oct → Dec grid</span><span className="text-[11px] font-mono text-zinc-600">Missed stays visible</span></div>
+                  <div className="flex items-center justify-between"><span className="text-[11px] font-mono tracking-widest text-zinc-500">Full arc</span><span className="text-[11px] font-mono text-zinc-600">Missed stays visible</span></div>
                   <div className="mt-4 grid grid-cols-7 sm:grid-cols-14 gap-1.5">
                     {Array.from({ length: 42 }, (_, i) => {
                       const v = i < 11 ? 'perfect' : i < 14 ? 'partial' : i < 16 ? 'miss' : i < 28 ? 'future' : 'empty'
@@ -599,7 +599,7 @@ export default function App() {
                   <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">PNG card for X or WhatsApp, or copy a prompt for your LLM. Nothing leaves your device until you hit share.</p>
                   <div className="mt-4 flex gap-2">
                     <span className="px-3 py-1.5 rounded-full bg-white border border-white text-zinc-900 text-xs font-semibold">X Post</span>
-                    <span className="px-3 py-1.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold">WhatsApp</span>
+                    <span className="px-3 py-1.5 rounded-full bg-emerald-500 text-white text-xs font-semibold">WhatsApp</span>
                     <span className="px-3 py-1.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs">PNG</span>
                   </div>
                 </div>
@@ -659,7 +659,7 @@ export default function App() {
                       return <span key={hid} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700">{h ? <><HabitIcon name={h.icon} size={11} /> {h.name}</> : hid}</span>
                     })}
                   </div>
-                  <button onClick={() => applyTemplate(t.id)} className="mt-4 inline-flex items-center gap-1.5 px-5 h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition self-start">Use template <ArrowRight size={14} /></button>
+                  <button onClick={() => applyTemplate(t.id)} className="mt-auto pt-4 inline-flex items-center gap-1.5 px-5 h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition self-start">Use template <ArrowRight size={14} /></button>
                 </motion.div>
               ))}
             </motion.div>
@@ -678,7 +678,7 @@ export default function App() {
                 <div className="text-[15px] font-semibold text-white">{cat.title}</div>
                 <div className="mt-3 grid sm:grid-cols-2 gap-3">
                   {cat.items.map(it => (
-                    <a key={it.name} href={it.url} target="_blank" rel="noreferrer" className="rounded-xl border border-zinc-800 bg-zinc-950 p-3 hover:border-zinc-700 transition block group">
+                    <a key={it.name} href={it.url} target="_blank" rel="noreferrer" className="rounded-2xl border border-zinc-800 bg-zinc-950 p-3 hover:border-zinc-700 transition block group">
                       <div className="flex items-center gap-2"><span className="text-sm font-medium text-white group-hover:text-zinc-200 transition">{it.name}</span><ExternalLink size={12} className="text-zinc-600 group-hover:text-zinc-400" /></div>
                       <div className="text-xs text-zinc-500 mt-1">{it.desc}</div>
                     </a>
@@ -782,7 +782,7 @@ export default function App() {
               <div key={p.title} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col">
                 <div className="text-[15px] font-semibold text-white">{p.title}</div>
                 <div className="mt-1 text-[13px] leading-5 text-zinc-500">{p.note}</div>
-                <ol className="mt-4 space-y-2 flex-1">
+                <ol className="mt-4 mb-auto space-y-2">
                   {p.steps.map((step, i) => (
                     <li key={step} className="flex gap-3 text-[13px] leading-5 text-zinc-300">
                       <span className="w-5 h-5 shrink-0 rounded-full border border-zinc-700 bg-zinc-950 grid place-items-center text-[10px] font-mono text-zinc-400">{i + 1}</span>
@@ -820,7 +820,7 @@ export default function App() {
               <div key={c.title} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col">
                 <div className="text-sm font-semibold text-white">{c.title}</div>
                 <p className="mt-1.5 text-[13px] leading-5 text-zinc-500 flex-1">{c.body}</p>
-                <a href={c.href} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1.5 self-start px-5 h-11 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-200 text-sm hover:bg-zinc-800 hover:border-zinc-700 transition">
+                <a href={c.href} target="_blank" rel="noreferrer" className="mt-auto pt-4 inline-flex items-center gap-1.5 self-start px-5 h-11 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-200 text-sm hover:bg-zinc-800 hover:border-zinc-700 transition">
                   {c.label} <ExternalLink size={12} />
                 </a>
               </div>
@@ -964,7 +964,7 @@ export default function App() {
                   const perfectInWeek = week.filter(d => effectiveHabits.length && effectiveHabits.every(h => (entries[d] || {})[h.id])).length
                   const checks = week.reduce((acc, d) => acc + effectiveHabits.filter(h => (entries[d] || {})[h.id]).length, 0)
                   const pct = week.length * effectiveHabits.length ? Math.round((checks / (week.length * effectiveHabits.length)) * 100) : 0
-                  return (<div key={wi} className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 flex items-center gap-3"><span className="text-xs font-mono text-zinc-500 w-9 shrink-0">W{wi + 1}</span><span className="text-xs text-zinc-400 flex-1">{week[0]?.slice(5)} → {week[week.length - 1]?.slice(5)}</span><span className="text-xs font-mono text-white">{perfectInWeek}/7</span><span className="text-xs font-mono text-zinc-400 w-10 text-right">{pct}%</span></div>)
+                  return (<div key={wi} className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 flex items-center gap-3"><span className="text-xs font-mono text-zinc-500 w-9 shrink-0">W{wi + 1}</span><span className="text-xs text-zinc-400 flex-1">{week[0]?.slice(5)} to {week[week.length - 1]?.slice(5)}</span><span className="text-xs font-mono text-white">{perfectInWeek}/7</span><span className="text-xs font-mono text-zinc-400 w-10 text-right">{pct}%</span></div>)
                 }) })()}
               </div>
             </div>
@@ -996,7 +996,7 @@ export default function App() {
             </div>
             <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {achievements.map(a => (
-                <div key={a.id} className={`rounded-xl border p-4 flex flex-col ${a.unlock ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800'}`}>
+                <div key={a.id} className={`rounded-2xl border p-4 flex flex-col ${a.unlock ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800'}`}>
                   <div className="flex items-center gap-3">
                     <Ring pct={a.pct} size={44} stroke={3} light={a.unlock}>
                       <span className={a.unlock ? 'text-zinc-900' : 'text-zinc-300'}><HabitIcon name={a.icon} size={15} /></span>
@@ -1011,7 +1011,7 @@ export default function App() {
                   </div>
                   <div className="mt-auto pt-3 flex gap-1.5">
                     <button disabled={!a.unlock} onClick={() => shareToX(a)} className={`flex-1 h-10 rounded-full text-xs font-semibold border transition ${a.unlock ? 'bg-zinc-900 border-zinc-900 text-white hover:bg-zinc-800' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>X</button>
-                    <button disabled={!a.unlock} onClick={() => shareToWhatsApp(a)} className={`flex-1 h-10 rounded-full text-xs border transition ${a.unlock ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>WhatsApp</button>
+                    <button disabled={!a.unlock} onClick={() => shareToWhatsApp(a)} className={`flex-1 h-10 rounded-full text-xs border transition ${a.unlock ? 'bg-emerald-500 border-emerald-500 text-white hover:bg-emerald-600' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>WhatsApp</button>
                     <button disabled={!a.unlock} onClick={() => downloadImage(a)} className={`px-3 h-10 rounded-full text-xs border transition ${a.unlock ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>PNG</button>
                   </div>
                 </div>
@@ -1024,7 +1024,7 @@ export default function App() {
       <AnimatePresence>
       {showOnboarding && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowOnboarding(false)} className="fixed inset-0 z-50 grid place-items-center p-4 sm:p-6 bg-zinc-950/80 backdrop-blur-xl" role="dialog" aria-modal="true">
-          <motion.div initial={{ opacity: 0, scale: 0.97, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 8 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} onClick={e => e.stopPropagation()} className="w-full max-w-[760px] max-h-[90dvh] overflow-y-auto overscroll-contain rounded-3xl bg-zinc-900 border border-zinc-800 p-4 sm:p-6 shadow-2xl">
+          <motion.div initial={{ opacity: 0, scale: 0.97, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 8 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} onClick={e => e.stopPropagation()} className="w-full max-w-[760px] max-h-[90dvh] overflow-y-auto overscroll-contain rounded-2xl bg-zinc-900 border border-zinc-800 p-4 sm:p-6 shadow-2xl">
             <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={26} /><span className="font-semibold tracking-[0.16em] text-[13px] text-white">Set up your arc</span> <span className="text-xs font-mono text-zinc-500">Step {onboardStep}/2</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-11 h-11 shrink-0 grid place-items-center rounded-full bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition"><X size={14} /></button></div>
             {onboardStep === 1 && (
               <div className="mt-6">
@@ -1104,7 +1104,7 @@ export default function App() {
                 <span className="font-semibold tracking-[0.16em] text-[12px] text-white">WINTERARC</span>
               </div>
               <p className="mt-3 text-[12px] leading-5 text-zinc-500">
-                Open source WinterArc tracker. Oct 1 to Dec 31, 92 days, Jan 1 graduation. Local-first, PWA, no login.
+                An open source tracker for your winter arc. Set your own dates, pick your habits, and keep the grid honest. Local-first, PWA, no login.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-x-10 gap-y-2 sm:ml-auto text-[13px]">

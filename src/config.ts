@@ -3,7 +3,6 @@ export const site = {
   domain: 'https://trywinterarc.vercel.app',
   tagline: 'Lock in while they coast.',
   hero: 'Disappear for 90 days. Come back unrecognizable.',
-  dates: { start: '2026-10-01', end: '2026-12-31', label: 'Oct 1 to Dec 31', days: 92 },
   author: { name: 'Ashutosh Jha', url: 'https://ashutosh887.in', github: 'https://github.com/ashutosh887/winterarc', handle: 'ashutosh887_' },
   builtOn: 'Vercel',
   support: { cta: 'Star on GitHub. It helps', github: 'https://github.com/ashutosh887/winterarc' },
@@ -71,7 +70,7 @@ export const challenges: { id: string; label: string; icon: string; desc: string
   { id: 'streak30', label: '30 day forge', icon: 'gem', desc: 'Thirty perfect days in a row', metric: 'streak', target: 30 },
   { id: 'perfect30', label: '30 perfect', icon: 'crown', desc: 'Thirty perfect days total', metric: 'perfect', target: 30 },
   { id: 'complete75', label: '75 percent', icon: 'rocket', desc: 'Three quarters of all checks', metric: 'pct', target: 75 },
-  { id: 'graduate', label: 'Graduation', icon: 'graduationcap', desc: 'Every single day perfect', metric: 'perfect', target: 92 },
+  { id: 'graduate', label: 'Graduation', icon: 'graduationcap', desc: 'Every single day perfect', metric: 'perfect', target: 0 },
 ]
 
 export const quotes: string[] = [
