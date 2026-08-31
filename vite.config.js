@@ -11,8 +11,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'og-image.png', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
-        name: 'TryWinterArc — Lock in while they coast',
-        short_name: 'TryWinterArc',
+        name: 'WinterArc — Lock in while they coast',
+        short_name: 'WinterArc',
         description: 'Disappear for 90 days. Come back unrecognizable. Oct 1 → Dec 31. Free, open source, 100% local.',
         theme_color: '#020617',
         background_color: '#020617',

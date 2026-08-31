@@ -1,9 +1,9 @@
-// TryWinterArc — single config for all free resources, templates, quotes
-// Edit here only — no backend needed
+// winterarc — single config for all free resources, templates, quotes
+// Edit here only — no backend needed. Project name is winterarc (WinterArc).
 
 export const site = {
-  name: 'TryWinterArc',
-  domain: 'https://trywinterarc.vercel.app',
+  name: 'WinterArc',
+  domain: 'https://winterarc-khaki.vercel.app',
   tagline: 'Lock in while they coast.',
   hero: 'Disappear for 90 days. Come back unrecognizable.',
   dates: { start: '2026-10-01', end: '2026-12-31', label: 'Oct 1 → Dec 31', days: 92 },

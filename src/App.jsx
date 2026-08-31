@@ -246,7 +246,7 @@ export default function App() {
     ctx.fillStyle = g; ctx.fillRect(0, 0, 1200, 675)
     ctx.fillStyle = 'rgba(56,189,248,0.08)'; for (let i = 0; i < 80; i++) { ctx.beginPath(); ctx.arc(Math.random() * 1200, Math.random() * 675, Math.random() * 1.8, 0, Math.PI * 2); ctx.fill() }
     ctx.fillStyle = '#e0f2fe'; ctx.font = '700 36px ui-sans-serif,system-ui'
-    ctx.fillText('TRYWINTERARC ❄️  —  Lock in while they coast.', 60, 80)
+    ctx.fillText('WINTERARC ❄️  —  Lock in while they coast.', 60, 80)
     if (achievement) {
       ctx.font = '700 68px ui-sans-serif,system-ui'; ctx.fillStyle = '#38bdf8'; ctx.fillText(`${achievement.icon}  ${achievement.label}`, 60, 190)
       ctx.font = '400 24px ui-sans-serif,system-ui'; ctx.fillStyle = '#cbd5e1'; ctx.fillText(achievement.desc, 60, 230)
@@ -261,7 +261,7 @@ export default function App() {
     // quote
     ctx.fillStyle = '#cbd5e1'; ctx.font = 'italic 20px ui-sans-serif,system-ui'; const q = achievement ? `"${quote.q}" — ${quote.a}` : `"${quote.q}"`; ctx.fillText(q.slice(0, 82), 60, 400)
     ctx.fillStyle = '#64748b'; ctx.font = '500 18px ui-sans-serif,system-ui'; ctx.fillText('Disappear for 90 days. Come back unrecognizable.', 60, 500)
-    ctx.fillStyle = '#475569'; ctx.font = '500 14px ui-sans-serif,system-ui'; ctx.fillText('trywinterarc.app • 100% local • no login • open source', 60, 625)
+    ctx.fillStyle = '#475569'; ctx.font = '500 14px ui-sans-serif,system-ui'; ctx.fillText('winterarc-khaki.vercel.app • 100% local • no login • open source', 60, 625)
     return canvas.toDataURL('image/png')
   }
   function downloadImage(achievement) {
@@ -271,19 +271,19 @@ export default function App() {
     const text = achievement
       ? `${achievement.icon} ${achievement.label} — Day ${stats.dayNum}/${totalDays} • ${stats.pct}% • streak ${stats.streak}🔥\nLock in while they coast. ❄️\n`
       : `Day ${stats.dayNum}/${totalDays} • ${stats.perfect} perfect • ${stats.pct}% • streak ${stats.streak}🔥\nDisappear for 90 days. Come back unrecognizable. ❄️\n`
-    const url = 'https://trywinterarc.app'
+    const url = 'https://winterarc-khaki.vercel.app'
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'width=600,height=400')
   }
   function shareToWhatsApp(achievement) {
     const text = achievement
-      ? `${achievement.icon} ${achievement.label} unlocked! Day ${stats.dayNum}/${totalDays} • ${stats.pct}% • streak ${stats.streak} — trywinterarc.app`
-      : `Winter Arc Day ${stats.dayNum}/${totalDays}: ${stats.pct}% • streak ${stats.streak}🔥 — trywinterarc.app — Lock in while they coast.`
+      ? `${achievement.icon} ${achievement.label} unlocked! Day ${stats.dayNum}/${totalDays} • ${stats.pct}% • streak ${stats.streak} — winterarc-khaki.vercel.app`
+      : `Winter Arc Day ${stats.dayNum}/${totalDays}: ${stats.pct}% • streak ${stats.streak}🔥 — winterarc-khaki.vercel.app — Lock in while they coast.`
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
   }
   async function nativeShare(achievement) {
     const text = achievement ? `${achievement.label}: ${achievement.desc}` : `Day ${stats.dayNum}/${totalDays} • ${stats.pct}%`
     if (navigator.share) {
-      try { await navigator.share({ title: 'TryWinterArc', text, url: location.href }) } catch {}
+      try { await navigator.share({ title: 'WinterArc', text, url: location.href }) } catch {}
     } else {
       shareToX(achievement)
     }
@@ -296,7 +296,7 @@ export default function App() {
           <button onClick={() => setView(hasData ? 'tracker' : 'landing')} aria-label="Go home" className="flex items-center gap-3">
             <Logo size={28} />
             <div className="leading-none text-left">
-              <div className="font-semibold tracking-[0.14em] text-[12px] text-white">TRYWINTERARC</div>
+              <div className="font-semibold tracking-[0.14em] text-[12px] text-white">WINTERARC</div>
               <div className="text-[11px] tracking-wide text-zinc-500 font-mono">{hasData ? (settings?.name ? `Hey ${settings.name} • ${start} → ${end}` : `${start} → ${end}`) : 'Oct 1 → Dec 31'}</div>
             </div>
           </button>
@@ -370,14 +370,14 @@ export default function App() {
                 <button onClick={startOnboarding} className="px-6 py-3 rounded-full bg-white text-slate-900 font-semibold text-[14px] hover:bg-slate-100 transition">Start your arc →</button>
                 <button onClick={() => { if (!hasData) startOnboarding(); else setView('tracker') }} className="px-6 py-3 rounded-full border border-slate-800 bg-transparent text-slate-300 font-medium text-[14px] hover:bg-slate-900 transition">View demo</button>
               </div>
-              <div className="mt-3 inline-flex items-center gap-2 text-[11px] font-mono tracking-wide text-zinc-600"><Shield size={12} /> Free forever • No paywall • Install as PWA • trywinterarc.vercel.app</div>
+              <div className="mt-3 inline-flex items-center gap-2 text-[11px] font-mono tracking-wide text-zinc-600"><Shield size={12} /> Free forever • No paywall • Install as PWA • winterarc-khaki.vercel.app</div>
             </div>
 
             {/* PRODUCT MOCK — not crowded, one clean window */}
             <div className="mt-14 rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-950">
                 <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-slate-800" /><span className="w-3 h-3 rounded-full bg-slate-800" /><span className="w-3 h-3 rounded-full bg-slate-800" /></div>
-                <div className="text-[11px] font-mono tracking-widest text-slate-500">TRYWINTERARC — PREVIEW</div>
+                <div className="text-[11px] font-mono tracking-widest text-slate-500">WINTERARC — PREVIEW</div>
                 <div className="text-[11px] font-mono text-slate-600">92 days</div>
               </div>
               <div className="grid md:grid-cols-[280px_1fr] gap-0">
@@ -745,13 +745,13 @@ export default function App() {
       <footer className="max-w-[980px] mx-auto px-6 py-10 border-t border-zinc-800/60 mt-8">
         <div className="flex flex-col gap-3 text-[11px] font-mono tracking-wide text-zinc-600">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
-            <span className="flex items-center gap-1.5">© 2026 TryWinterArc • Built by <a href={site.author.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-white transition">{site.author.name} <ExternalLink size={10} /></a> • <a href={site.author.github} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-zinc-300"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.85v2.74c0 .26.18.58.69.48A10 10 0 0 0 12 2z" /></svg> GitHub</a> • Lock in while they coast.</span>
+            <span className="flex items-center gap-1.5">© 2026 WinterArc • Built by <a href={site.author.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-white transition">{site.author.name} <ExternalLink size={10} /></a> • <a href={site.author.github} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-zinc-300"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.85v2.74c0 .26.18.58.69.48A10 10 0 0 0 12 2z" /></svg> GitHub</a> • Lock in while they coast.</span>
             <span className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1"><Heart size={10} /> Free forever</span>
               <span className="opacity-30">•</span>
               <a href={site.support.github} target="_blank" rel="noreferrer" className="hover:text-zinc-300">Star us</a>
               <span className="opacity-30">•</span>
-              <span>trywinterarc.vercel.app</span>
+              <span>winterarc-khaki.vercel.app</span>
             </span>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-zinc-900 pt-3">
