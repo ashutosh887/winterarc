@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, User, Settings, Menu, LayoutGrid, Compass,
   Footprints, Moon, Salad, Egg, Droplets, Target, Ban, Wind, NotebookPen, Sun, PhoneOff, TreePine, Coins, BrushCleaning, ShowerHead, AlarmClock,
-  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone
+  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone, Copy
 } from 'lucide-react'
 import { site, resources, templates, challenges, quotes as QUOTES_CFG } from './config'
 import { Button } from '@/components/ui/button'
@@ -137,16 +137,16 @@ export default function App() {
   const [heroReady, setHeroReady] = useState(false)
   const [installEvent, setInstallEvent] = useState(null)
   const [showInstallHint, setShowInstallHint] = useState(false)
+  const [copied, setCopied] = useState(false)
   const canvasRef = useRef(null)
 
   useEffect(() => {
     const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
-    if (standalone || localStorage.getItem('wa_install_hint') === 'dismissed') return
+    if (standalone || sessionStorage.getItem('wa_install_hint') === 'dismissed') return
     const onPrompt = e => { e.preventDefault(); setInstallEvent(e); setShowInstallHint(true) }
     window.addEventListener('beforeinstallprompt', onPrompt)
-    const onScroll = () => { if (window.scrollY > 900) setShowInstallHint(true) }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => { window.removeEventListener('beforeinstallprompt', onPrompt); window.removeEventListener('scroll', onScroll) }
+    const t = setTimeout(() => setShowInstallHint(true), 2500)
+    return () => { window.removeEventListener('beforeinstallprompt', onPrompt); clearTimeout(t) }
   }, [])
 
   useEffect(() => {
@@ -386,9 +386,15 @@ export default function App() {
     ] : []),
   ]
 
+  function copyLink() {
+    navigator.clipboard?.writeText(site.domain).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1800)
+    }).catch(() => {})
+  }
   function dismissInstallHint() {
     setShowInstallHint(false)
-    try { localStorage.setItem('wa_install_hint', 'dismissed') } catch {}
+    try { sessionStorage.setItem('wa_install_hint', 'dismissed') } catch {}
   }
   async function runInstall() {
     if (!installEvent) { goTo('install'); dismissInstallHint(); return }
@@ -427,7 +433,7 @@ export default function App() {
             </nav>
 
             <a href={site.support.github} target="_blank" rel="noreferrer" aria-label="Star WinterArc on GitHub" className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-zinc-800 bg-zinc-900 text-[13px] font-medium text-zinc-400 hover:text-white hover:border-zinc-700 transition">
-              <Star size={13} /> {stars === null ? 'Star' : stars}
+              <Star size={13} /> {stars === null ? 'Star' : stars.toLocaleString()}
             </a>
 
             <button onClick={startOnboarding} className="inline-flex shrink-0 items-center gap-1.5 h-9 px-3 sm:px-4 rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold text-[13px] transition whitespace-nowrap">
@@ -494,30 +500,33 @@ export default function App() {
         <main id="main">
           <section className="relative overflow-hidden aurora border-b border-zinc-800">
             {heroReady && <Suspense fallback={null}><ThreeHero /></Suspense>}
-            <div className="max-w-[1040px] mx-auto px-5 sm:px-6 pt-16 sm:pt-24 pb-12">
+            <div className="max-w-[1040px] mx-auto px-5 sm:px-6 min-h-[calc(100dvh-3.5rem)] flex flex-col justify-center py-16">
             <motion.div variants={stagger} initial="hidden" animate="show" className="text-center">
-              <motion.h1 variants={fadeUp} className="font-[800] tracking-[-0.04em] leading-[0.92] text-[40px] sm:text-[60px] text-white">
+              <motion.h1 variants={fadeUp} className="font-[800] tracking-[-0.045em] leading-[0.88] text-[56px] sm:text-[88px] lg:text-[104px] text-white">
                 Lock in while<br />
                 they coast.
               </motion.h1>
-              <motion.p variants={fadeUp} className="mt-4 text-[16px] sm:text-[18px] font-medium text-zinc-500 max-w-[520px] mx-auto">
+              <motion.p variants={fadeUp} className="mt-6 text-[18px] sm:text-[24px] font-medium text-zinc-400 max-w-[620px] mx-auto">
                 Disappear for 90 days. Come back unrecognizable.
               </motion.p>
-              <motion.p variants={fadeUp} className="mt-5 max-w-[560px] mx-auto text-sm leading-6 text-zinc-500">
+              <motion.p variants={fadeUp} className="mt-4 max-w-[520px] mx-auto text-[15px] leading-6 text-zinc-500">
                 Pick a few habits. Check them off daily. Nothing leaves your device.
               </motion.p>
 
-              <motion.div variants={fadeUp} className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <button onClick={startOnboarding} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white text-zinc-900 font-semibold text-[14px] hover:bg-zinc-100 transition">
+              <motion.div variants={fadeUp} className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button onClick={startOnboarding} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 h-12 rounded-full bg-white text-zinc-900 font-semibold text-[15px] hover:bg-zinc-100 transition">
                   Start your arc <ArrowRight size={16} />
                 </button>
-                <button onClick={() => { hasData ? goTo('tracker') : goTo('templates') }} className="w-full sm:w-auto inline-flex justify-center px-6 py-3 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-200 font-medium text-[14px] hover:bg-zinc-800 hover:border-zinc-700 transition">
+                <button onClick={() => { hasData ? goTo('tracker') : goTo('templates') }} className="w-full sm:w-auto inline-flex items-center justify-center px-7 h-12 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-200 font-medium text-[15px] hover:bg-zinc-800 hover:border-zinc-700 transition">
                   {hasData ? 'Open tracker' : 'Browse templates'}
                 </button>
               </motion.div>
             </motion.div>
+            </div>
+          </section>
 
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.6, ease: [0.22,1,0.36,1] }} className="mt-12 rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden">
+          <section className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
+            <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.6, ease: [0.22,1,0.36,1] }} className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800 bg-zinc-950">
                 <div className="text-[11px] font-mono tracking-widest text-zinc-500">Preview</div>
                 <div className="text-[11px] font-mono text-zinc-600">Honest grid</div>
@@ -559,7 +568,6 @@ export default function App() {
                 </div>
               </div>
             </motion.div>
-            </div>
           </section>
 
           <section id="features" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-[calc(3.5rem+env(safe-area-inset-top))]">
@@ -568,7 +576,7 @@ export default function App() {
             <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">Three things, and none of them nag you.</p>
 
             <div className="mt-8 space-y-6">
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2">
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2 md:min-h-[280px]">
                 <div className="p-6 sm:p-7 flex flex-col justify-center">
                   <div className="w-9 h-9 rounded-full bg-white text-zinc-900 grid place-items-center"><Check size={16} /></div>
                   <h3 className="mt-3 text-[15px] font-semibold text-white">The grid does not lie</h3>
@@ -584,7 +592,7 @@ export default function App() {
                   </div>
                 </div>
               </div>
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2">
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2 md:min-h-[280px]">
                 <div className="bg-zinc-950 border-b md:border-b-0 md:border-r border-zinc-800 p-6 grid place-items-center order-2 md:order-1">
                   <div className="flex items-center gap-6">
                     <Ring pct={72} size={72}><span className="text-xs font-bold text-white">72%</span></Ring>
@@ -602,7 +610,7 @@ export default function App() {
                   <div className="mt-4 text-xs font-mono text-zinc-600">Updates live as you check the day</div>
                 </div>
               </div>
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2">
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2 md:min-h-[280px]">
                 <div className="p-6 sm:p-7 flex flex-col justify-center">
                   <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-200 grid place-items-center"><ExternalLink size={16} /></div>
                   <h3 className="mt-3 text-[15px] font-semibold text-white">Share only if you want</h3>
@@ -618,7 +626,7 @@ export default function App() {
                     <div className="text-[11px] font-mono tracking-widest text-zinc-500">WINTERARC · Day 34/92</div>
                     <div className="mt-2 text-sm font-semibold text-white">18 perfect · 64% · streak 5</div>
                     <div className="mt-2 h-2 rounded-full bg-zinc-800 overflow-hidden"><div className="h-full w-[64%] bg-white" /></div>
-                    <div className="mt-3 text-xs text-zinc-500">Nobody is watching in October. That is the point.</div>
+                    <div className="mt-3 text-xs text-zinc-500">Day 34 of 92. No filter, no caption needed.</div>
                   </div>
                 </div>
               </div>
@@ -700,7 +708,7 @@ export default function App() {
           <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-white flex items-center gap-2"><Star size={14} /> Quote of the day</h2>
-              <span className="text-xs font-mono text-zinc-500">{QUOTES.length} quotes</span>
+              <span className="text-xs font-mono text-zinc-500">Day {stats.dayNum || 1}</span>
             </div>
             <blockquote className="mt-3 text-[15px] leading-6 text-zinc-200">{quote}</blockquote>
           </div>
@@ -765,6 +773,13 @@ export default function App() {
           <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Put it on your home screen</h1>
           <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">WinterArc is a web app that installs like a native one. It opens without browser chrome, works offline, and your data stays in the same place it already is.</p>
 
+          <div className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-3">
+            <a href={site.domain} className="font-mono text-[13px] text-white underline decoration-zinc-700 hover:decoration-zinc-400 px-2">{site.domain.replace('https://', '')}</a>
+            <button onClick={copyLink} className="ml-auto inline-flex items-center gap-1.5 h-9 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">
+              {copied ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy link</>}
+            </button>
+          </div>
+
           {installEvent && (
             <button onClick={runInstall} className="mt-6 inline-flex items-center gap-2 h-11 px-5 rounded-full bg-white text-zinc-900 font-semibold text-sm hover:bg-zinc-100 transition">
               Install now <ArrowRight size={14} />
@@ -776,7 +791,7 @@ export default function App() {
               {
                 title: 'iPhone and iPad',
                 note: 'Safari only. Chrome and in-app browsers cannot install it.',
-                steps: ['Open trywinterarc.vercel.app in Safari', 'Tap the Share button in the toolbar', 'Scroll down and tap Add to Home Screen', 'Tap Add'],
+                steps: ['Open the site in Safari', 'Tap the Share button in the toolbar', 'Scroll down and tap Add to Home Screen', 'Tap Add'],
               },
               {
                 title: 'Android',
