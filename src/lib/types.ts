@@ -101,6 +101,13 @@ export interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
+declare global {
+  interface Window {
+    /** Set by public/pwa-install.js when the prompt fires before React mounts. */
+    waInstallPrompt: BeforeInstallPromptEvent | null
+  }
+}
+
 /**
  * Real quotes from named people, with a source anyone can check. Nothing here is
  * written in-house and dressed up as someone's wisdom, and nothing is a reworded

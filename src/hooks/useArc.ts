@@ -11,6 +11,17 @@ import type {
   MonthGroup, Settings, View,
 } from '@/lib/types'
 
+/** True when this page is already running as the installed app. */
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches
+    || (window.navigator as Navigator & { standalone?: boolean }).standalone === true
+}
+
+/** The banner is a once-per-session offer, tracked apart from the prompt itself. */
+function installHintDismissed() {
+  try { return sessionStorage.getItem('wa_install_hint') === 'dismissed' } catch { return false }
+}
+
 /**
  * Every piece of arc state, its derived values and the actions that change it.
  * Lifted out of App so the views can be plain components that read one object.
@@ -37,7 +48,9 @@ export function useArc() {
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [stars, setStars] = useState<number | null>(null)
   const [heroReady, setHeroReady] = useState(false)
-  const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null)
+  const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(() => window.waInstallPrompt ?? null)
+  const [installed, setInstalled] = useState(isStandalone)
+  const [installOutcome, setInstallOutcome] = useState<'accepted' | 'dismissed' | null>(null)
   const [showInstallHint, setShowInstallHint] = useState(false)
   const [copied, setCopied] = useState(false)
   const [promptOpen, setPromptOpen] = useState(false)
@@ -52,16 +65,32 @@ export function useArc() {
   const overlayDown = useRef(false)
 
   useEffect(() => {
-    const standalone = window.matchMedia('(display-mode: standalone)').matches
-      || (window.navigator as Navigator & { standalone?: boolean }).standalone === true
-    let dismissed = false
-    try { dismissed = sessionStorage.getItem('wa_install_hint') === 'dismissed' } catch {}
-    if (standalone || dismissed) return
-    const onPrompt = (e: Event) => { e.preventDefault(); setInstallEvent(e as BeforeInstallPromptEvent); setShowInstallHint(true) }
+    if (installed) return
+    // The prompt is captured even when the banner was dismissed. Dismissing the
+    // banner hides the banner, it must not throw away the event the Install
+    // page needs to offer a real install button later in the same session.
+    const onPrompt = (e: Event) => {
+      e.preventDefault()
+      setInstallEvent(e as BeforeInstallPromptEvent)
+      if (!installHintDismissed()) setShowInstallHint(true)
+    }
+    const onInstalled = () => {
+      setInstalled(true)
+      setInstallEvent(null)
+      setInstallOutcome('accepted')
+      setShowInstallHint(false)
+    }
     window.addEventListener('beforeinstallprompt', onPrompt)
-    const t = setTimeout(() => setShowInstallHint(true), 2500)
-    return () => { window.removeEventListener('beforeinstallprompt', onPrompt); clearTimeout(t) }
-  }, [])
+    window.addEventListener('appinstalled', onInstalled)
+    // Anything that fired before this effect ran is waiting in the holder.
+    if (window.waInstallPrompt) setInstallEvent(window.waInstallPrompt)
+    const t = installHintDismissed() ? 0 : window.setTimeout(() => setShowInstallHint(true), 2500)
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onPrompt)
+      window.removeEventListener('appinstalled', onInstalled)
+      clearTimeout(t)
+    }
+  }, [installed])
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -620,11 +649,25 @@ export function useArc() {
     setShowInstallHint(false)
     try { sessionStorage.setItem('wa_install_hint', 'dismissed') } catch {}
   }
+  /**
+   * The only place that fires the native prompt, shared by the landing banner
+   * and the Install page. A prompt event can be used once, so a declined
+   * install clears it and the page falls back to the manual steps.
+   */
   async function runInstall() {
-    if (!installEvent) { goTo('install'); dismissInstallHint(); return }
+    if (!installEvent) {
+      if (view !== 'install') goTo('install')
+      dismissInstallHint()
+      return
+    }
+    setInstallOutcome(null)
     installEvent.prompt()
-    try { await installEvent.userChoice } catch {}
+    let outcome: 'accepted' | 'dismissed' = 'dismissed'
+    try { outcome = (await installEvent.userChoice).outcome } catch {}
     setInstallEvent(null)
+    window.waInstallPrompt = null
+    setInstallOutcome(outcome)
+    if (outcome === 'accepted') setInstalled(true)
     dismissInstallHint()
   }
 
@@ -694,6 +737,8 @@ export function useArc() {
     setHeroReady,
     installEvent,
     setInstallEvent,
+    installed,
+    installOutcome,
     showInstallHint,
     setShowInstallHint,
     copied,
