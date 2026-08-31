@@ -13,7 +13,6 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 
-// icon map — single source, no emojis
 const ICON_MAP = {
   dumbbell: Dumbbell, footprints: Footprints, moon: Moon, salad: Salad, egg: Egg, droplets: Droplets, target: Target, ban: Ban,
   bookopen: BookOpen, wind: Wind, notebookpen: NotebookPen, sun: Sun, phoneoff: PhoneOff, treepine: TreePine, coins: Coins,
@@ -36,7 +35,6 @@ const DEFAULT_END = getDefaultArc().end
 
 const TIER_LABELS = { 'non-neg': 'Non negotiables', extra: 'Good extras', aesthetic: 'Winter arc aesthetic', custom: 'Custom' }
 
-// presets use icon keys — lucide only
 const PRESETS = [
   { id: 'gym', name: 'Gym / Train 45m', icon: 'dumbbell', tier: 'non-neg', desc: 'Minimum 30 min. Walk counts.' },
   { id: 'steps', name: '10k Steps', icon: 'footprints', tier: 'non-neg', desc: 'Half before lunch.' },
@@ -94,12 +92,11 @@ function Ring({ pct, size = 44, stroke = 4, children }) {
 
 
 
-function Logo({ size = 32 }) {
+function Logo({ size = 28 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden>
-      <rect width="64" height="64" rx="14" fill="#18181b" stroke="#27272a" strokeWidth="1.2" />
-      <path d="M14 44 L24 20 L32 32 L40 20 L50 44" fill="none" stroke="#fafafa" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M24 44 L32 32 L40 44" fill="none" stroke="#fafafa" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" opacity="0.2" />
+    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden>
+      <rect width="32" height="32" rx="9" fill="#18181b" stroke="#27272a" strokeWidth="1" />
+      <path d="M6.5 21.5 L11 10.2 L16 16.6 L21 10.2 L25.5 21.5" fill="none" stroke="#fafafa" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -310,44 +307,35 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#09090b]">
-      {/* NAV — clean, no Home, no date */}
-      <header className="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/75 border-b border-zinc-800/60">
-        <div className="max-w-[1040px] mx-auto px-5 sm:px-6 h-[56px] flex items-center justify-between gap-4">
-          <button onClick={() => { setView('landing'); window.scrollTo({ top: 0, behavior: 'smooth' }) }} aria-label="WinterArc home" className="flex items-center gap-3 shrink-0">
-            <Logo size={30} />
-            <div className="leading-none text-left">
-              <div className="font-semibold tracking-[0.13em] text-[12.5px] text-white">WINTERARC</div>
-              <div className="text-[11px] tracking-wide text-zinc-500 font-mono hidden sm:block">Lock in while they coast.</div>
-            </div>
+      <header className="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800">
+        <div className="max-w-[1040px] mx-auto px-5 sm:px-6 h-[60px] flex items-center justify-between gap-6">
+          <button onClick={() => { setView('landing'); window.scrollTo({ top: 0, behavior: 'smooth' }) }} aria-label="WinterArc home" className="flex items-center gap-2.5 shrink-0">
+            <Logo size={28} />
+            <span className="font-semibold tracking-[0.14em] text-[13px] text-white">WINTERARC</span>
           </button>
 
-          <nav className="hidden lg:flex items-center gap-1 text-[13px]">
+          <nav className="hidden lg:flex items-center gap-1">
             {view === 'landing' ? (
               <>
-                <button onClick={() => scrollToId('features')} className="px-3 py-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900 transition">Features</button>
-                <button onClick={() => scrollToId('how')} className="px-3 py-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900 transition">How it works</button>
-                <button onClick={() => scrollToId('templates')} className="px-3 py-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900 transition">Templates</button>
-                <button onClick={() => scrollToId('resources')} className="px-3 py-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900 transition">Resources</button>
+                <button onClick={() => scrollToId('features')} className="px-3.5 py-2 rounded-full text-[13px] font-medium text-zinc-400 hover:text-white hover:bg-zinc-900 transition">Features</button>
+                <button onClick={() => scrollToId('how')} className="px-3.5 py-2 rounded-full text-[13px] font-medium text-zinc-400 hover:text-white hover:bg-zinc-900 transition">How it works</button>
+                <button onClick={() => scrollToId('templates')} className="px-3.5 py-2 rounded-full text-[13px] font-medium text-zinc-400 hover:text-white hover:bg-zinc-900 transition">Templates</button>
+                <button onClick={() => scrollToId('resources')} className="px-3.5 py-2 rounded-full text-[13px] font-medium text-zinc-400 hover:text-white hover:bg-zinc-900 transition">Resources</button>
               </>
             ) : (
-              <button onClick={() => setView('landing')} className="px-3 py-1.5 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900 transition inline-flex items-center gap-1.5"><ArrowRight size={14} className="rotate-180" /> Back to site</button>
+              <button onClick={() => setView('landing')} className="px-3.5 py-2 rounded-full text-[13px] text-zinc-400 hover:text-white hover:bg-zinc-900 transition inline-flex items-center gap-1.5"><ArrowRight size={14} className="rotate-180" /> Back to site</button>
             )}
-            {hasData ? (
+            {hasData && (
               <>
-                <span className="w-px h-4 bg-zinc-800 mx-1" />
-                <button onClick={() => setView('tracker')} className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition ${view === 'tracker' ? 'bg-white text-zinc-900' : 'text-zinc-300 hover:text-white hover:bg-zinc-900'}`}>Tracker</button>
-                <button onClick={() => setView('dashboard')} className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition ${view === 'dashboard' ? 'bg-white text-zinc-900' : 'text-zinc-300 hover:text-white hover:bg-zinc-900'}`}>Dashboard</button>
-              </>
-            ) : (
-              <>
-                <span className="w-px h-4 bg-zinc-800 mx-1 hidden sm:block" />
-                <button onClick={() => setView('tracker')} className="hidden sm:inline-flex px-3 py-1.5 rounded-full text-zinc-500 hover:text-zinc-300 transition text-sm">Tracker</button>
+                <span className="w-px h-5 bg-zinc-800 mx-2" />
+                <button onClick={() => setView('tracker')} className={`px-4 py-2 rounded-full text-[13px] font-medium transition ${view === 'tracker' ? 'bg-white text-zinc-900' : 'text-zinc-300 hover:text-white hover:bg-zinc-900'}`}>Tracker</button>
+                <button onClick={() => setView('dashboard')} className={`px-4 py-2 rounded-full text-[13px] font-medium transition ${view === 'dashboard' ? 'bg-white text-zinc-900' : 'text-zinc-300 hover:text-white hover:bg-zinc-900'}`}>Dashboard</button>
               </>
             )}
           </nav>
 
           <div className="flex items-center gap-2">
-            <Button onClick={startOnboarding} size="sm" className="rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold px-4">
+            <Button onClick={startOnboarding} size="sm" className="rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold px-5 h-9">
               <Sparkles size={14} /> {hasData ? 'Edit arc' : 'Start your arc'}
             </Button>
             <Button variant="ghost" size="icon-sm" onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" className="lg:hidden rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900">
@@ -378,7 +366,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* quote — subtle, not noisy */}
       {hasData && view === 'tracker' && (
         <div className="max-w-[1040px] mx-auto px-5 sm:px-6 pt-4">
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-3 flex items-center gap-3">
@@ -407,28 +394,20 @@ export default function App() {
         )
       })()}
 
-      {/* ——— LANDING: single page, professional ——— */}
       {view === 'landing' && (
         <main id="main">
-          {/* HERO */}
           <section className="relative overflow-hidden aurora border-b border-zinc-800">
             <Suspense fallback={null}><ThreeHero /></Suspense>
-            <div className="max-w-[1040px] mx-auto px-5 sm:px-6 pt-14 sm:pt-20 pb-10">
+            <div className="max-w-[1040px] mx-auto px-5 sm:px-6 pt-16 sm:pt-24 pb-12">
             <motion.div variants={stagger} initial="hidden" animate="show" className="text-center">
-              <motion.div variants={fadeUp} className="flex justify-center">
-                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/70 text-[11px] font-mono tracking-widest text-zinc-400">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Oct 1 → Dec 31 · 92 days · Free · No login
-                </span>
-              </motion.div>
-
-              <motion.h1 variants={fadeUp} className="mt-8 font-[800] tracking-[-0.04em] leading-[0.88] text-[42px] sm:text-[64px] text-white">
+              <motion.h1 variants={fadeUp} className="font-[800] tracking-[-0.04em] leading-[0.88] text-[42px] sm:text-[64px] text-white">
                 Disappear for<br />
                 <span className="text-zinc-500">90 days.</span><br />
                 Come back<br />
                 <span className="text-white">unrecognizable.</span>
               </motion.h1>
 
-              <motion.p variants={fadeUp} className="mt-4 text-[17px] font-medium text-zinc-400">Lock in while they coast.</motion.p>
+              <motion.p variants={fadeUp} className="mt-5 text-[17px] font-medium text-zinc-400">Lock in while they coast.</motion.p>
               {todayYMD() < DEFAULT_START && (
                 <motion.div variants={fadeUp} className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-400">
                   September is prep. {daysBetween(todayYMD(), DEFAULT_START)} days to Oct 1
@@ -446,17 +425,13 @@ export default function App() {
                   {hasData ? 'Open tracker' : 'See how it works'}
                 </button>
               </motion.div>
-              <motion.div variants={fadeUp} className="mt-3 inline-flex items-center gap-2 text-[11px] font-mono tracking-wide text-zinc-600">
-                <Shield size={12} /> Free. Open source. Works as PWA.
-              </motion.div>
             </motion.div>
 
-            {/* product preview — clean, no shine */}
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.6, ease: [0.22,1,0.36,1] }} className="mt-12 rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800 bg-zinc-950">
                 <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-zinc-800" /><span className="w-2.5 h-2.5 rounded-full bg-zinc-800" /><span className="w-2.5 h-2.5 rounded-full bg-zinc-800" /></div>
-                <div className="text-[11px] font-mono tracking-widest text-zinc-500">Preview. Your grid after 2 weeks</div>
-                <div className="text-[11px] font-mono text-zinc-600 hidden sm:block">Honest grid · No restart</div>
+                <div className="text-[11px] font-mono tracking-widest text-zinc-500">Preview</div>
+                <div className="text-[11px] font-mono text-zinc-600 hidden sm:block">Honest grid</div>
               </div>
               <div className="grid md:grid-cols-[300px_1fr] gap-0">
                 <div className="p-5 border-r border-zinc-800 bg-zinc-950/40">
@@ -498,14 +473,12 @@ export default function App() {
             </div>
           </section>
 
-          {/* FEATURES — left/right, no fluff */}
           <section id="features" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-16">
             <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Sparkles size={12} /> Features</div>
-            <h2 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Everything you need to stay honest.</h2>
-            <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">No streak tricks. No AI coach. Just a grid, a ring, and a share card if you want one.</p>
+            <h2 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Stay honest.</h2>
+            <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">A grid, a ring, and a share card if you want one.</p>
 
             <div className="mt-8 space-y-6">
-              {/* 1 */}
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2">
                 <div className="p-6 sm:p-7 flex flex-col justify-center">
                   <div className="w-9 h-9 rounded-xl bg-white text-zinc-900 grid place-items-center"><Check size={16} /></div>
@@ -522,7 +495,6 @@ export default function App() {
                   </div>
                 </div>
               </div>
-              {/* 2 */}
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2">
                 <div className="bg-zinc-950 border-b md:border-b-0 md:border-r border-zinc-800 p-6 grid place-items-center order-2 md:order-1">
                   <div className="flex items-center gap-6">
@@ -541,7 +513,6 @@ export default function App() {
                   <div className="mt-4 text-xs font-mono text-zinc-600">Updates live as you check the day</div>
                 </div>
               </div>
-              {/* 3 */}
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2">
                 <div className="p-6 sm:p-7 flex flex-col justify-center">
                   <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-200 grid place-items-center"><ExternalLink size={16} /></div>
@@ -565,7 +536,6 @@ export default function App() {
             </div>
           </section>
 
-          {/* HOW — tiers */}
           <section id="how" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 sm:py-14 scroll-mt-16">
             <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={stagger}>
               <motion.div variants={fadeUp} className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Zap size={12} /> How it works</motion.div>
@@ -610,13 +580,12 @@ export default function App() {
             </motion.div>
           </section>
 
-          {/* TEMPLATES */}
           <section id="templates" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-16">
             <div className="flex items-end justify-between gap-4">
               <div>
-                <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><BookOpen size={12} /> Templates · Free</div>
+                <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><BookOpen size={12} /> Templates</div>
                 <h2 className="mt-2 text-[22px] font-bold tracking-tight text-white">Start from a template</h2>
-                <p className="mt-1 text-sm text-zinc-500">All habits are free. Pick one and customize in the next step.</p>
+                <p className="mt-1 text-sm text-zinc-500">Pick one and tweak it.</p>
               </div>
               <button onClick={startOnboarding} className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Create custom <ArrowRight size={14} /></button>
             </div>
@@ -626,7 +595,6 @@ export default function App() {
                   <div className="flex items-center gap-3">
                     <span className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-300"><HabitIcon name={t.icon} size={16} /></span>
                     <span className="font-semibold text-white">{t.name}</span>
-                    <span className="ml-auto text-[11px] font-mono px-2 py-1 rounded-full bg-white text-zinc-900">Free</span>
                   </div>
                   <div className="mt-3 text-sm text-zinc-400 leading-relaxed">{t.desc}</div>
                   <div className="mt-3 flex flex-wrap gap-1.5">
@@ -641,11 +609,10 @@ export default function App() {
             </motion.div>
           </section>
 
-          {/* CHALLENGES */}
           <section id="challenges" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-16">
-            <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Flame size={12} /> Challenges · Progress based</div>
+            <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Flame size={12} /> Challenges</div>
             <h2 className="mt-2 text-[22px] font-bold tracking-tight text-white">Stay in the game</h2>
-            <p className="mt-1 text-sm text-zinc-500">No backend. Progress comes from your arc. Even at 0% the card shows you what’s next.</p>
+            <p className="mt-1 text-sm text-zinc-500">Progress comes from your arc.</p>
             <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={stagger} className="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {challenges.map(c => {
                 const pct = c.type === 'streak'
@@ -671,11 +638,10 @@ export default function App() {
             </motion.div>
           </section>
 
-          {/* RESOURCES */}
           <section id="resources" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-16">
-            <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Dumbbell size={12} /> Resources · Curated & free</div>
-            <h2 className="mt-2 text-[22px] font-bold tracking-tight text-white">Free resources that actually help</h2>
-            <p className="mt-1 text-sm text-zinc-500">No affiliates. Edit <code className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">src/config.ts</code> to add your own.</p>
+            <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Dumbbell size={12} /> Resources</div>
+            <h2 className="mt-2 text-[22px] font-bold tracking-tight text-white">Resources that help</h2>
+            <p className="mt-1 text-sm text-zinc-500">Curated. No affiliates. Edit <code className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">src/config.ts</code> to add your own.</p>
             <div className="mt-6 grid gap-6">
               {Object.entries(resources).map(([key, cat]) => (
                 <div key={key} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
@@ -683,9 +649,8 @@ export default function App() {
                   <div className="mt-3 grid sm:grid-cols-2 gap-3">
                     {cat.items.map(it => (
                       <a key={it.name} href={it.url} target="_blank" rel="noreferrer" className="rounded-xl border border-zinc-800 bg-zinc-950 p-3 hover:border-zinc-700 transition block group">
-                        <div className="flex items-center gap-2"><span className="text-sm font-medium text-white group-hover:text-sky-300 transition">{it.name}</span><ExternalLink size={12} className="text-zinc-600 group-hover:text-zinc-400" /><span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/15">FREE</span></div>
+                        <div className="flex items-center gap-2"><span className="text-sm font-medium text-white group-hover:text-zinc-200 transition">{it.name}</span><ExternalLink size={12} className="text-zinc-600 group-hover:text-zinc-400" /></div>
                         <div className="text-xs text-zinc-500 mt-1">{it.desc}</div>
-                        <div className="text-[11px] font-mono text-zinc-600 truncate">{it.url}</div>
                       </a>
                     ))}
                   </div>
@@ -693,24 +658,22 @@ export default function App() {
               ))}
             </div>
 
-            {/* quotes — compact */}
             <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
-              <div className="flex items-center justify-between"><h3 className="font-semibold text-white flex items-center gap-2"><Star size={14} /> Daily quotes</h3><span className="text-xs font-mono text-zinc-500">Day {stats.dayNum || 1} · Rotates daily</span></div>
-              <p className="text-xs text-zinc-500 mt-1">"{quote.q}" - <span className="text-zinc-400">{quote.a}</span></p>
-              <div className="mt-4 grid sm:grid-cols-2 gap-2 max-h-[320px] overflow-auto pr-1">
-                {QUOTES.slice(0, 12).map((qq, i) => (
+              <div className="flex items-center justify-between"><h3 className="font-semibold text-white flex items-center gap-2"><Star size={14} /> Daily quotes</h3><span className="text-xs font-mono text-zinc-500">Day {stats.dayNum || 1}</span></div>
+              <p className="text-sm text-zinc-300 mt-2">"{quote.q}" <span className="text-zinc-500">- {quote.a}</span></p>
+              <div className="mt-4 grid sm:grid-cols-2 gap-2">
+                {QUOTES.slice(0, 6).map((qq, i) => (
                   <div key={i} className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
                     <div className="text-[11px] font-mono text-zinc-500">Day {i + 1}</div>
-                    <div className="text-sm mt-1 text-zinc-300 italic">“{qq.q}”</div>
+                    <div className="text-sm mt-1 text-zinc-300">"{qq.q}"</div>
                     <div className="text-xs text-zinc-500">- {qq.a}</div>
                   </div>
                 ))}
               </div>
-              <div className="mt-3 text-xs font-mono text-zinc-600 text-center">92 quotes. One per day. Rotates automatically.</div>
+              <div className="mt-3 text-xs font-mono text-zinc-600 text-center">92 quotes. One per day.</div>
             </div>
           </section>
 
-          {/* FINAL CTA — single row, feedback via CONTRIBUTING.md only */}
           <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pb-8">
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>

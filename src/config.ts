@@ -1,5 +1,3 @@
-// winterarc — single config for all free resources, templates, quotes
-
 export const site = {
   name: 'WinterArc',
   domain: 'https://trywinterarc.vercel.app',
@@ -54,7 +52,6 @@ export const resources: Record<string, { title: string; items: { name: string; u
   },
 }
 
-// icon keys map to lucide icons — no emojis
 export const templates: { id: string; name: string; icon: string; habitIds: string[]; desc: string }[] = [
   { id: 'body', name: 'Body arc', icon: 'dumbbell', habitIds: ['gym', 'steps', 'sleep', 'nutrition', 'water'], desc: 'Train. Move. Sleep. Eat clean.' },
   { id: 'mind', name: 'Mind arc', icon: 'wind', habitIds: ['meditation', 'journaling', 'reading', 'sleep', 'phone-pm'], desc: 'Calm mornings. Reading. Journaling. Phone curfew.' },
@@ -70,7 +67,6 @@ export const challenges: { id: string; label: string; icon: string; days: number
   { id: 'perfectWeek', label: 'Perfect Week', icon: 'star', days: 7, type: 'week', desc: '7/7 perfect in a calendar week' },
 ]
 
-// 92 quotes — one per day of the arc (Oct 1 -> Dec 31)
 export const quotes: { q: string; a: string }[] = [
   { q: "You do not rise to the level of your goals. You fall to the level of your systems.", a: "James Clear" },
   { q: "Discipline is the bridge between goals and accomplishment.", a: "Jim Rohn" },
