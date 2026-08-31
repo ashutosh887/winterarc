@@ -696,10 +696,28 @@ export default function App() {
                 <div className="text-[11px] font-mono tracking-widest text-zinc-500">Preview</div>
                 <div className="text-[11px] font-mono text-zinc-600">Honest grid</div>
               </div>
-              <div className="grid md:grid-cols-[300px_1fr] gap-0">
-                <div className="p-5 border-b md:border-b-0 md:border-r border-zinc-800 bg-zinc-950/40">
-                  <div className="text-[11px] font-mono tracking-widest text-zinc-500">Day 14 · 3 of 5 done</div>
-                  <div className="mt-3 space-y-2">
+              <div className="px-4 pt-4 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { k: 'Day', v: '14', sub: '15% through', pct: 15 },
+                  { k: 'Streak', v: '6', sub: 'best 6', pct: 85 },
+                  { k: 'Perfect', v: '11', sub: 'of 14 days', pct: 78 },
+                  { k: 'Completion', v: '82%', sub: '57 of 70', pct: 82 },
+                ].map(st => (
+                  <div key={st.k} className="rounded-2xl border border-zinc-800 bg-zinc-950 p-3 flex items-center gap-2.5">
+                    <Ring pct={st.pct} size={38} stroke={3}><span className="text-[9px] font-mono font-bold text-white">{st.pct}%</span></Ring>
+                    <div className="min-w-0">
+                      <div className="text-[10px] font-mono tracking-widest text-zinc-500">{st.k}</div>
+                      <div className="text-[15px] font-bold text-white leading-tight tabular-nums">{st.v}</div>
+                      <div className="text-[10px] font-mono text-zinc-500 truncate">{st.sub}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid md:grid-cols-[280px_1fr] gap-0 mt-4">
+                <div className="p-4 border-b md:border-b-0 md:border-r border-zinc-800 bg-zinc-950/40">
+                  <div className="text-[11px] font-mono tracking-widest text-zinc-500">Today, 3 of 5</div>
+                  <div className="mt-3 space-y-1.5">
                     {[
                       { n: 'Gym 45m', icon: 'dumbbell', d: true },
                       { n: 'Sleep 7.5h', icon: 'moon', d: true },
@@ -707,29 +725,54 @@ export default function App() {
                       { n: 'Deep work 90m', icon: 'target', d: false },
                       { n: 'Reading 10p', icon: 'bookopen', d: false },
                     ].map(r => (
-                      <div key={r.n} className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-sm ${r.d ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-400 border-zinc-800'}`}>
-                        <span className={`w-5 h-5 rounded-full border grid place-items-center ${r.d ? 'bg-zinc-900 text-white border-zinc-900' : 'border-zinc-700'}`}>{r.d ? <Check size={12} /> : null}</span>
-                        <span className="w-7 h-7 rounded-full bg-zinc-800 grid place-items-center text-zinc-400"><HabitIcon name={r.icon} size={13} /></span>
-                        <span className="font-medium">{r.n}</span>
+                      <div key={r.n} className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 text-[13px] ${r.d ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-400 border-zinc-800'}`}>
+                        <span className={`w-4 h-4 rounded-full border grid place-items-center ${r.d ? 'bg-zinc-900 text-white border-zinc-900' : 'border-zinc-700'}`}>{r.d ? <Check size={10} /> : null}</span>
+                        <span className={`w-6 h-6 rounded-full grid place-items-center ${r.d ? 'bg-zinc-900 text-white' : 'bg-zinc-800 text-zinc-400'}`}><HabitIcon name={r.icon} size={12} /></span>
+                        <span className="font-medium truncate">{r.n}</span>
                       </div>
                     ))}
                   </div>
-                  <div className="mt-4 flex items-center justify-between text-[11px] font-mono"><span className="text-zinc-500">3 of 5</span><span className="text-zinc-400">60%</span></div>
+                  <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3">
+                    <div className="text-[10px] font-mono tracking-widest text-zinc-500">Current streak</div>
+                    <div className="mt-1 flex items-end gap-2">
+                      <span className="text-[26px] leading-none font-bold tabular-nums text-white">6</span>
+                      <span className="pb-0.5 text-[11px] text-zinc-500">days in a row</span>
+                    </div>
+                    <div className="mt-2 flex gap-1">
+                      {['full', 'full', 'rest', 'full', 'full', 'full', 'part'].map((v, i) => (
+                        <span key={i} className={`flex-1 h-5 rounded-sm ${v === 'full' ? 'bg-white' : v === 'part' ? 'bg-zinc-500' : 'bg-zinc-900 border border-zinc-800'}`} />
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <div className="p-5">
-                  <div className="flex items-center justify-between"><span className="text-[11px] font-mono tracking-widest text-zinc-500">Full arc</span><span className="text-[11px] font-mono text-zinc-600">Missed stays visible</span></div>
-                  <div className="mt-4 grid grid-cols-7 sm:grid-cols-14 gap-1.5">
-                    {Array.from({ length: 42 }, (_, i) => {
-                      const v = i < 11 ? 'perfect' : i < 14 ? 'partial' : i < 16 ? 'miss' : i < 28 ? 'future' : 'empty'
-                      const cls = v === 'perfect' ? 'bg-white border-white' : v === 'partial' ? 'bg-zinc-300 border-zinc-300' : v === 'miss' ? 'bg-red-500/15 border-red-500/20' : 'bg-zinc-800 border-zinc-800'
-                      return <div key={i} className={`aspect-square rounded-sm border ${cls}`} />
+
+                <div className="p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-mono tracking-widest text-zinc-500">October</span>
+                    <span className="text-[11px] font-mono text-zinc-600 tabular-nums">11/22</span>
+                  </div>
+                  <div className="mt-3 grid grid-cols-7 gap-1 sm:gap-1.5">
+                    {Array.from({ length: 31 }, (_, i) => {
+                      const rest = i % 7 === 5 || i % 7 === 6
+                      const v = rest ? 'rest' : i < 11 ? 'perfect' : i < 13 ? 'partial' : i < 15 ? 'miss' : 'future'
+                      const cls = v === 'perfect' ? 'bg-white border-white' : v === 'partial' ? 'bg-zinc-300 border-zinc-300' : v === 'miss' ? 'bg-red-500/15 border-red-500/20' : v === 'rest' ? 'bg-zinc-950 border-zinc-800/70' : 'bg-zinc-900 border-zinc-800/60'
+                      return <div key={i} className={`aspect-square rounded-md border ${cls}`} />
                     })}
                   </div>
-                  <div className="mt-4 flex gap-4 text-[11px] font-mono text-zinc-600">
+                  <div className="mt-3 space-y-1.5">
+                    {['November', 'December'].map((m, i) => (
+                      <div key={m} className="rounded-xl border border-zinc-800 bg-zinc-950 min-h-9 px-3 flex items-center gap-3">
+                        <span className="text-zinc-600 text-[11px]">&#9656;</span>
+                        <span className="text-[12px] text-zinc-400">{m}</span>
+                        <span className="ml-auto text-[10px] font-mono text-zinc-600 tabular-nums">{i === 0 ? '0/21' : '0/22'}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-mono text-zinc-600">
                     <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-white border border-white" /> perfect</span>
                     <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-zinc-300 border border-zinc-300" /> partial</span>
                     <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-red-500/15 border border-red-500/20" /> missed</span>
-                    {activeDays.length < 7 && <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-zinc-950 border border-zinc-800" /> rest</span>}
+                    <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-zinc-950 border border-zinc-800" /> rest</span>
                   </div>
                 </div>
               </div>
