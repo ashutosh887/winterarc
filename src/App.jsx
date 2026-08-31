@@ -374,7 +374,11 @@ export default function App() {
   const dailyPct = effectiveHabits.length ? Math.round((dayDoneCount / effectiveHabits.length) * 100) : 0
   const dayPct = totalDays ? Math.round((stats.dayNum / totalDays) * 100) : 0
 
-  const quote = useMemo(() => (QUOTES.length ? QUOTES[stats.dayNum % QUOTES.length] : ''), [stats.dayNum])
+  const quote = useMemo(() => QUOTES[stats.dayNum % QUOTES.length], [stats.dayNum])
+  // Attribution travels with the quote everywhere it goes: the header, the image
+  // and the shared text. A quote leaving the app without its author is the bug.
+  const quoteCredit = quote.source ? `${quote.author}, ${quote.source}` : quote.author
+  const quoteShareText = `"${quote.text}"\n\u2014 ${quote.author}`
 
   const achievements = useMemo(() => challenges.map(c => {
     const value = c.metric === 'checks' ? stats.totalChecked
@@ -569,11 +573,20 @@ export default function App() {
       box(gx + (i % cols) * (cell + gap), gy + Math.floor(i / cols) * (cell + gap), cell, cell, Math.min(5, cell / 3), color)
     })
 
+    const fit = (text, max) => {
+      if (ctx.measureText(text).width <= max) return text
+      let cut = text
+      while (cut.length > 1 && ctx.measureText(`${cut}...`).width > max) cut = cut.slice(0, -1)
+      return `${cut}...`
+    }
+    const textW = W - PAD * 2
     ctx.fillStyle = '#d4d4d8'; ctx.font = '400 20px ui-sans-serif,system-ui'
-    ctx.fillText(quote.length > 78 ? `${quote.slice(0, 75)}...` : quote, PAD, 552)
+    ctx.fillText(fit(`"${quote.text}"`, textW), PAD, 544)
+    ctx.fillStyle = '#71717a'; ctx.font = '400 15px ui-sans-serif,system-ui'
+    ctx.fillText(fit(`\u2014 ${quoteCredit}`, textW), PAD, 570)
 
     ctx.fillStyle = '#52525b'; ctx.font = '500 14px ui-monospace,monospace'
-    ctx.fillText(site.domain.replace('https://', ''), PAD, 586)
+    ctx.fillText(site.domain.replace('https://', ''), PAD, 600)
     const legend = [['#fafafa', 'all'], ['#a1a1aa', 'some'], ['#4c1d1d', 'none']]
     let lx = W - PAD
     for (let i = legend.length - 1; i >= 0; i--) {
@@ -581,9 +594,9 @@ export default function App() {
       const tw = ctx.measureText(label).width
       lx -= tw
       ctx.fillStyle = '#52525b'
-      ctx.fillText(label, lx, 586)
+      ctx.fillText(label, lx, 600)
       lx -= 10
-      box(lx - 10, 575, 10, 10, 3, c)
+      box(lx - 10, 589, 10, 10, 3, c)
       lx -= 26
     }
     return canvas.toDataURL('image/png')
@@ -603,19 +616,21 @@ export default function App() {
   function shareToX(achievement) {
     downloadImage(achievement)
     const text = achievement
-      ? `${achievement.label}. Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done, streak ${stats.streak}.\n${site.tagline}\n`
-      : `Day ${stats.dayNum}/${totalDays}. ${stats.perfect} perfect days, ${stats.pct}% done, streak ${stats.streak}.\n${site.hero}\n`
+      ? `${achievement.label}. Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done, streak ${stats.streak}.\n\n${quoteShareText}\n`
+      : `Day ${stats.dayNum}/${totalDays}. ${stats.perfect} perfect days, ${stats.pct}% done, streak ${stats.streak}.\n\n${quoteShareText}\n`
     const url = site.domain
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'noopener,noreferrer,width=600,height=400')
   }
   function shareToWhatsApp(achievement) {
     const text = achievement
-      ? `${achievement.label} unlocked. Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done, streak ${stats.streak}. ${site.domain}`
-      : `WinterArc day ${stats.dayNum}/${totalDays}. ${stats.pct}% done, streak ${stats.streak}. ${site.domain}`
+      ? `${achievement.label} unlocked. Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done, streak ${stats.streak}.\n\n${quoteShareText}\n\n${site.domain}`
+      : `WinterArc day ${stats.dayNum}/${totalDays}. ${stats.pct}% done, streak ${stats.streak}.\n\n${quoteShareText}\n\n${site.domain}`
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer')
   }
   async function nativeShare(achievement) {
-    const text = achievement ? `${achievement.label}. ${achievement.desc}` : `Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done`
+    const text = achievement
+      ? `${achievement.label}. ${achievement.desc}\n\n${quoteShareText}`
+      : `Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done\n\n${quoteShareText}`
     if (!navigator.share) return shareToX(achievement)
     const payload = { title: 'WinterArc', text, url: site.domain }
     try {
@@ -822,7 +837,9 @@ export default function App() {
           <div className="max-w-[1040px] mx-auto px-5 sm:px-6 py-3">
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 flex items-center gap-3">
             <span className="w-7 h-7 shrink-0 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-400"><Snowflake size={13} /></span>
-            <span className="text-sm text-zinc-400 line-clamp-2 sm:truncate">{quote}</span>
+            <span className="min-w-0 text-sm text-zinc-400 line-clamp-2 sm:truncate">
+              {quote.text} <span className="text-zinc-500">&mdash; {quote.author}</span>
+            </span>
             <span className="ml-auto hidden sm:inline shrink-0 text-[11px] font-mono text-zinc-500 tabular-nums">Day {stats.dayNum} / {totalDays} · {dayPct}%</span>
           </motion.div>
           </div>
@@ -1101,7 +1118,10 @@ export default function App() {
               <h2 className="font-semibold text-white flex items-center gap-2"><Star size={14} /> Quote of the day</h2>
               <span className="text-xs font-mono text-zinc-500">Day {stats.dayNum || 1}</span>
             </div>
-            <blockquote className="mt-3 text-[15px] leading-6 text-zinc-200">{quote}</blockquote>
+            <blockquote className="mt-3 text-[15px] leading-6 text-zinc-200">
+              {quote.text}
+              <cite className="mt-2 block not-italic text-[13px] text-zinc-500">&mdash; {quoteCredit}</cite>
+            </blockquote>
           </div>
         </main>
       )}
@@ -1723,7 +1743,10 @@ export default function App() {
             </div>
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col">
               <div className="text-[11px] font-mono tracking-widest text-zinc-500">Today</div>
-              <blockquote className="mt-3 text-[15px] leading-6 text-zinc-200">{quote}</blockquote>
+              <blockquote className="mt-3 text-[15px] leading-6 text-zinc-200">
+                {quote.text}
+                <cite className="mt-2 block not-italic text-[13px] text-zinc-500">&mdash; {quoteCredit}</cite>
+              </blockquote>
 
               <div className="mt-5 space-y-1">
                 <label htmlFor="dash-name" className="text-[11px] font-mono tracking-widest text-zinc-500">Name on your share card</label>

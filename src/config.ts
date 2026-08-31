@@ -1,3 +1,5 @@
+import type { Challenge, Quote, ResourceGroup, Template } from './lib/types'
+
 export const site = {
   name: 'WinterArc',
   domain: 'https://trywinterarc.vercel.app',
@@ -7,7 +9,7 @@ export const site = {
   support: { github: 'https://github.com/ashutosh887/winterarc' },
 }
 
-export const resources: Record<string, { title: string; items: { name: string; url: string; desc: string }[] }> = {
+export const resources: Record<string, ResourceGroup> = {
   workout: {
     title: 'Workout',
     items: [
@@ -50,7 +52,7 @@ export const resources: Record<string, { title: string; items: { name: string; u
   },
 }
 
-export const templates: { id: string; name: string; icon: string; habitIds: string[]; desc: string }[] = [
+export const templates: Template[] = [
   { id: 'body', name: 'Body arc', icon: 'dumbbell', habitIds: ['gym', 'steps', 'sleep', 'nutrition', 'water'], desc: 'Train. Move. Sleep. Eat clean.' },
   { id: 'mind', name: 'Mind arc', icon: 'wind', habitIds: ['meditation', 'journaling', 'reading', 'sleep', 'phone-pm'], desc: 'Calm mornings. Reading. Journaling. Phone curfew.' },
   { id: 'grind', name: 'Grind arc', icon: 'target', habitIds: ['work', 'sleep', 'gym', 'reading', 'phone-am'], desc: 'Deep work 90 min. Train. Read. No phone in the morning.' },
@@ -58,7 +60,7 @@ export const templates: { id: string; name: string; icon: string; habitIds: stri
   { id: 'minimal', name: 'Minimal', icon: 'snowflake', habitIds: ['gym', 'sleep', 'work'], desc: 'Just three. Good place to start. Add more later.' },
 ]
 
-export const challenges: { id: string; label: string; icon: string; desc: string; metric: 'checks' | 'perfect' | 'streak' | 'pct'; target: number }[] = [
+export const challenges: Challenge[] = [
   { id: 'first', label: 'First check', icon: 'check', desc: 'Log one habit', metric: 'checks', target: 1 },
   { id: 'perfect1', label: 'Perfect day', icon: 'star', desc: 'Every habit in one day', metric: 'perfect', target: 1 },
   { id: 'streak3', label: '3 day streak', icon: 'flame', desc: 'Three perfect days in a row', metric: 'streak', target: 3 },
@@ -72,75 +74,23 @@ export const challenges: { id: string; label: string; icon: string; desc: string
   { id: 'graduate', label: 'Graduation', icon: 'graduationcap', desc: 'Every single day perfect', metric: 'perfect', target: 0 },
 ]
 
-export const quotes: string[] = [
-  "Nobody is watching. That is what makes it count.",
-  "October is what December is made of.",
-  "A missed day stays missed. That is the honest part.",
-  "One blank square is weather. A row of them is climate.",
-  "Say nothing now. Let the finished grid talk.",
-  "Start ugly. Fix it while it moves.",
-  "Behind is a story. The date is the only fact.",
-  "Do it before you have time to negotiate.",
-  "Ready is a decision, not a signal you wait for.",
-  "The hard part is the ten minutes before you begin.",
-  "Doing it tired is the whole skill.",
-  "The work does not know you are tired.",
-  "You will not always want to. Go anyway.",
-  "Tired is not the same as unable.",
-  "Aim at the day you can repeat, not the day you can post.",
-  "Small and boring, every day, beats big and rare.",
-  "Two misses in a row stop being bad luck.",
-  "Every clean day makes the next one cheaper.",
-  "Momentum is expensive to build and cheap to keep.",
-  "Decide once. Then stop deciding.",
-  "If today has to be small, make it small. Not zero.",
-  "Skipping once teaches you that skipping is allowed.",
-  "Your real standard is the one you keep on bad days.",
-  "Partial days still count. They just are not perfect ones.",
-  "Effort you can repeat beats effort you can brag about.",
-  "A rough day logged beats a flawless day imagined.",
-  "Progress is quiet. Excuses are loud.",
-  "Nobody has ever talked themselves into being finished.",
-  "Excuses are plans you made for failing.",
-  "A full calendar is not the same as a full grid.",
-  "Pick fewer things and refuse to miss them.",
-  "Three you never miss beats eight you miss half of.",
-  "You do not need more willpower. You need a shorter list.",
-  "Stop optimizing. Start repeating.",
-  "You do not need a better plan. You need today.",
-  "Comfort is the thing you are actually competing with.",
-  "This costs you something either way. Pick which way.",
-  "There is no version of this that feels good every day.",
-  "Do it while it is inconvenient. That is the test.",
-  "If it were easy you would not need a tracker.",
-  "No shortcut survives a full arc.",
-  "Whatever you repeat gets easier. Skipping included.",
-  "Streaks end. What they built into you does not.",
-  "Discipline is last week's decision beating today's excuse.",
-  "Being consistent is a skill, not a trait.",
-  "Nobody drifts into discipline.",
-  "The point is not to feel good. It is to be different.",
-  "Mood is weather. Build something that runs in the rain.",
-  "Start first. The wanting shows up somewhere in the middle.",
-  "You do not have to be motivated. You have to be moving.",
-  "Waiting to feel like it is how the year disappears.",
-  "Twenty minutes today beats two hours next week.",
-  "Nothing you skip today gets easier tomorrow.",
-  "The days you skip are the ones you will remember.",
-  "You do not need more time. You need less negotiation.",
-  "You cannot start yesterday. You can start this hour.",
-  "Everyone is impressive in January. Be impressive in November.",
-  "Winter is long. Use it or watch it pass.",
-  "Winter rewards whoever refused to coast.",
-  "You get one shot at this particular winter.",
-  "The middle is where most people quietly stop.",
-  "Rest days are on the schedule. Quitting never makes it.",
-  "The version of you that quits always has a good reason.",
-  "Nobody feels it on day two. Keep going anyway.",
-  "Missing one day is recoverable. Deciding to stop is not.",
-  "Do the thing you would skip if nobody asked.",
-  "Do enough today that tomorrow is not a rescue mission.",
-  "Discipline buys you options later.",
-  "The people ahead of you just did not stop.",
-  "A bad rep still happened. A skipped one did not.",
+export const quotes: Quote[] = [
+  // Public domain. Primary texts are linked in CONTRIBUTING.md.
+  { text: "Never suffer an exception to occur till the new habit is securely rooted in your life.", author: "William James", source: "The Principles of Psychology, 1890" },
+  { text: "Nothing we ever do is, in strict scientific literalness, wiped out.", author: "William James", source: "The Principles of Psychology, 1890" },
+  { text: "We are spinning our own fates, good or evil, and never to be undone.", author: "William James", source: "The Principles of Psychology, 1890" },
+  { text: "Every smallest stroke of virtue or of vice leaves its never so little scar.", author: "William James", source: "The Principles of Psychology, 1890" },
+  { text: "A small daily task, if it be really daily, will beat the labours of a spasmodic Hercules.", author: "Anthony Trollope", source: "An Autobiography, 1883" },
+  { text: "Men become builders by building and lyre-players by playing the lyre.", author: "Aristotle", source: "Nicomachean Ethics II, trans. Ross" },
+  { text: "No longer talk at all about the kind of man that a good man ought to be, but be such.", author: "Marcus Aurelius", source: "Meditations X.16, trans. Long" },
+  { text: "No great thing is created suddenly, any more than a bunch of grapes or a fig.", author: "Epictetus", source: "Discourses I.15" },
+
+  // In copyright, quoted short and attributed.
+  { text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author: "Will Durant", source: "The Story of Philosophy, 1926" },
+  { text: "How we spend our days is, of course, how we spend our lives.", author: "Annie Dillard", source: "The Writing Life, 1989" },
+  { text: "Inspiration is for amateurs. The rest of us just show up and get to work.", author: "Chuck Close", source: "Esquire, 2001" },
+  { text: "Habit will sustain you whether you're inspired or not.", author: "Octavia E. Butler", source: "Furor Scribendi, 1995" },
+  { text: "You do not rise to the level of your goals. You fall to the level of your systems.", author: "James Clear", source: "Atomic Habits, 2018" },
+  { text: "The repetition itself becomes the important thing; it's a form of mesmerism.", author: "Haruki Murakami", source: "What I Talk About When I Talk About Running, 2007" },
+  { text: "Don't quit. Suffer now and live the rest of your life as a champion.", author: "Muhammad Ali" },
 ]
