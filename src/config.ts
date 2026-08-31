@@ -4,7 +4,7 @@ export const site = {
   tagline: 'Lock in while they coast.',
   hero: 'Disappear for 90 days. Come back unrecognizable.',
   dates: { start: '2026-10-01', end: '2026-12-31', label: 'Oct 1 to Dec 31', days: 92 },
-  author: { name: 'Ashutosh Jha', url: 'https://ashutosh887.in', github: 'https://github.com/ashutosh887/winterarc', handle: 'ashutosh887' },
+  author: { name: 'Ashutosh Jha', url: 'https://ashutosh887.in', github: 'https://github.com/ashutosh887/winterarc', handle: 'ashutosh887_' },
   builtOn: 'Vercel',
   support: { cta: 'Star on GitHub. It helps', github: 'https://github.com/ashutosh887/winterarc' },
 }

@@ -411,15 +411,15 @@ export default function App() {
                 Disappear for 90 days. Come back unrecognizable.
               </motion.p>
               <motion.p variants={fadeUp} className="mt-5 max-w-[560px] mx-auto text-[14.5px] leading-6 text-zinc-500">
-                A private tracker for your 90-day lock-in. Pick 3–5 habits. Check daily. No account, no cloud. Data stays on your device.
+                Pick a few habits. Check them off daily. No account, no cloud. Your data stays on your device.
               </motion.p>
 
               <motion.div variants={fadeUp} className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <button onClick={startOnboarding} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white text-zinc-900 font-semibold text-[14px] hover:bg-zinc-100 transition">
                   Start your arc <ArrowRight size={16} />
                 </button>
-                <button onClick={() => { if (!hasData) startOnboarding(); else setView('tracker') }} className="w-full sm:w-auto inline-flex justify-center px-6 py-3 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-200 font-medium text-[14px] hover:bg-zinc-800 hover:border-zinc-700 transition">
-                  {hasData ? 'Open tracker' : 'See how it works'}
+                <button onClick={() => { hasData ? goTo('tracker') : goTo('templates') }} className="w-full sm:w-auto inline-flex justify-center px-6 py-3 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-200 font-medium text-[14px] hover:bg-zinc-800 hover:border-zinc-700 transition">
+                  {hasData ? 'Open tracker' : 'Browse templates'}
                 </button>
               </motion.div>
             </motion.div>
@@ -535,37 +535,14 @@ export default function App() {
           <section id="how" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 sm:py-14 scroll-mt-16">
             <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={stagger}>
               <motion.div variants={fadeUp} className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Zap size={12} /> How it works</motion.div>
-              <motion.h2 variants={fadeUp} className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Pick habits. Check daily. Jan 1 you’ll know.</motion.h2>
-              <motion.p variants={fadeUp} className="mt-2 text-sm text-zinc-500 max-w-[620px]">Three tiers keep you honest. Choose 3 to 5 to start. Every habit is binary. Yes or no each day. No partial credit games.</motion.p>
+              <motion.h2 variants={fadeUp} className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Pick habits. Check daily. Jan 1 you know.</motion.h2>
+              <motion.p variants={fadeUp} className="mt-2 text-sm text-zinc-500 max-w-[560px]">Every habit is binary. Yes or no, once a day. No partial credit.</motion.p>
 
-              <div className="mt-8 grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-zinc-800 border border-zinc-800 rounded-2xl overflow-hidden bg-zinc-900/40">
-                <motion.div variants={fadeUp} className="p-6">
-                  <div className="text-[11px] font-mono tracking-widest text-zinc-500 flex items-center gap-1.5"><span className="w-6 h-6 rounded-full bg-white text-zinc-900 grid place-items-center"><Zap size={12} /></span> 01 · Non negotiables</div>
-                  <div className="mt-3 text-[14px] font-semibold text-white">What actually changes you</div>
-                  <div className="mt-2 text-[13px] leading-5 text-zinc-500">Gym. Steps. Sleep. No sugar. Protein. Water. Deep work. Pick three to five.</div>
-                </motion.div>
-                <motion.div variants={fadeUp} className="p-6">
-                  <div className="text-[11px] font-mono tracking-widest text-zinc-500">02 · Good extras</div>
-                  <div className="mt-3 text-[14px] font-semibold text-white">Useful extras</div>
-                  <div className="mt-2 text-[13px] leading-5 text-zinc-500">Reading. Meditation. Journaling. Sunlight. Phone limits.</div>
-                </motion.div>
-                <motion.div variants={fadeUp} className="p-6">
-                  <div className="text-[11px] font-mono tracking-widest text-zinc-500 flex items-center gap-1.5"><Snowflake size={12} /> 03 · Aesthetic · Optional</div>
-                  <div className="mt-3 text-[14px] font-semibold text-white">You don’t need this to win</div>
-                  <div className="mt-2 text-[13px] leading-5 text-zinc-500">Cold shower. 5am wake. 100 pushups. Just for discipline.</div>
-                </motion.div>
-              </div>
-
-              <div className="mt-4 rounded-full border border-zinc-800 bg-zinc-900 px-5 py-3 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2 text-sm font-medium text-white"><span className="w-6 h-6 rounded-full bg-white grid place-items-center"><Check size={14} className="text-zinc-900" /></span> Open source. Local-first.</div>
-                <div className="text-xs font-mono text-zinc-500">Data stays on device · Export anytime</div>
-              </div>
-
-              <div className="mt-10 grid md:grid-cols-3 gap-8">
+              <div className="mt-8 grid sm:grid-cols-3 gap-6">
                 {[
-                  { n: '01', t: 'Pick habits', d: 'Choose three to ten. Four or five is enough. Add your own. Keep it yes or no.' },
-                  { n: '02', t: 'Check daily', d: 'Fill any past date. Missed days stay red. No restart. The grid tells the truth.' },
-                  { n: '03', t: 'Share & export', d: 'Download a PNG for social. Export CSV/JSON. Copy a prompt for your LLM.' },
+                  { n: '01', t: 'Pick habits', d: 'Start with three to five. Add your own if the presets do not fit.' },
+                  { n: '02', t: 'Check daily', d: 'Fill any past date. Missed days stay red. There is no reset button.' },
+                  { n: '03', t: 'Share or export', d: 'Save a PNG, export JSON or CSV, or keep it entirely to yourself.' },
                 ].map(s => (
                   <motion.div variants={fadeUp} key={s.n} className="flex gap-4">
                     <div className="text-[13px] font-mono tracking-widest text-zinc-400 pt-0.5">{s.n}</div>
@@ -576,18 +553,10 @@ export default function App() {
             </motion.div>
           </section>
 
-          <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pb-8">
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div>
-                <div className="text-sm font-semibold text-white">Ready to lock in?</div>
-                <div className="text-sm text-zinc-500">No email. Start in 2 minutes.</div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button onClick={startOnboarding} className="px-5 py-2.5 rounded-full bg-white text-zinc-900 font-semibold hover:bg-zinc-100 transition text-sm">Start your arc</button>
-                <a href="https://github.com/ashutosh887/winterarc/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer" className="px-4 py-2.5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 hover:bg-zinc-800 transition text-sm inline-flex items-center gap-1.5">Contribute <ExternalLink size={12} /></a>
-              </div>
+          <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pb-10">
+            <div className="text-center text-xs font-mono text-zinc-600">
+              Ideas or bugs go through <a href="https://github.com/ashutosh887/winterarc/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer" className="underline decoration-zinc-700 hover:text-zinc-400">CONTRIBUTING.md</a> or <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="underline decoration-zinc-700 hover:text-zinc-400">@ashutosh887_</a> on X.
             </div>
-            <div className="mt-3 text-center text-xs font-mono text-zinc-600">Feedback or feature idea? Open a PR via <a href="https://github.com/ashutosh887/winterarc/blob/main/CONTRIBUTING.md" className="underline decoration-zinc-700 hover:text-zinc-400">CONTRIBUTING.md</a> or DM <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="underline decoration-zinc-700 hover:text-zinc-400">@ashutosh887_</a> on X.</div>
           </section>
         </main>
       )}
@@ -600,15 +569,7 @@ export default function App() {
             <p className="mt-1 text-sm text-zinc-500">Pick one, then edit it in setup.</p>
           </section>
           <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pb-12">
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><BookOpen size={12} /> Templates</div>
-                <h2 className="mt-2 text-[22px] font-bold tracking-tight text-white">Start from a template</h2>
-                <p className="mt-1 text-sm text-zinc-500">Pick one and tweak it.</p>
-              </div>
-              <button onClick={startOnboarding} className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Create custom <ArrowRight size={14} /></button>
-            </div>
-            <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={stagger} className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={stagger} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {templates.map(t => (
                 <motion.div variants={fadeUp} key={t.id} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col hover:border-zinc-700 transition">
                   <div className="flex items-center gap-3">
@@ -626,9 +587,6 @@ export default function App() {
                 </motion.div>
               ))}
             </motion.div>
-            <div className="mt-4 text-center">
-              <button onClick={startOnboarding} className="sm:hidden inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-200 text-sm hover:bg-zinc-800 transition">Create custom <ArrowRight size={14} /></button>
-            </div>
           </section>
 
           <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pb-12">
