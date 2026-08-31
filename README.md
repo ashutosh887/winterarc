@@ -2,7 +2,7 @@
 
 > **Disappear for 90 days. Come back unrecognizable.** — *Lock in while they coast.* ❄️
 
-Free forever. No paywall. Open source **WinterArc** tracker — Oct 1 → Dec 31 (92 days, Jan 1 graduation).  
+Free. No paywall. Open source **WinterArc** tracker — Oct 1 → Dec 31 (92 days, Jan 1 graduation).  
 100% local. No login. PWA installable. Works offline. Your data never leaves your device.
 
 **Live:** https://winterarc-khaki.vercel.app — also https://trywinterarc.vercel.app *(alias, same deploy)*
@@ -17,7 +17,7 @@ Free forever. No paywall. Open source **WinterArc** tracker — Oct 1 → Dec 31
 - **Share** — X, WhatsApp, native share, PNG canvas (1200×675)
 - **Export** — JSON / CSV + one-click LLM prompt
 - **PWA** — offline, installable, `vite-plugin-pwa`
-- **Free forever** — MIT, no tracking, `localStorage` only
+- **Free** — MIT, no tracking, `localStorage` only
 
 ## Stack
 Vite + React + Tailwind v4 + `vite-plugin-pwa` + `framer-motion` + `lucide-react` + `three`/`@react-three/fiber`/`drei` + `localStorage`

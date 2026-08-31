@@ -42,7 +42,7 @@ function useLocalStorage(key, initial) {
   useEffect(() => { try { localStorage.setItem(key, JSON.stringify(val)) } catch {} }, [key, val])
   return [val, setVal]
 }
-function ymd(d) { return d.toISOString().slice(0, 10) }
+function ymd(d) { const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0'); return `${y}-${m}-${dd}` }
 function parseYMD(s) { const [y, m, dd] = s.split('-').map(Number); return new Date(y, m - 1, dd) }
 function daysBetween(a, b) { return Math.round((parseYMD(b) - parseYMD(a)) / 86400000) + 1 }
 function addDays(s, n) { const d = parseYMD(s); d.setDate(d.getDate() + n); return ymd(d) }
@@ -303,6 +303,7 @@ export default function App() {
           <nav className="flex items-center gap-1 sm:gap-2">
             <button onClick={() => setView('templates')} className={`hidden sm:inline-flex px-3 py-1.5 rounded-full text-[13px] font-medium ${view === 'templates' ? 'bg-zinc-900 text-white border border-zinc-800' : 'text-zinc-400 hover:text-white'}`}>Templates</button>
             <button onClick={() => setView('resources')} className={`hidden sm:inline-flex px-3 py-1.5 rounded-full text-[13px] font-medium ${view === 'resources' ? 'bg-zinc-900 text-white border border-zinc-800' : 'text-zinc-400 hover:text-white'}`}>Resources</button>
+            <button onClick={() => setView('feedback')} className={`hidden sm:inline-flex px-3 py-1.5 rounded-full text-[13px] font-medium ${view === 'feedback' ? 'bg-zinc-900 text-white border border-zinc-800' : 'text-zinc-400 hover:text-white'}`}>Feedback</button>
             {hasData && (<>
               <button onClick={() => setView('tracker')} aria-current={view === 'tracker'} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'tracker' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>Tracker</button>
               <button onClick={() => setView('dashboard')} aria-current={view === 'dashboard'} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'dashboard' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>Dashboard</button>
@@ -362,15 +363,20 @@ export default function App() {
                 <span className="text-white">unrecognizable.</span>
               </h1>
               <p className="mt-4 text-[18px] font-medium text-slate-400">Lock in while they coast.</p>
+              {todayYMD() < DEFAULT_START && (
+                <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-mono text-amber-200">
+                  September is preparation — {daysBetween(todayYMD(), DEFAULT_START)} days until Oct 1 • Set your arc now, start tracking on Day 1
+                </div>
+              )}
               <p className="mt-5 max-w-[560px] mx-auto text-[15px] leading-6 text-slate-500">
-                A minimal, private tracker for your 90-day lock-in. No account. No cloud.<br className="hidden sm:block" /> Your data lives on your device — forever.
+                A minimal, private tracker for your 90-day lock-in. No account. No cloud.<br className="hidden sm:block" /> Your data lives on your device.
               </p>
 
               <div className="mt-8 flex items-center justify-center gap-3">
                 <button onClick={startOnboarding} className="px-6 py-3 rounded-full bg-white text-slate-900 font-semibold text-[14px] hover:bg-slate-100 transition">Start your arc →</button>
                 <button onClick={() => { if (!hasData) startOnboarding(); else setView('tracker') }} className="px-6 py-3 rounded-full border border-slate-800 bg-transparent text-slate-300 font-medium text-[14px] hover:bg-slate-900 transition">View demo</button>
               </div>
-              <div className="mt-3 inline-flex items-center gap-2 text-[11px] font-mono tracking-wide text-zinc-600"><Shield size={12} /> Free forever • No paywall • Install as PWA • winterarc-khaki.vercel.app</div>
+              <div className="mt-3 inline-flex items-center gap-2 text-[11px] font-mono tracking-wide text-zinc-600"><Shield size={12} /> Free • No paywall • Install as PWA • winterarc-khaki.vercel.app</div>
             </div>
 
             {/* PRODUCT MOCK — not crowded, one clean window */}
@@ -438,7 +444,7 @@ export default function App() {
               </div>
             </div>
             <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900/40 px-5 py-4 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-sm font-medium text-white"><span className="w-6 h-6 rounded-full bg-white grid place-items-center"><Check size={14} className="text-zinc-900" /></span> Free forever — no paywall, no pro plan</div>
+              <div className="flex items-center gap-2 text-sm font-medium text-white"><span className="w-6 h-6 rounded-full bg-white grid place-items-center"><Check size={14} className="text-zinc-900" /></span> Free — no paywall, no pro plan</div>
               <div className="text-xs font-mono text-zinc-500">Open source (MIT) • 100% local • Export anytime</div>
             </div>
           </section>
@@ -465,7 +471,7 @@ export default function App() {
         <main id="main" className="max-w-[980px] mx-auto px-6 py-10">
           <div className="flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><BookOpen size={12} /> TEMPLATES • FREE</div>
           <h1 className="mt-2 text-[28px] font-bold tracking-tight text-white">Pick a template — keep it free</h1>
-          <p className="mt-1 text-sm text-zinc-400">All habits are free forever. Config is in <code className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800">src/config.ts</code> — edit and redeploy.</p>
+          <p className="mt-1 text-sm text-zinc-400">All habits are free. Config is in <code className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800">src/config.ts</code> — edit and redeploy.</p>
           <div className="mt-6 grid sm:grid-cols-2 gap-4">
             {templates.map(t => (
               <div key={t.id} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col">
@@ -521,6 +527,39 @@ export default function App() {
                 )
               })}
             </div>
+          </div>
+        </main>
+      )}
+
+      {view === 'feedback' && (
+        <main id="main" className="max-w-[980px] mx-auto px-6 py-10">
+          <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Heart size={12} /> FEEDBACK</div>
+          <h1 className="mt-2 text-[28px] font-bold tracking-tight text-white">Recommend a feature</h1>
+          <p className="mt-1 text-sm text-zinc-400">WinterArc is free & open source. Tell us what to build next — we ship fast.</p>
+          <div className="mt-6 grid sm:grid-cols-2 gap-4">
+            <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 hover:border-zinc-700 transition block">
+              <div className="text-sm font-semibold text-white flex items-center gap-2">Reach on X <ExternalLink size={12} className="text-zinc-500" /></div>
+              <div className="text-sm text-zinc-400 mt-1">DM or tag @ashutosh887_ — fastest response</div>
+              <div className="mt-2 text-xs font-mono text-zinc-500">x.com/ashutosh887_</div>
+            </a>
+            <a href="https://linkedin.com/in/ashutosh887" target="_blank" rel="noreferrer" className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 hover:border-zinc-700 transition block">
+              <div className="text-sm font-semibold text-white flex items-center gap-2">Reach on LinkedIn <ExternalLink size={12} className="text-zinc-500" /></div>
+              <div className="text-sm text-zinc-400 mt-1">Connect & message — we read every suggestion</div>
+              <div className="mt-2 text-xs font-mono text-zinc-500">linkedin.com/in/ashutosh887</div>
+            </a>
+          </div>
+          <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
+            <div className="text-sm font-medium text-white">What to suggest?</div>
+            <ul className="mt-2 text-sm text-zinc-400 list-disc list-inside space-y-1">
+              <li>Template you want (e.g., Study Arc, Creator Arc)</li>
+              <li>Resource link that should be in <code className="px-1 py-0.5 rounded bg-zinc-900 border border-zinc-800">src/config.ts</code></li>
+              <li>Bug or polish (e.g., date edge case, OG look)</li>
+            </ul>
+            <div className="mt-3 text-xs font-mono text-zinc-500">Prefer GitHub? Open an issue at <a href="https://github.com/ashutosh887/winterarc/issues" className="underline hover:text-zinc-300">ashutosh887/winterarc</a></div>
+          </div>
+          <div className="mt-6 rounded-2xl border border-zinc-800 bg-white p-5 flex items-center justify-between">
+            <div className="text-sm font-medium text-zinc-900">Star the repo if WinterArc helps you</div>
+            <a href="https://github.com/ashutosh887/winterarc" target="_blank" rel="noreferrer" className="px-4 py-2 rounded-full bg-zinc-900 text-white text-sm font-semibold">Star on GitHub</a>
           </div>
         </main>
       )}
@@ -631,9 +670,9 @@ export default function App() {
           </div>
 
           <div className="mt-6 rounded-2xl bg-slate-900 border border-slate-800 p-4">
-            <div className="flex items-center justify-between gap-2"><div className="font-semibold text-white">Export & LLM prompt</div><button onClick={() => navigator.clipboard.writeText(llmPrompt)} className="px-3 py-1.5 rounded-full bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-semibold">Copy prompt</button></div>
+            <div className="flex items-center justify-between gap-2"><div className="font-semibold text-white">Export & LLM prompt</div><div className="flex items-center gap-2"><button onClick={() => navigator.clipboard.writeText(llmPrompt)} className="px-3 py-1.5 rounded-full bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-semibold">Copy prompt</button><button onClick={() => { if (confirm('Reset all WinterArc data? This cannot be undone. Are you sure?')) { localStorage.clear(); location.reload() } }} className="px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-semibold">Reset</button></div></div>
             <div className="mt-3 rounded-xl bg-slate-950 border border-slate-800 p-3 overflow-auto"><pre className="text-xs leading-relaxed text-slate-300 whitespace-pre-wrap break-words font-mono">{llmPrompt}</pre></div>
-            <div className="mt-2 text-xs text-slate-500">Paste with exported JSON into ChatGPT/Claude. Data never leaves device until you paste.</div>
+            <div className="mt-2 text-xs text-slate-500">Paste with exported JSON into ChatGPT/Claude. Data never leaves device until you paste. Reset asks for confirmation.</div>
           </div>
         </main>
       )}
@@ -731,7 +770,7 @@ export default function App() {
             {onboardStep === 3 && (
               <div className="mt-6">
                 <h2 className="text-xl font-bold text-white">Pick your habits</h2>
-                <p className="text-sm text-zinc-400 mt-1">Choose 3–10 max. Shown in 3 tiers. Free forever.</p>
+                <p className="text-sm text-zinc-400 mt-1">Choose 3–10 max. Shown in 3 tiers. Free.</p>
                 <div className="mt-2 text-xs font-mono text-amber-300">Selected: {tmpSelected.size} {tmpSelected.size > 10 && '⚠ over 10'}</div>
                 {['non-neg', 'extra', 'aesthetic'].map(tier => (<div key={tier} className="mt-5"><div className="text-[11px] font-mono tracking-widest text-zinc-400">{TIER_LABELS[tier]}</div><div className="mt-2 grid sm:grid-cols-2 gap-2">{PRESETS.filter(p => p.tier === tier).map(p => { const sel = tmpSelected.has(p.id); return (<button key={p.id} onClick={() => setTmpSelected(s => { const n = new Set(s); sel ? n.delete(p.id) : n.add(p.id); return n })} className={`text-left rounded-xl border p-3 flex gap-3 items-start transition ${sel ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}><span className="text-lg">{p.icon}</span><span className="flex-1"><span className={`text-sm font-medium block ${sel ? 'text-zinc-900' : 'text-zinc-200'}`}>{p.name}</span><span className="text-xs text-zinc-500">{p.desc}</span></span><span className={`mt-1 w-5 h-5 rounded-full grid place-items-center border text-xs ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'border-zinc-600 text-transparent'}`}><Check size={12} /></span></button>) })}</div></div>))}
                 <div className="mt-6 rounded-xl bg-zinc-950 border border-zinc-800 p-3"><div className="text-xs font-mono tracking-widest text-zinc-400">CUSTOM HABIT</div><div className="mt-2 flex gap-2"><input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g., No sugar, 3L water" className="flex-1 rounded-xl bg-zinc-900 border border-zinc-800 px-3 py-2 text-sm text-white placeholder:text-zinc-500" onKeyDown={e => e.key === 'Enter' && addCustom()} /><button onClick={addCustom} className="px-4 py-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium border border-zinc-700">Add</button></div>{customList.length > 0 && (<div className="mt-3 flex flex-wrap gap-2">{customList.map(c => (<span key={c.id} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-zinc-200 text-sm text-zinc-900">{c.name} <button onClick={() => { setCustomList(prev => prev.filter(x => x.id !== c.id)); setTmpSelected(s => { const n = new Set(s); n.delete(c.id); return n }) }} className="text-zinc-500">✕</button></span>))}</div>)}</div>
@@ -747,7 +786,7 @@ export default function App() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
             <span className="flex items-center gap-1.5">© 2026 WinterArc • Built by <a href={site.author.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-white transition">{site.author.name} <ExternalLink size={10} /></a> • <a href={site.author.github} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-zinc-300"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.85v2.74c0 .26.18.58.69.48A10 10 0 0 0 12 2z" /></svg> GitHub</a> • Lock in while they coast.</span>
             <span className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1"><Heart size={10} /> Free forever</span>
+              <span className="inline-flex items-center gap-1"><Heart size={10} /> Free</span>
               <span className="opacity-30">•</span>
               <a href={site.support.github} target="_blank" rel="noreferrer" className="hover:text-zinc-300">Star us</a>
               <span className="opacity-30">•</span>
