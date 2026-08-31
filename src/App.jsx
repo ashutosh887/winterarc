@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, Suspense, lazy } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, User, Settings, Menu, LayoutGrid, Compass,
+  Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, Settings, Menu, LayoutGrid, Compass,
   Footprints, Moon, Salad, Egg, Droplets, Target, Ban, Wind, NotebookPen, Sun, PhoneOff, TreePine, Coins, BrushCleaning, ShowerHead, AlarmClock,
   MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone, Copy, ChevronDown, Share2, MessageCircle, ImageDown, MoreHorizontal, Info
 } from 'lucide-react'
@@ -1468,18 +1468,40 @@ export default function App() {
 
       {view === 'dashboard' && hasData && (
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
-          <div className="grid lg:grid-cols-3 gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <Eyebrow icon={Trophy}>Dashboard</Eyebrow>
+              <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">
+                {settings?.name ? `${settings.name}'s arc` : 'Your arc'}
+              </h1>
+              <p className="mt-1.5 text-sm text-zinc-500 tabular-nums">{start} to {end} · {effectiveHabits.length} {effectiveHabits.length === 1 ? 'habit' : 'habits'} · {activeDays.length === 7 ? 'every day' : `${activeDays.length} days a week`}</p>
+            </div>
+            <button onClick={() => goTo('tracker')} className="h-11 px-5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-sm hover:text-white hover:border-zinc-700 transition">Open tracker</button>
+          </div>
+
+          <div className="mt-6 grid lg:grid-cols-3 gap-4">
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col items-center">
               <div className="text-[11px] font-mono tracking-widest text-zinc-500">Overall</div>
               <div className="mt-4">
                 <Ring pct={stats.pct} size={160} stroke={10}>
-                  <div className="text-center"><div className="text-3xl font-bold text-white">{stats.pct}%</div><div className="text-xs font-mono text-zinc-500">{stats.totalChecked}/{stats.totalPossible}</div></div>
+                  <div className="text-center"><div className="text-[34px] font-bold text-white tabular-nums leading-none">{stats.pct}%</div><div className="mt-1 text-xs font-mono text-zinc-500 tabular-nums">{stats.totalChecked} of {stats.totalPossible}</div></div>
                 </Ring>
               </div>
-              <div className="mt-4 text-sm text-zinc-400">{stats.perfect} perfect {stats.perfect === 1 ? "day" : "days"} of {stats.scheduled} scheduled</div>
+              <div className="mt-5 w-full grid grid-cols-3 gap-2 text-center">
+                {[
+                  ['Perfect', stats.perfect],
+                  ['Streak', stats.streak],
+                  ['Best', stats.bestStreak],
+                ].map(([k, v]) => (
+                  <div key={k} className="rounded-xl border border-zinc-800 bg-zinc-950 py-2.5">
+                    <div className="text-[17px] font-bold text-white tabular-nums leading-tight">{v}</div>
+                    <div className="text-[10px] font-mono tracking-widest text-zinc-500">{k}</div>
+                  </div>
+                ))}
+              </div>
               <div className="mt-auto pt-4 w-full grid grid-cols-2 gap-2">
-                <button onClick={() => shareToX()} className="h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Share X</button>
-                <button onClick={() => downloadImage()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">Download PNG</button>
+                <button onClick={() => nativeShare()} className="h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition inline-flex items-center justify-center gap-1.5"><Share2 size={14} /> Share</button>
+                <button onClick={() => downloadImage()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><ImageDown size={14} /> PNG</button>
               </div>
             </div>
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col">
@@ -1526,22 +1548,30 @@ export default function App() {
               <div className="mt-3 text-[10px] font-mono text-zinc-500">{Math.ceil(allDates.length / 7)} weeks</div>
             </div>
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col">
-              <div className="text-[11px] font-mono tracking-widest text-zinc-500">Quote of the day</div>
-              <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-                <div className="text-sm leading-6 text-zinc-200">{quote}</div>
-              </div>
-              <div className="mt-4 flex-1 flex flex-col space-y-3 text-sm">
-                <div className="flex items-center justify-between"><span className="text-zinc-400 flex items-center gap-1.5"><User size={12} /> Name</span>
-                  <span className="flex items-center gap-1.5">
-                    <input value={settings?.name ?? ''} onChange={e => setSettings(s => ({ ...s, name: e.target.value || null }))} placeholder="Add name" className="w-28 h-10 rounded-full bg-zinc-950 border border-zinc-800 px-3 text-base sm:text-xs text-white placeholder:text-zinc-500 text-right" />
-                    <button onClick={startOnboarding} aria-label="Edit arc" className="w-10 h-10 grid place-items-center rounded-full bg-zinc-800 hover:bg-zinc-700 transition"><Settings size={12} className="text-zinc-400" /></button>
-                  </span>
+              <div className="text-[11px] font-mono tracking-widest text-zinc-500">Today</div>
+              <blockquote className="mt-3 text-[15px] leading-6 text-zinc-200">{quote}</blockquote>
+
+              <div className="mt-5 pt-4 border-t border-zinc-800 space-y-1">
+                <label htmlFor="dash-name" className="text-[11px] font-mono tracking-widest text-zinc-500">Name on your share card</label>
+                <div className="flex gap-2">
+                  <input
+                    id="dash-name"
+                    value={settings?.name ?? ''}
+                    onChange={e => setSettings(prev => ({ ...prev, name: e.target.value || null }))}
+                    placeholder="Optional"
+                    maxLength={40}
+                    className="flex-1 min-w-0 h-11 rounded-full bg-zinc-950 border border-zinc-800 px-4 text-base sm:text-sm text-white placeholder:text-zinc-500"
+                  />
+                  <button onClick={startOnboarding} aria-label="Edit habits and dates" title="Edit habits and dates" className="w-11 h-11 shrink-0 grid place-items-center rounded-full bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition"><Settings size={15} className="text-zinc-300" /></button>
                 </div>
-                <div className="flex justify-between"><span className="text-zinc-400">Habits</span><span className="text-white font-mono">{effectiveHabits.length}</span></div>
-                <div className="flex justify-between"><span className="text-zinc-400">Range</span><span className="text-white font-mono text-xs truncate ml-2">{start} to {end}</span></div>
-                <div className="flex justify-between"><span className="text-zinc-400">Best streak</span><span className="text-white font-mono">{stats.bestStreak}</span></div>
-                <div className="mt-auto pt-3 flex gap-2"><button onClick={exportJSON} className="flex-1 h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">JSON</button><button onClick={exportCSV} className="flex-1 h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">CSV</button></div>
-                <button onClick={() => setConfirmReset(true)} className="w-full h-11 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-sm hover:bg-red-500/15 transition">Reset</button>
+              </div>
+
+              <div className="mt-auto pt-5">
+                <div className="text-[11px] font-mono tracking-widest text-zinc-500">Take your data</div>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <button onClick={exportJSON} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">JSON</button>
+                  <button onClick={exportCSV} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">CSV</button>
+                </div>
               </div>
             </div>
           </div>
