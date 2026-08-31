@@ -237,7 +237,7 @@ export default function App() {
     const t = templates.find(x => x.id === tid); if (!t) return
     setTmpName(settings?.name ?? tmpName)
     setTmpStart(settings?.start ?? DEFAULT_START); setTmpEnd(settings?.end ?? DEFAULT_END)
-    setTmpSelected(new Set(t.habitIds)); setCustomList([]); setOnboardStep(3); setShowOnboarding(true)
+    setTmpSelected(new Set(t.habitIds)); setCustomList([]); setOnboardStep(2); setShowOnboarding(true)
   }
   function exportJSON() {
     const data = { settings: { start, end, name: settings?.name ?? null }, habits: effectiveHabits, entries, exportedAt: new Date().toISOString() }
@@ -341,7 +341,7 @@ export default function App() {
               </div>
             )}
             <Button onClick={startOnboarding} size="sm" className="rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold px-4 h-8 text-[13px]">
-              {hasData ? 'Edit arc' : 'Start your arc'}
+              <ArrowRight size={14} /> {hasData ? 'Edit arc' : 'Start your arc'}
             </Button>
             <Button variant="ghost" size="icon-sm" onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" className="lg:hidden rounded-full text-zinc-500 hover:text-white">
               <Menu size={18} />
@@ -700,10 +700,10 @@ export default function App() {
       {view === 'tracker' && !hasData && (
         <main className="max-w-[640px] mx-auto px-5 sm:px-6 py-16 text-center">
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-8">
-            <div className="w-10 h-10 rounded-xl bg-white text-zinc-900 grid place-items-center mx-auto"><Sparkles size={18} /></div>
+            <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 text-white grid place-items-center mx-auto"><ArrowRight size={18} /></div>
             <h2 className="mt-4 text-xl font-bold text-white">No arc yet</h2>
             <p className="mt-2 text-sm text-zinc-500">Start your arc to see the tracker. It takes 30 seconds.</p>
-            <Button onClick={startOnboarding} className="mt-6">Start your arc</Button>
+            <Button onClick={startOnboarding} className="mt-6">Start your arc <ArrowRight size={14} /></Button>
           </div>
         </main>
       )}
@@ -903,39 +903,34 @@ export default function App() {
       {showOnboarding && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowOnboarding(false)} className="fixed inset-0 z-50 grid place-items-center p-4 sm:p-6 bg-zinc-950/80 backdrop-blur-xl" role="dialog" aria-modal="true">
           <motion.div initial={{ opacity: 0, scale: 0.97, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 8 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} onClick={e => e.stopPropagation()} className="w-full max-w-[760px] max-h-[90dvh] overflow-y-auto overscroll-contain rounded-[24px] bg-zinc-900 border border-zinc-800 p-4 sm:p-6 shadow-2xl">
-            <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={26} /><span className="font-semibold tracking-[0.13em] text-sm text-white">Set up your arc</span> <span className="text-xs font-mono text-zinc-500">Step {onboardStep}/3</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-8 h-8 grid place-items-center rounded-full bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition"><X size={14} /></button></div>
+            <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={26} /><span className="font-semibold tracking-[0.13em] text-sm text-white">Set up your arc</span> <span className="text-xs font-mono text-zinc-500">Step {onboardStep}/2</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-8 h-8 grid place-items-center rounded-full bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition"><X size={14} /></button></div>
             {onboardStep === 1 && (
               <div className="mt-6">
-                <h2 className="text-xl font-bold text-white">What should we call you?</h2>
-                <p className="text-sm text-zinc-400 mt-1">Personalises your arc. Stored locally only.</p>
-                <div className="mt-4 space-y-2">
-                  <Label htmlFor="arc-name" className="text-zinc-400">Name</Label>
-                  <Input id="arc-name" value={tmpName} onChange={e => setTmpName(e.target.value)} placeholder="Ashutosh" autoFocus />
+                <h2 className="text-xl font-bold text-white">Set up your arc</h2>
+                <p className="text-sm text-zinc-400 mt-1">Stored locally. No account.</p>
+                <div className="mt-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="arc-name" className="text-zinc-400">Your name</Label>
+                    <Input id="arc-name" value={tmpName} onChange={e => setTmpName(e.target.value)} placeholder="Your name" autoFocus />
+                    <div className="text-xs text-zinc-500">Leave blank and we'll say your arc. Example: Ashutosh</div>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5"><Label htmlFor="arc-start" className="text-zinc-400">Start</Label><Input id="arc-start" type="date" value={tmpStart} onChange={e => setTmpStart(e.target.value)} /></div>
+                    <div className="space-y-1.5"><Label htmlFor="arc-end" className="text-zinc-400">End</Label><Input id="arc-end" type="date" value={tmpEnd} onChange={e => setTmpEnd(e.target.value)} /></div>
+                  </div>
+                  <div className="rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-2 flex items-center justify-between"><span className="text-sm text-zinc-300">Duration</span><Badge variant="secondary">{daysBetween(tmpStart, tmpEnd)} days</Badge></div>
                 </div>
-                <div className="mt-3 text-xs font-mono text-zinc-500">You can skip. We’ll just say “your arc”.</div>
-                <div className="mt-6 flex justify-end"><Button onClick={() => setOnboardStep(2)}>Continue</Button></div>
+                <div className="mt-6 flex justify-end"><Button onClick={() => setOnboardStep(2)}>Continue <ArrowRight size={14} /></Button></div>
               </div>
             )}
             {onboardStep === 2 && (
-              <div className="mt-6">
-                <h2 className="text-xl font-bold text-white">When is your winter arc?</h2>
-                <p className="text-sm text-zinc-400 mt-1">Default is Oct 1 → Dec 31 (92 days). Adjust if you start late.</p>
-                <div className="mt-4 grid sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5"><Label htmlFor="arc-start" className="text-zinc-400">Start</Label><Input id="arc-start" type="date" value={tmpStart} onChange={e => setTmpStart(e.target.value)} /></div>
-                  <div className="space-y-1.5"><Label htmlFor="arc-end" className="text-zinc-400">End</Label><Input id="arc-end" type="date" value={tmpEnd} onChange={e => setTmpEnd(e.target.value)} /></div>
-                </div>
-                <div className="mt-3 rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-2 flex items-center justify-between"><span className="text-sm text-zinc-300">Duration</span><Badge variant="secondary">{daysBetween(tmpStart, tmpEnd)} days</Badge></div>
-                <div className="mt-6 flex items-center justify-between"><Button variant="outline" onClick={() => setOnboardStep(1)}>Back</Button><Button onClick={() => setOnboardStep(3)}>Next · Pick habits</Button></div>
-              </div>
-            )}
-            {onboardStep === 3 && (
               <div className="mt-6">
                 <h2 className="text-xl font-bold text-white">Pick your habits</h2>
                 <p className="text-sm text-zinc-400 mt-1">Choose 3–10. Three tiers. All free.</p>
                 <div className="mt-2 text-xs font-mono text-zinc-400">Selected {tmpSelected.size} {tmpSelected.size > 10 && '· over 10'}</div>
                 {['non-neg', 'extra', 'aesthetic'].map(tier => (<div key={tier} className="mt-5"><div className="text-[11px] font-mono tracking-widest text-zinc-400">{TIER_LABELS[tier]}</div><div className="mt-2 grid sm:grid-cols-2 gap-2">{PRESETS.filter(p => p.tier === tier).map(p => { const sel = tmpSelected.has(p.id); return (<button key={p.id} onClick={() => setTmpSelected(s => { const n = new Set(s); sel ? n.delete(p.id) : n.add(p.id); return n })} className={`text-left rounded-xl border p-3 flex gap-3 items-start transition ${sel ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}><span className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-300 shrink-0"><HabitIcon name={p.icon} size={14} /></span><span className="flex-1 min-w-0"><span className={`text-sm font-medium block ${sel ? 'text-zinc-900' : 'text-zinc-200'}`}>{p.name}</span><span className="text-xs text-zinc-500">{p.desc}</span></span><span className={`mt-1 w-5 h-5 rounded-full grid place-items-center border text-xs shrink-0 ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'border-zinc-600 text-transparent'}`}><Check size={12} /></span></button>) })}</div></div>))}
                 <div className="mt-6 rounded-xl bg-zinc-950 border border-zinc-800 p-3"><div className="text-xs font-mono tracking-widest text-zinc-400">Custom habit</div><div className="mt-2 flex gap-2"><Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. No sugar, 3L water" onKeyDown={e => e.key === 'Enter' && addCustom()} /><Button variant="secondary" onClick={addCustom}>Add</Button></div>{customList.length > 0 && (<div className="mt-3 flex flex-wrap gap-2">{customList.map(c => (<Badge key={c.id} variant="secondary" className="gap-1.5">{c.name} <button onClick={() => { setCustomList(prev => prev.filter(x => x.id !== c.id)); setTmpSelected(s => { const n = new Set(s); n.delete(c.id); return n }) }} className="ml-1 hover:text-destructive"><X size={12} /></button></Badge>))}</div>)}</div>
-                <div className="mt-6 flex items-center justify-between"><Button variant="outline" onClick={() => setOnboardStep(2)}>Back</Button><Button onClick={completeOnboarding}>Save arc · {tmpSelected.size} habits</Button></div>
+                <div className="mt-6 flex items-center justify-between"><Button variant="outline" onClick={() => setOnboardStep(1)}>Back</Button><Button onClick={completeOnboarding}>Save arc · {tmpSelected.size} habits <ArrowRight size={14} /></Button></div>
               </div>
             )}
           </motion.div>
