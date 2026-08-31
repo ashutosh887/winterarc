@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from 'react'
-import { motion } from 'framer-motion'
-import { Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, Heart } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, Heart, X, User, Settings } from 'lucide-react'
 import { Canvas } from '@react-three/fiber'
 import { Float, Icosahedron } from '@react-three/drei'
 import { site, resources, templates, quotes as QUOTES_CFG } from './config'
@@ -261,7 +261,7 @@ export default function App() {
     // quote
     ctx.fillStyle = '#cbd5e1'; ctx.font = 'italic 20px ui-sans-serif,system-ui'; const q = achievement ? `"${quote.q}" — ${quote.a}` : `"${quote.q}"`; ctx.fillText(q.slice(0, 82), 60, 400)
     ctx.fillStyle = '#64748b'; ctx.font = '500 18px ui-sans-serif,system-ui'; ctx.fillText('Disappear for 90 days. Come back unrecognizable.', 60, 500)
-    ctx.fillStyle = '#475569'; ctx.font = '500 14px ui-sans-serif,system-ui'; ctx.fillText('winterarc-khaki.vercel.app • 100% local • no login • open source', 60, 625)
+    ctx.fillStyle = '#475569'; ctx.font = '500 14px ui-sans-serif,system-ui'; ctx.fillText('trywinterarc.vercel.app • 100% local • no login • open source', 60, 625)
     return canvas.toDataURL('image/png')
   }
   function downloadImage(achievement) {
@@ -271,13 +271,13 @@ export default function App() {
     const text = achievement
       ? `${achievement.icon} ${achievement.label} — Day ${stats.dayNum}/${totalDays} • ${stats.pct}% • streak ${stats.streak}🔥\nLock in while they coast. ❄️\n`
       : `Day ${stats.dayNum}/${totalDays} • ${stats.perfect} perfect • ${stats.pct}% • streak ${stats.streak}🔥\nDisappear for 90 days. Come back unrecognizable. ❄️\n`
-    const url = 'https://winterarc-khaki.vercel.app'
+    const url = 'https://trywinterarc.vercel.app'
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'width=600,height=400')
   }
   function shareToWhatsApp(achievement) {
     const text = achievement
-      ? `${achievement.icon} ${achievement.label} unlocked! Day ${stats.dayNum}/${totalDays} • ${stats.pct}% • streak ${stats.streak} — winterarc-khaki.vercel.app`
-      : `Winter Arc Day ${stats.dayNum}/${totalDays}: ${stats.pct}% • streak ${stats.streak}🔥 — winterarc-khaki.vercel.app — Lock in while they coast.`
+      ? `${achievement.icon} ${achievement.label} unlocked! Day ${stats.dayNum}/${totalDays} • ${stats.pct}% • streak ${stats.streak} — trywinterarc.vercel.app`
+      : `Winter Arc Day ${stats.dayNum}/${totalDays}: ${stats.pct}% • streak ${stats.streak}🔥 — trywinterarc.vercel.app — Lock in while they coast.`
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
   }
   async function nativeShare(achievement) {
@@ -376,7 +376,7 @@ export default function App() {
                 <button onClick={startOnboarding} className="px-6 py-3 rounded-full bg-white text-slate-900 font-semibold text-[14px] hover:bg-slate-100 transition">Start your arc →</button>
                 <button onClick={() => { if (!hasData) startOnboarding(); else setView('tracker') }} className="px-6 py-3 rounded-full border border-zinc-800 bg-transparent text-zinc-300 font-medium text-[14px] hover:bg-zinc-900 transition">View demo</button>
               </div>
-              <div className="mt-3 inline-flex items-center gap-2 text-[11px] font-mono tracking-wide text-zinc-600"><Shield size={12} /> Free • No paywall • Install as PWA • winterarc-khaki.vercel.app</div>
+              <div className="mt-3 inline-flex items-center gap-2 text-[11px] font-mono tracking-wide text-zinc-600"><Shield size={12} /> Free • No paywall • Install as PWA • trywinterarc.vercel.app</div>
             </div>
 
             {/* PRODUCT MOCK — premium glass + shine */}
@@ -711,11 +711,17 @@ export default function App() {
                 <div className="text-xs font-mono text-zinc-500 mt-1">— {quote.a}</div>
               </div>
               <div className="mt-4 space-y-3 text-sm">
+                <div className="flex items-center justify-between"><span className="text-zinc-400 flex items-center gap-1.5"><User size={12} /> Name</span>
+                  <span className="flex items-center gap-1.5">
+                    <input value={settings?.name ?? ''} onChange={e => setSettings(s => ({ ...s, name: e.target.value || null }))} placeholder="Add name" className="w-28 rounded-full bg-zinc-950 border border-zinc-800 px-2.5 py-1 text-xs text-white placeholder:text-zinc-500 text-right" />
+                    <button onClick={() => setShowOnboarding(true)} className="p-1 rounded-full bg-zinc-800 hover:bg-zinc-700"><Settings size={12} className="text-zinc-400" /></button>
+                  </span>
+                </div>
                 <div className="flex justify-between"><span className="text-zinc-400">Habits</span><span className="text-white font-mono">{effectiveHabits.length}</span></div>
                 <div className="flex justify-between"><span className="text-zinc-400">Range</span><span className="text-white font-mono text-xs">{start} → {end}</span></div>
                 <div className="flex justify-between"><span className="text-zinc-400">Best streak</span><span className="text-amber-400 font-mono">{stats.bestStreak} 🔥</span></div>
                 <div className="pt-3 flex gap-2"><button onClick={exportJSON} className="flex-1 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm">JSON</button><button onClick={exportCSV} className="flex-1 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm">CSV</button></div>
-                <button onClick={() => { if (confirm('Reset all data?')) { localStorage.clear(); location.reload() } }} className="w-full py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-sm">Reset</button>
+                <button onClick={() => { if (confirm('Reset all WinterArc data? This cannot be undone. Are you sure?')) { localStorage.clear(); location.reload() } }} className="w-full py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-sm">Reset</button>
               </div>
             </div>
           </div>
@@ -745,10 +751,11 @@ export default function App() {
         </main>
       )}
 
+      <AnimatePresence>
       {showOnboarding && (
-        <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-zinc-950/70 backdrop-blur" role="dialog" aria-modal="true">
-          <div className="w-full max-w-[760px] max-h-[90vh] overflow-auto rounded-[20px] bg-zinc-900 border border-zinc-800 p-6">
-            <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={28} /><span className="font-semibold tracking-[0.14em] text-sm text-white">SET UP YOUR ARC</span> <span className="text-xs font-mono text-zinc-500">Step {onboardStep}/3</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-8 h-8 grid place-items-center rounded-full bg-zinc-800 text-zinc-400">✕</button></div>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center p-4 bg-zinc-950/80 backdrop-blur-xl" role="dialog" aria-modal="true">
+          <motion.div initial={{ opacity: 0, scale: 0.96, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 8 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} className="w-full max-w-[760px] max-h-[90vh] overflow-auto rounded-[24px] bg-zinc-900 border border-zinc-800 p-6 shadow-2xl">
+            <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={28} /><span className="font-semibold tracking-[0.14em] text-sm text-white">SET UP YOUR ARC</span> <span className="text-xs font-mono text-zinc-500">Step {onboardStep}/3</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-8 h-8 grid place-items-center rounded-full bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition"><X size={14} /></button></div>
             {onboardStep === 1 && (
               <div className="mt-6">
                 <h2 className="text-xl font-bold text-white">What should we call you?</h2>
@@ -777,9 +784,10 @@ export default function App() {
                 <div className="mt-6 flex items-center justify-between"><button onClick={() => setOnboardStep(2)} className="px-5 py-2.5 rounded-full bg-zinc-800 text-zinc-200 border border-zinc-700">← Back</button><button onClick={completeOnboarding} className="px-6 py-2.5 rounded-full bg-white text-zinc-900 font-bold">Save Arc • {tmpSelected.size} habits</button></div>
               </div>
             )}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       <footer className="max-w-[980px] mx-auto px-6 py-10 border-t border-zinc-800/60 mt-8">
         <div className="flex flex-col gap-3 text-[11px] font-mono tracking-wide text-zinc-600">
@@ -790,7 +798,7 @@ export default function App() {
               <span className="opacity-30">•</span>
               <a href={site.support.github} target="_blank" rel="noreferrer" className="hover:text-zinc-300">Star us</a>
               <span className="opacity-30">•</span>
-              <span>winterarc-khaki.vercel.app</span>
+              <span>trywinterarc.vercel.app</span>
             </span>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-zinc-900 pt-3">

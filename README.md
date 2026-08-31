@@ -5,7 +5,7 @@ Lock in while they coast. ❄️
 
 Open source WinterArc tracker — Oct 1 → Dec 31 (92 days, Jan 1 graduation). Local-first, PWA, no login.
 
-**Live:** https://winterarc-khaki.vercel.app
+**Live:** https://trywinterarc.vercel.app
 
 ## Features
 - 92-day grid — backfill, no restart

@@ -11,6 +11,7 @@
 
 :root { color-scheme: dark; }
 * { scrollbar-width: thin; scrollbar-color: #27272a transparent; }
+button, a, [role="button"], label { cursor: pointer; }
 body { background: #09090b; color: #e4e4e7; font-family: var(--font-display); -webkit-font-smoothing: antialiased; }
 
 /* premium shine */

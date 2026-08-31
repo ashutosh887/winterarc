@@ -3,7 +3,7 @@
 
 export const site = {
   name: 'WinterArc',
-  domain: 'https://winterarc-khaki.vercel.app',
+  domain: 'https://trywinterarc.vercel.app',
   tagline: 'Lock in while they coast.',
   hero: 'Disappear for 90 days. Come back unrecognizable.',
   dates: { start: '2026-10-01', end: '2026-12-31', label: 'Oct 1 → Dec 31', days: 92 },
