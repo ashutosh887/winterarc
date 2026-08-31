@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, User, Settings, Menu, LayoutGrid, Compass,
   Footprints, Moon, Salad, Egg, Droplets, Target, Ban, Wind, NotebookPen, Sun, PhoneOff, TreePine, Coins, BrushCleaning, ShowerHead, AlarmClock,
-  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock
+  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone
 } from 'lucide-react'
 import { site, resources, templates, challenges, quotes as QUOTES_CFG } from './config'
 import { Button } from '@/components/ui/button'
@@ -128,7 +128,18 @@ export default function App() {
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [stars, setStars] = useState(null)
   const [heroReady, setHeroReady] = useState(false)
+  const [installEvent, setInstallEvent] = useState(null)
+  const [showInstallHint, setShowInstallHint] = useState(false)
   const canvasRef = useRef(null)
+
+  useEffect(() => {
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
+    if (standalone || localStorage.getItem('wa_install_hint') === 'dismissed') return
+    const onPrompt = e => { e.preventDefault(); setInstallEvent(e); setShowInstallHint(true) }
+    window.addEventListener('beforeinstallprompt', onPrompt)
+    const t = setTimeout(() => setShowInstallHint(true), 6000)
+    return () => { window.removeEventListener('beforeinstallprompt', onPrompt); clearTimeout(t) }
+  }, [])
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -366,6 +377,18 @@ export default function App() {
       { label: 'Dashboard', onClick: () => goTo('dashboard'), active: view === 'dashboard' },
     ] : []),
   ]
+
+  function dismissInstallHint() {
+    setShowInstallHint(false)
+    try { localStorage.setItem('wa_install_hint', 'dismissed') } catch {}
+  }
+  async function runInstall() {
+    if (!installEvent) { goTo('install'); dismissInstallHint(); return }
+    installEvent.prompt()
+    try { await installEvent.userChoice } catch {}
+    setInstallEvent(null)
+    dismissInstallHint()
+  }
 
   function goTo(next) {
     setView(next)
@@ -689,6 +712,63 @@ export default function App() {
         </main>
       )}
 
+      {view === 'install' && (
+        <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
+          <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Smartphone size={12} /> Install</div>
+          <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Put it on your home screen</h1>
+          <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">WinterArc is a web app that installs like a native one. It opens without browser chrome, works offline, and your data stays in the same place it already is.</p>
+
+          {installEvent && (
+            <button onClick={runInstall} className="mt-6 inline-flex items-center gap-2 h-11 px-5 rounded-full bg-white text-zinc-900 font-semibold text-sm hover:bg-zinc-100 transition">
+              Install now <ArrowRight size={14} />
+            </button>
+          )}
+
+          <div className="mt-8 grid md:grid-cols-3 gap-4">
+            {[
+              {
+                title: 'iPhone and iPad',
+                note: 'Safari only. Chrome and in-app browsers cannot install it.',
+                steps: ['Open trywinterarc.vercel.app in Safari', 'Tap the Share button in the toolbar', 'Scroll down and tap Add to Home Screen', 'Tap Add'],
+              },
+              {
+                title: 'Android',
+                note: 'Chrome, Edge, Samsung Internet and Brave all work.',
+                steps: ['Open the site in Chrome', 'Tap the three dot menu', 'Tap Install app or Add to home screen', 'Confirm'],
+              },
+              {
+                title: 'Desktop',
+                note: 'Chrome, Edge and Brave. Safari on Mac uses Add to Dock.',
+                steps: ['Open the site', 'Click the install icon at the right of the address bar', 'Click Install'],
+              },
+            ].map(p => (
+              <div key={p.title} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col">
+                <div className="text-[15px] font-semibold text-white">{p.title}</div>
+                <div className="mt-1 text-[13px] leading-5 text-zinc-500">{p.note}</div>
+                <ol className="mt-4 space-y-2 flex-1">
+                  {p.steps.map((step, i) => (
+                    <li key={step} className="flex gap-3 text-[13px] leading-5 text-zinc-300">
+                      <span className="w-5 h-5 shrink-0 rounded-full border border-zinc-700 bg-zinc-950 grid place-items-center text-[10px] font-mono text-zinc-400">{i + 1}</span>
+                      {step}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+            <div className="text-[15px] font-semibold text-white">What you should know on iOS</div>
+            <ul className="mt-3 space-y-2 text-[13px] leading-5 text-zinc-500">
+              <li>Apple only lets Safari add a web app to the home screen, so that step cannot be skipped.</li>
+              <li>The installed copy keeps its own storage. If you set up your arc in Safari first, it carries over. If you set it up somewhere else, it does not.</li>
+              <li>Storage is capped lower than a native app. A full 92 day arc is a few kilobytes, so this will not bite you.</li>
+              <li>Notifications need iOS 16.4 or later and only work after you add it to the home screen. WinterArc does not send any yet.</li>
+            </ul>
+          </div>
+        </main>
+      )}
+
       {view === 'feedback' && (
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
           <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><NotebookPen size={12} /> Feedback</div>
@@ -952,6 +1032,31 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {showInstallHint && view === 'landing' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
+            className="fixed left-4 right-4 sm:left-auto sm:right-6 sm:w-[360px] z-40 rounded-2xl border border-zinc-800 bg-zinc-900/95 backdrop-blur p-4 shadow-xl"
+            style={{ bottom: 'calc(1.25rem + env(safe-area-inset-bottom))' }}
+          >
+            <div className="flex items-start gap-3">
+              <span className="w-9 h-9 shrink-0 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-300"><Smartphone size={15} /></span>
+              <div className="min-w-0 flex-1">
+                <div className="text-[13px] font-semibold text-white">Keep it on your home screen</div>
+                <div className="mt-0.5 text-[12px] leading-5 text-zinc-500">Installs like an app, opens offline, still no account.</div>
+                <div className="mt-3 flex gap-2">
+                  <button onClick={runInstall} className="h-9 px-4 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">
+                    {installEvent ? 'Install' : 'How'}
+                  </button>
+                  <button onClick={dismissInstallHint} className="h-9 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 text-[13px] hover:text-white transition">Not now</button>
+                </div>
+              </div>
+              <button onClick={dismissInstallHint} aria-label="Dismiss" className="w-8 h-8 shrink-0 grid place-items-center rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition"><X size={14} /></button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <canvas ref={canvasRef} className="hidden" aria-hidden />
 
       <footer className="border-t border-zinc-800 mt-12">
@@ -970,6 +1075,7 @@ export default function App() {
               <div className="space-y-2">
                 <button onClick={() => goTo('templates')} className="block text-zinc-400 hover:text-white transition">Templates</button>
                 <button onClick={() => goTo('resources')} className="block text-zinc-400 hover:text-white transition">Resources</button>
+                <button onClick={() => goTo('install')} className="block text-zinc-400 hover:text-white transition">Install as app</button>
                 <button onClick={() => goTo('feedback')} className="block text-zinc-400 hover:text-white transition">Feedback</button>
               </div>
               <div className="space-y-2">
