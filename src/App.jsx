@@ -25,6 +25,14 @@ function HabitIcon({ name, size = 16, className }) {
   return <C size={size} className={className} />
 }
 
+const ARC_PRESETS = [
+  { label: 'Winter arc', range: () => getDefaultArc() },
+  { label: '30 days', range: () => ({ start: todayYMD(), end: addDays(todayYMD(), 29) }) },
+  { label: '60 days', range: () => ({ start: todayYMD(), end: addDays(todayYMD(), 59) }) },
+  { label: '90 days', range: () => ({ start: todayYMD(), end: addDays(todayYMD(), 89) }) },
+  { label: 'This month', range: () => { const d = new Date(); const y = d.getFullYear(), m = d.getMonth(); const p = x => String(x).padStart(2, '0'); return { start: `${y}-${p(m + 1)}-01`, end: `${y}-${p(m + 1)}-${p(new Date(y, m + 1, 0).getDate())}` } } },
+]
+
 const getDefaultArc = () => {
   const y = new Date().getFullYear()
   return { start: `${y}-10-01`, end: `${y}-12-31` }
@@ -123,6 +131,7 @@ export default function App() {
   const [tmpSelected, setTmpSelected] = useState(new Set())
   const [customName, setCustomName] = useState('')
   const [customList, setCustomList] = useState([])
+  const arcLength = useMemo(() => daysBetween(tmpStart, tmpEnd), [tmpStart, tmpEnd])
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [stars, setStars] = useState(null)
   const [heroReady, setHeroReady] = useState(false)
@@ -403,8 +412,8 @@ export default function App() {
             <span className="font-semibold tracking-[0.16em] text-[13px] text-white">WINTERARC</span>
           </button>
 
-          <div className="flex items-center gap-2">
-            <nav className="hidden lg:flex items-center gap-0.5">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <nav className="hidden lg:flex items-center gap-0.5 lg:mr-2 lg:pr-3 lg:border-r lg:border-zinc-800">
               {navLinks.map(l => (
                 <button
                   key={l.label}
@@ -494,7 +503,7 @@ export default function App() {
                 Disappear for 90 days. Come back unrecognizable.
               </motion.p>
               <motion.p variants={fadeUp} className="mt-5 max-w-[560px] mx-auto text-sm leading-6 text-zinc-500">
-                Pick a few habits. Check them off daily. No account, no cloud. Your data stays on your device.
+                Pick a few habits. Check them off daily. Nothing leaves your device.
               </motion.p>
 
               <motion.div variants={fadeUp} className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -555,14 +564,14 @@ export default function App() {
           <section id="features" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-[calc(3.5rem+env(safe-area-inset-top))]">
             <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><LayoutGrid size={12} /> Features</div>
             <h2 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Stay honest.</h2>
-            <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">A grid that stays honest, a ring per habit, and a share card you can ignore.</p>
+            <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">Three things, and none of them nag you.</p>
 
             <div className="mt-8 space-y-6">
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2">
                 <div className="p-6 sm:p-7 flex flex-col justify-center">
                   <div className="w-9 h-9 rounded-full bg-white text-zinc-900 grid place-items-center"><Check size={16} /></div>
                   <h3 className="mt-3 text-[15px] font-semibold text-white">The grid does not lie</h3>
-                  <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">One square per day. White is a clean day, grey is partial, red is a miss. Fill any past date. There is no reset button, so what you see is what you did.</p>
+                  <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">One square a day. White is clean, grey is partial, red is a miss. There is no reset button.</p>
                   <div className="mt-4 text-xs font-mono text-zinc-600">Local only · Export JSON/CSV anytime</div>
                 </div>
                 <div className="bg-zinc-950 border-t md:border-t-0 md:border-l border-zinc-800 p-5 grid place-items-center">
@@ -588,7 +597,7 @@ export default function App() {
                 <div className="p-6 sm:p-7 flex flex-col justify-center order-1 md:order-2">
                   <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-200 grid place-items-center"><Trophy size={16} /></div>
                   <h3 className="mt-3 text-[15px] font-semibold text-white">Rings for each habit</h3>
-                  <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">Every habit gets its own ring. You can see which one is dragging and which one runs itself.</p>
+                  <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">See which habit is dragging and which one runs itself.</p>
                   <div className="mt-4 text-xs font-mono text-zinc-600">Updates live as you check the day</div>
                 </div>
               </div>
@@ -596,7 +605,7 @@ export default function App() {
                 <div className="p-6 sm:p-7 flex flex-col justify-center">
                   <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-200 grid place-items-center"><ExternalLink size={16} /></div>
                   <h3 className="mt-3 text-[15px] font-semibold text-white">Share only if you want</h3>
-                  <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">PNG card for X or WhatsApp, or copy a prompt for your LLM. Nothing leaves your device until you hit share.</p>
+                  <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">A PNG for X or WhatsApp. Nothing leaves the device until you tap share.</p>
                   <div className="mt-4 flex gap-2">
                     <span className="px-3 py-1.5 rounded-full bg-white border border-white text-zinc-900 text-xs font-semibold">X Post</span>
                     <span className="px-3 py-1.5 rounded-full bg-emerald-500 text-white text-xs font-semibold">WhatsApp</span>
@@ -619,13 +628,13 @@ export default function App() {
             <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={stagger}>
               <motion.div variants={fadeUp} className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Zap size={12} /> How it works</motion.div>
               <motion.h2 variants={fadeUp} className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Set it up once. Then it is ten seconds a day.</motion.h2>
-              <motion.p variants={fadeUp} className="mt-2 text-sm text-zinc-500 max-w-[560px]">Every habit is yes or no. No partial credit, no streak insurance.</motion.p>
+              <motion.p variants={fadeUp} className="mt-2 text-sm text-zinc-500 max-w-[560px]">Yes or no. No partial credit, no streak insurance.</motion.p>
 
               <div className="mt-8 grid sm:grid-cols-3 gap-6">
                 {[
-                  { n: '01', t: 'Set it up', d: 'Your dates and the habits you actually intend to do. Five is plenty. Past seven you are lying to yourself.' },
-                  { n: '02', t: 'Tap what you did', d: 'You can backfill any past date, so forgetting to log is not the same as missing the habit.' },
-                  { n: '03', t: 'Watch the grid fill', d: 'White is a clean day, grey is partial, red stays red. There is no reset button, and that is the point.' },
+                  { n: '01', t: 'Set it up', d: 'Your dates, your habits. Five is plenty. Past seven you are lying to yourself.' },
+                  { n: '02', t: 'Tap what you did', d: 'Backfill any past date. Forgetting to log is not the same as missing.' },
+                  { n: '03', t: 'Watch the grid fill', d: 'Red stays red. That is the point.' },
                 ].map(s => (
                   <motion.div variants={fadeUp} key={s.n} className="flex gap-4">
                     <div className="text-[13px] font-mono tracking-widest text-zinc-500 pt-0.5">{s.n}</div>
@@ -644,7 +653,7 @@ export default function App() {
           <section className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
             <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><BookOpen size={12} /> Templates</div>
             <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Start from a template</h1>
-            <p className="mt-1.5 text-sm text-zinc-500">Pick one, then edit it in setup. Nothing here is locked in.</p>
+            <p className="mt-1.5 text-sm text-zinc-500">Pick one, then edit it in setup.</p>
             <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={stagger} className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {templates.map(t => (
                 <motion.div variants={fadeUp} key={t.id} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col hover:border-zinc-700 transition">
@@ -1030,19 +1039,46 @@ export default function App() {
               <div className="mt-6">
                 <h2 className="text-[22px] font-bold tracking-tight text-white">Name and dates</h2>
                 <p className="mt-1 text-sm text-zinc-500">Saved in this browser. No account.</p>
-                <div className="mt-4 space-y-4">
+                <div className="mt-5 space-y-5">
                   <div className="space-y-2">
-                    <Label htmlFor="arc-name" className="text-zinc-400">Your name</Label>
-                    <Input id="arc-name" value={tmpName} onChange={e => setTmpName(e.target.value)} placeholder="Your name" autoFocus />
-                    <div className="text-xs text-zinc-500">Leave it blank and the app just says your arc. Example: Ashutosh</div>
+                    <Label htmlFor="arc-name" className="text-zinc-500">Your name</Label>
+                    <Input id="arc-name" value={tmpName} onChange={e => setTmpName(e.target.value)} placeholder="Your name" className="h-11" />
+                    <div className="text-xs text-zinc-500">Optional. Example: Ashutosh</div>
                   </div>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5"><Label htmlFor="arc-start" className="text-zinc-500">Start</Label><Input id="arc-start" type="date" value={tmpStart} onChange={e => setTmpStart(e.target.value)} /></div>
-                    <div className="space-y-1.5"><Label htmlFor="arc-end" className="text-zinc-400">End</Label><Input id="arc-end" type="date" value={tmpEnd} onChange={e => setTmpEnd(e.target.value)} /></div>
+
+                  <div className="space-y-2">
+                    <Label className="text-zinc-500">How long</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {ARC_PRESETS.map(preset => {
+                        const range = preset.range()
+                        const active = tmpStart === range.start && tmpEnd === range.end
+                        return (
+                          <button
+                            key={preset.label}
+                            type="button"
+                            onClick={() => { setTmpStart(range.start); setTmpEnd(range.end) }}
+                            className={`h-9 px-4 rounded-full text-[13px] font-medium border transition ${active ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-950 text-zinc-300 border-zinc-800 hover:border-zinc-700 hover:text-white'}`}
+                          >
+                            {preset.label}
+                          </button>
+                        )
+                      })}
+                    </div>
                   </div>
-                  <div className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 flex items-center justify-between"><span className="text-sm text-zinc-300">Duration</span><Badge variant="secondary">{daysBetween(tmpStart, tmpEnd)} days</Badge></div>
+
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5"><Label htmlFor="arc-start" className="text-zinc-500">Start</Label><Input id="arc-start" type="date" value={tmpStart} onChange={e => setTmpStart(e.target.value)} className="h-11 appearance-none" /></div>
+                    <div className="space-y-1.5"><Label htmlFor="arc-end" className="text-zinc-500">End</Label><Input id="arc-end" type="date" value={tmpEnd} onChange={e => setTmpEnd(e.target.value)} className="h-11 appearance-none" /></div>
+                  </div>
+
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 flex items-center justify-between">
+                    <span className="text-sm text-zinc-300">Duration</span>
+                    <span className={`text-sm font-mono ${arcLength > 0 ? 'text-white' : 'text-red-300'}`}>
+                      {arcLength > 0 ? `${arcLength} days` : 'End date is before the start'}
+                    </span>
+                  </div>
                 </div>
-                <div className="mt-6 flex justify-end"><Button onClick={() => setOnboardStep(2)}>Continue <ArrowRight size={14} /></Button></div>
+                <div className="mt-6 flex justify-end"><Button disabled={arcLength < 1} onClick={() => setOnboardStep(2)} className="h-11 px-5">Continue <ArrowRight size={14} /></Button></div>
               </div>
             )}
             {onboardStep === 2 && (
@@ -1095,36 +1131,43 @@ export default function App() {
 
       <canvas ref={canvasRef} className="hidden" aria-hidden />
 
-      <footer className="border-t border-zinc-800 mt-12" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-10">
-            <div className="sm:max-w-[300px]">
-              <div className="flex items-center gap-2.5">
-                <Logo size={24} />
+      <footer className="border-t border-zinc-800 mt-16" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="max-w-[1040px] mx-auto px-5 sm:px-6 py-10">
+          <div className="grid gap-8 sm:grid-cols-[1.4fr_1fr_1fr]">
+            <div>
+              <button onClick={() => goTo('landing')} className="flex items-center gap-2.5">
+                <Logo size={22} />
                 <span className="font-semibold tracking-[0.16em] text-[12px] text-white">WINTERARC</span>
-              </div>
-              <p className="mt-3 text-[12px] leading-5 text-zinc-500">
-                An open source tracker for your winter arc. Set your own dates, pick your habits, and keep the grid honest. Local-first, PWA, no login.
+              </button>
+              <p className="mt-3 text-[13px] leading-6 text-zinc-500 max-w-[280px]">
+                Set your dates, pick your habits, keep the grid honest.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-x-10 gap-y-2 sm:ml-auto text-[13px]">
-              <div className="space-y-2">
-                <button onClick={() => goTo('about')} className="block py-1.5 text-zinc-400 hover:text-white transition">What is a winter arc</button>
-                <button onClick={() => goTo('templates')} className="block py-1.5 text-zinc-400 hover:text-white transition">Templates</button>
-                <button onClick={() => goTo('resources')} className="block py-1.5 text-zinc-400 hover:text-white transition">Resources</button>
-                <button onClick={() => goTo('install')} className="block py-1.5 text-zinc-400 hover:text-white transition">Install as app</button>
-                <button onClick={() => goTo('feedback')} className="block py-1.5 text-zinc-400 hover:text-white transition">Feedback</button>
+
+            <div>
+              <div className="text-[11px] font-mono tracking-widest text-zinc-500">Product</div>
+              <div className="mt-3 flex flex-col items-start gap-1">
+                <button onClick={() => goTo('about')} className="py-1 text-[13px] text-zinc-400 hover:text-white transition">What is a winter arc</button>
+                <button onClick={() => goTo('templates')} className="py-1 text-[13px] text-zinc-400 hover:text-white transition">Templates</button>
+                <button onClick={() => goTo('resources')} className="py-1 text-[13px] text-zinc-400 hover:text-white transition">Resources</button>
+                <button onClick={() => goTo('install')} className="py-1 text-[13px] text-zinc-400 hover:text-white transition">Install as app</button>
               </div>
-              <div className="space-y-2">
-                <a href={site.support.github} target="_blank" rel="noreferrer" className="block py-1.5 text-zinc-400 hover:text-white transition">GitHub</a>
-                <a href={site.support.github + '/blob/main/CONTRIBUTING.md'} target="_blank" rel="noreferrer" className="block py-1.5 text-zinc-400 hover:text-white transition">Contribute</a>
-                <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="block py-1.5 text-zinc-400 hover:text-white transition">X</a>
+            </div>
+
+            <div>
+              <div className="text-[11px] font-mono tracking-widest text-zinc-500">Project</div>
+              <div className="mt-3 flex flex-col items-start gap-1">
+                <a href={site.support.github} target="_blank" rel="noreferrer" className="py-1 text-[13px] text-zinc-400 hover:text-white transition">GitHub</a>
+                <a href={site.support.github + '/blob/main/CONTRIBUTING.md'} target="_blank" rel="noreferrer" className="py-1 text-[13px] text-zinc-400 hover:text-white transition">Contribute</a>
+                <button onClick={() => goTo('feedback')} className="py-1 text-[13px] text-zinc-400 hover:text-white transition">Feedback</button>
+                <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="py-1 text-[13px] text-zinc-400 hover:text-white transition">X</a>
               </div>
             </div>
           </div>
-          <div className="mt-8 pt-5 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] font-mono text-zinc-500">
+
+          <div className="mt-10 pt-5 border-t border-zinc-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-[11px] font-mono text-zinc-500">
             <span>&copy; {new Date().getFullYear()} {site.author.name}. MIT licensed.</span>
-            <span>Built in public. No trackers.</span>
+            <span>Local-first. No account, no trackers.</span>
           </div>
         </div>
       </footer>
