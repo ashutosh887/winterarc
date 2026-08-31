@@ -170,34 +170,6 @@ export default function App() {
   const [customName, setCustomName] = useState('')
   const [customList, setCustomList] = useState([])
   const [tmpDays, setTmpDays] = useState(ALL_WEEKDAYS)
-  const selectedIsFuture = selectedDate > today
-  const isPerfectDay = useCallback(d => {
-    const e = entries[d] || {}
-    return effectiveHabits.length > 0 && effectiveHabits.every(h => e[h.id])
-  }, [entries, effectiveHabits])
-
-  const months = useMemo(() => {
-    const fmt = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' })
-    const byKey = new Map()
-    allDates.forEach(d => {
-      const key = d.slice(0, 7)
-      if (!byKey.has(key)) byKey.set(key, { key, label: fmt.format(parseYMD(d)), dates: [] })
-      byKey.get(key).dates.push(d)
-    })
-    return [...byKey.values()].map(m => ({
-      ...m,
-      scheduled: m.dates.filter(isActiveDay).length,
-      perfect: m.dates.filter(d => isActiveDay(d) && isPerfectDay(d)).length,
-    }))
-  }, [allDates, isActiveDay, isPerfectDay])
-
-  const focusMonth = useMemo(() => {
-    const clamped = today < start ? start : today > end ? end : today
-    return clamped.slice(0, 7)
-  }, [today, start, end])
-
-  const [openMonths, setOpenMonths] = useState([])
-  useEffect(() => { setOpenMonths([focusMonth]) }, [focusMonth])
   const arcLength = useMemo(() => daysBetween(tmpStart, tmpEnd), [tmpStart, tmpEnd])
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [stars, setStars] = useState(null)
@@ -277,6 +249,35 @@ export default function App() {
   const activeDays = useMemo(() => activeDaysKey.split(',').map(Number), [activeDaysKey])
   const isActiveDay = useCallback(d => activeDays.includes(weekdayOf(d)), [activeDays])
   const allDates = useMemo(() => Array.from({ length: totalDays }, (_, i) => addDays(start, i)), [start, totalDays])
+
+  const selectedIsFuture = selectedDate > today
+  const isPerfectDay = useCallback(d => {
+    const e = entries[d] || {}
+    return effectiveHabits.length > 0 && effectiveHabits.every(h => e[h.id])
+  }, [entries, effectiveHabits])
+
+  const months = useMemo(() => {
+    const fmt = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' })
+    const byKey = new Map()
+    allDates.forEach(d => {
+      const key = d.slice(0, 7)
+      if (!byKey.has(key)) byKey.set(key, { key, label: fmt.format(parseYMD(d)), dates: [] })
+      byKey.get(key).dates.push(d)
+    })
+    return [...byKey.values()].map(m => ({
+      ...m,
+      scheduled: m.dates.filter(isActiveDay).length,
+      perfect: m.dates.filter(d => isActiveDay(d) && isPerfectDay(d)).length,
+    }))
+  }, [allDates, isActiveDay, isPerfectDay])
+
+  const focusMonth = useMemo(() => {
+    const clamped = today < start ? start : today > end ? end : today
+    return clamped.slice(0, 7)
+  }, [today, start, end])
+
+  const [openMonths, setOpenMonths] = useState([])
+  useEffect(() => { setOpenMonths([focusMonth]) }, [focusMonth])
 
   useEffect(() => {
     const tick = () => setToday(prev => {
@@ -743,7 +744,7 @@ export default function App() {
                 <div className="p-6 sm:p-7 flex flex-col justify-center">
                   <div className="w-9 h-9 rounded-full bg-white text-zinc-900 grid place-items-center"><Check size={16} /></div>
                   <h3 className="mt-3 text-[15px] font-semibold text-white">The grid does not lie</h3>
-                  <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">One square a day. White is clean, grey is partial, red is a miss. There is no reset button.</p>
+                  <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">One square a day. White is clean, grey is partial, red is a miss. You can fill in a day you forgot to log, but not one that has not happened.</p>
                   <div className="mt-4 text-xs font-mono text-zinc-600">Local only · Export JSON/CSV anytime</div>
                 </div>
                 <div className="bg-zinc-950 border-t md:border-t-0 md:border-l border-zinc-800 p-5 grid place-items-center">
@@ -806,7 +807,7 @@ export default function App() {
                 {[
                   { n: '01', t: 'Set it up', d: 'Your dates, your habits. Five is plenty. Past seven you are lying to yourself.' },
                   { n: '02', t: 'Tap what you did', d: 'Backfill any past date. Forgetting to log is not the same as missing.' },
-                  { n: '03', t: 'Watch the grid fill', d: 'Red stays red. That is the point.' },
+                  { n: '03', t: 'Watch the grid fill', d: 'Red stays red, and tomorrow stays locked until it arrives.' },
                 ].map(s => (
                   <motion.div variants={fadeUp} key={s.n} className="flex gap-4">
                     <div className="text-[13px] font-mono tracking-widest text-zinc-500 pt-0.5">{s.n}</div>
@@ -904,7 +905,7 @@ export default function App() {
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
               <div className="text-[15px] font-semibold text-white">Why no streak insurance</div>
               <p className="mt-2 text-[13px] leading-6 text-zinc-500">
-                Most trackers let you freeze a streak or repair a day. That turns the number into a score you protect rather than a record of what happened. Here a missed day stays red, and you can still fill in any past date you actually did.
+                Most trackers let you freeze a streak or repair a day. That turns the number into a score you protect rather than a record of what happened. Here a missed day stays red. You can backfill a day you forgot to log, because that is a record-keeping gap rather than a missed habit, and future days stay locked so nobody can pre-tick their way to a streak.
               </p>
             </div>
           </div>
@@ -914,7 +915,7 @@ export default function App() {
             <ul className="mt-3 space-y-2 text-[13px] leading-6 text-zinc-500">
               <li>Pick fewer habits than you think you can hold. Three you never miss beats eight you miss half of.</li>
               <li>Make every habit answerable with yes or no. "Eat better" is not a habit, "no sugar" is.</li>
-              <li>Set a floor, not a target. The gym habit is showing up, not the perfect session.</li>
+              <li>Commit to the floor. The gym habit is showing up, and the good session is a bonus.</li>
               <li>Missing one day is noise. Missing two in a row is the thing that ends arcs.</li>
             </ul>
           </div>
@@ -930,7 +931,7 @@ export default function App() {
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
           <Eyebrow icon={Smartphone}>Install</Eyebrow>
           <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Put it on your home screen</h1>
-          <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">WinterArc is a web app that installs like a native one. It opens without browser chrome, works offline, and your data stays in the same place it already is.</p>
+          <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">WinterArc installs like a native app. No browser chrome, works offline, and your data stays exactly where it already is.</p>
 
           <div className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-3">
             <button onClick={() => goTo('landing')} className="font-mono text-[13px] text-white underline decoration-zinc-700 hover:decoration-zinc-400 px-2 h-11">{site.domain.replace('https://', '')}</button>
@@ -983,7 +984,7 @@ export default function App() {
             <ul className="mt-3 space-y-2 text-[13px] leading-5 text-zinc-500">
               <li>Apple only lets Safari add a web app to the home screen, so that step cannot be skipped.</li>
               <li>The installed copy keeps its own storage. If you set up your arc in Safari first, it carries over. If you set it up somewhere else, it does not.</li>
-              <li>Storage is capped lower than a native app. A whole arc is a few kilobytes, so this will not bite you.</li>
+              <li>Storage is capped lower than a native app. A whole arc is a few kilobytes, so you will not hit it.</li>
               <li>Notifications need iOS 16.4 or later and only work after you add it to the home screen. WinterArc does not send any yet.</li>
             </ul>
           </div>
@@ -994,7 +995,7 @@ export default function App() {
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
           <Eyebrow icon={NotebookPen}>Feedback</Eyebrow>
           <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Found a bug, want a feature</h1>
-          <p className="mt-1 text-sm text-zinc-500 max-w-[560px]">There is no form here and no analytics. Everything goes through GitHub or X, so you can see what happened to your report.</p>
+          <p className="mt-1 text-sm text-zinc-500 max-w-[560px]">No form, no analytics. Everything goes through GitHub or X, so you can watch what happens to your report.</p>
           <div className="mt-8 grid sm:grid-cols-3 gap-4">
             {[
               { title: 'Report a bug', body: 'Open an issue with what you did and what happened.', label: 'Open an issue', href: site.support.github + '/issues/new' },
