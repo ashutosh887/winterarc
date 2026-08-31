@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, User, Settings, Menu, LayoutGrid, Compass,
   Footprints, Moon, Salad, Egg, Droplets, Target, Ban, Wind, NotebookPen, Sun, PhoneOff, TreePine, Coins, BrushCleaning, ShowerHead, AlarmClock,
-  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone, Copy
+  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone, Copy, ChevronDown
 } from 'lucide-react'
 import { site, resources, templates, challenges, quotes as QUOTES_CFG } from './config'
 import { Button } from '@/components/ui/button'
@@ -32,6 +32,19 @@ const ARC_PRESETS = [
   { label: '90 days', range: () => ({ start: todayYMD(), end: addDays(todayYMD(), 89) }) },
   { label: 'This month', range: () => { const d = new Date(); const y = d.getFullYear(), m = d.getMonth(); const p = x => String(x).padStart(2, '0'); return { start: `${y}-${p(m + 1)}-01`, end: `${y}-${p(m + 1)}-${p(new Date(y, m + 1, 0).getDate())}` } } },
 ]
+
+const ROUTES = {
+  '/': 'landing',
+  '/winter-arc': 'about',
+  '/templates': 'templates',
+  '/resources': 'resources',
+  '/install': 'install',
+  '/feedback': 'feedback',
+  '/tracker': 'tracker',
+  '/dashboard': 'dashboard',
+}
+const PATHS = Object.fromEntries(Object.entries(ROUTES).map(([path, view]) => [view, path]))
+const viewForPath = path => ROUTES[path.replace(/\/+$/, '') || '/'] ?? 'landing'
 
 const getDefaultArc = () => {
   const y = new Date().getFullYear()
@@ -120,7 +133,7 @@ export default function App() {
   const [habits, setHabits] = useLocalStorage('wa_habits', [])
   const [habitsV2, setHabitsV2] = useLocalStorage('wa_habits_v2', null)
   const [entries, setEntries] = useLocalStorage('wa_entries', {})
-  const [view, setView] = useState('landing')
+  const [view, setView] = useState(() => viewForPath(window.location.pathname))
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState(todayYMD())
   const [showOnboarding, setShowOnboarding] = useState(false)
@@ -138,6 +151,8 @@ export default function App() {
   const [installEvent, setInstallEvent] = useState(null)
   const [showInstallHint, setShowInstallHint] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [promptOpen, setPromptOpen] = useState(false)
+  const [promptCopied, setPromptCopied] = useState(false)
   const canvasRef = useRef(null)
 
   useEffect(() => {
@@ -193,7 +208,29 @@ export default function App() {
   const totalDays = useMemo(() => daysBetween(start, end), [start, end])
   const allDates = useMemo(() => Array.from({ length: totalDays }, (_, i) => addDays(start, i)), [start, totalDays])
 
-  useEffect(() => { if (!hasData) setView('landing') }, [hasData])
+  useEffect(() => {
+    const onPop = () => setView(viewForPath(window.location.pathname))
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
+  // an onboarded visitor landing on / goes straight to the tracker, including from the installed app
+  const routedOnce = useRef(false)
+  useEffect(() => {
+    if (routedOnce.current) return
+    routedOnce.current = true
+    if (hasData && viewForPath(window.location.pathname) === 'landing') {
+      setView('tracker')
+      window.history.replaceState({}, '', PATHS.tracker)
+    }
+  }, [hasData])
+
+  // the tracker and dashboard need data, so fall back rather than render nothing
+  useEffect(() => {
+    if (!hasData && (view === 'tracker' || view === 'dashboard')) return
+    const path = PATHS[view] ?? '/'
+    if (window.location.pathname !== path) window.history.replaceState({}, '', path)
+  }, [view, hasData])
   useEffect(() => {
     if (selectedDate < start) setSelectedDate(start)
     if (selectedDate > end) setSelectedDate(todayYMD() < start ? start : todayYMD() > end ? end : todayYMD())
@@ -264,7 +301,7 @@ export default function App() {
     if (chosen.length > 10 && !confirm(`You picked ${chosen.length} habits. Recommended max is 10. Continue?`)) return
     setSettings({ start: tmpStart, end: tmpEnd, name: tmpName.trim() || null })
     setHabitsV2(chosen); setHabits(chosen)
-    setShowOnboarding(false); setView('tracker'); setSelectedDate(tmpStart)
+    setShowOnboarding(false); goTo('tracker'); setSelectedDate(tmpStart)
   }
   function addCustom() {
     if (!customName.trim()) return
@@ -386,6 +423,12 @@ export default function App() {
     ] : []),
   ]
 
+  function copyPrompt() {
+    navigator.clipboard?.writeText(llmPrompt).then(() => {
+      setPromptCopied(true)
+      setTimeout(() => setPromptCopied(false), 1800)
+    }).catch(() => {})
+  }
   function copyLink() {
     navigator.clipboard?.writeText(site.domain).then(() => {
       setCopied(true)
@@ -405,6 +448,8 @@ export default function App() {
   }
 
   function goTo(next) {
+    const path = PATHS[next] ?? '/'
+    if (window.location.pathname !== path) window.history.pushState({}, '', path)
     setView(next)
     setMobileMenuOpen(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -871,32 +916,40 @@ export default function App() {
 
       {view === 'tracker' && hasData && (
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
-          <motion.div initial="hidden" animate="show" variants={stagger} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <motion.div initial="hidden" animate="show" variants={stagger} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex items-center gap-3">
               <Ring pct={Math.round((stats.dayNum / totalDays) * 100)} size={56}><span className="text-[10px] font-mono font-bold tabular-nums text-white">{stats.dayNum}/{totalDays}</span></Ring>
-              <div className="min-w-0"><div className="text-[11px] font-mono tracking-widest text-zinc-500">Day</div><div className="text-sm text-zinc-300">{stats.remaining} left</div><div className="text-[10px] font-mono text-zinc-500 truncate">{start} to {end}</div></div>
-            </motion.div>
-            <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex items-center gap-3">
-              <Ring pct={stats.streak ? Math.min(100, (stats.streak / 7) * 100) : 0} size={54}><span className="text-zinc-300"><Flame size={18} /></span></Ring>
-              <div><div className="text-[11px] font-mono tracking-widest text-zinc-500">Streak</div><div className="text-lg font-bold text-white">{stats.streak} <span className="text-xs font-mono text-zinc-500">best {stats.bestStreak}</span></div><div className="text-xs text-zinc-500">{stats.perfect} perfect ({stats.perfectPct}%)</div></div>
-            </motion.div>
-            <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex items-center gap-3">
-              <Ring pct={stats.pct} size={54}><span className="text-xs font-bold text-zinc-400">{stats.pct}%</span></Ring>
-              <div><div className="text-[11px] font-mono tracking-widest text-zinc-500">Completion</div><div className="text-xs text-zinc-500">{stats.totalChecked}/{stats.totalPossible} checks</div><div className="w-20 h-1.5 bg-zinc-800 rounded-full mt-1"><div className="h-1.5 bg-white rounded-full transition-all" style={{ width: `${stats.pct}%` }} /></div></div>
-            </motion.div>
-            <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex flex-col justify-center gap-2">
-              <div className="grid grid-cols-3 gap-1.5">
-                <button onClick={() => shareToX()} className="h-11 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition">X Post</button>
-                <button onClick={() => shareToWhatsApp()} className="h-11 rounded-full bg-emerald-500 text-white font-semibold text-xs hover:bg-emerald-600 transition">WhatsApp</button>
-                <button onClick={() => downloadImage()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">PNG</button>
+              <div className="min-w-0">
+                <div className="text-[11px] font-mono tracking-widest text-zinc-500">Day</div>
+                <div className="text-lg font-bold text-white">{stats.remaining} left</div>
+                <div className="text-[10px] font-mono text-zinc-500 truncate">{start} to {end}</div>
               </div>
-              <div className="flex gap-2">
-                <button onClick={() => nativeShare()} className="flex-1 h-10 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700 hover:bg-zinc-700 transition">More</button>
-                <button onClick={exportJSON} className="px-3 h-10 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700 hover:bg-zinc-700 transition">JSON</button>
-                <button onClick={exportCSV} className="px-3 h-10 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700 hover:bg-zinc-700 transition">CSV</button>
+            </motion.div>
+            <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex items-center gap-3">
+              <Ring pct={stats.streak ? Math.min(100, (stats.streak / 7) * 100) : 0} size={56}><span className="text-zinc-300"><Flame size={18} /></span></Ring>
+              <div className="min-w-0">
+                <div className="text-[11px] font-mono tracking-widest text-zinc-500">Streak</div>
+                <div className="text-lg font-bold text-white">{stats.streak} <span className="text-xs font-mono text-zinc-500">best {stats.bestStreak}</span></div>
+                <div className="text-[10px] font-mono text-zinc-500">{stats.perfect} perfect days</div>
+              </div>
+            </motion.div>
+            <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex items-center gap-3">
+              <Ring pct={stats.pct} size={56}><span className="text-xs font-bold tabular-nums text-white">{stats.pct}%</span></Ring>
+              <div className="min-w-0">
+                <div className="text-[11px] font-mono tracking-widest text-zinc-500">Completion</div>
+                <div className="text-lg font-bold text-white">{stats.totalChecked}<span className="text-xs font-mono text-zinc-500">/{stats.totalPossible}</span></div>
+                <div className="text-[10px] font-mono text-zinc-500">checks logged</div>
               </div>
             </motion.div>
           </motion.div>
+
+          <div className="mt-3 rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-mono tracking-widest text-zinc-500 px-2 hidden sm:inline">Share</span>
+            <button onClick={() => shareToX()} className="flex-1 sm:flex-none px-5 h-10 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition">X Post</button>
+            <button onClick={() => shareToWhatsApp()} className="flex-1 sm:flex-none px-5 h-10 rounded-full bg-emerald-500 text-white font-semibold text-xs hover:bg-emerald-600 transition">WhatsApp</button>
+            <button onClick={() => downloadImage()} className="flex-1 sm:flex-none px-5 h-10 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">PNG</button>
+            <button onClick={() => nativeShare()} className="flex-1 sm:flex-none sm:ml-auto px-5 h-10 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs hover:text-white hover:border-zinc-700 transition">More</button>
+          </div>
 
           <div className="mt-6 grid lg:grid-cols-[360px_1fr] gap-6">
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 h-fit">
@@ -959,9 +1012,24 @@ export default function App() {
           </div>
 
           <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2"><div className="text-[15px] font-semibold text-white">Export and LLM prompt</div><div className="flex items-center gap-2"><button onClick={() => navigator.clipboard.writeText(llmPrompt)} className="px-4 h-9 rounded-full bg-white text-zinc-900 text-xs font-semibold hover:bg-zinc-100 transition">Copy prompt</button><button onClick={resetAll} className="px-4 h-9 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-xs font-semibold hover:bg-red-500/15 transition">Reset</button></div></div>
-            <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 overflow-auto"><pre className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-words font-mono">{llmPrompt}</pre></div>
-            <div className="mt-2 text-xs text-zinc-500">Paste with exported JSON into your LLM. Data stays local until you paste.</div>
+            <button onClick={() => setPromptOpen(v => !v)} aria-expanded={promptOpen} className="w-full flex items-center justify-between gap-3 text-left">
+              <span className="text-[15px] font-semibold text-white">Export and LLM prompt</span>
+              <span className="shrink-0 inline-flex items-center gap-1.5 text-xs font-mono text-zinc-500">
+                {promptOpen ? 'Hide' : 'Show'} <ChevronDown size={14} className={`transition-transform ${promptOpen ? 'rotate-180' : ''}`} />
+              </span>
+            </button>
+            {promptOpen && (
+              <div className="mt-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <button onClick={copyPrompt} className="px-4 h-9 rounded-full bg-white text-zinc-900 text-xs font-semibold hover:bg-zinc-100 transition">{promptCopied ? 'Copied' : 'Copy prompt'}</button>
+                  <button onClick={exportJSON} className="px-4 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">JSON</button>
+                  <button onClick={exportCSV} className="px-4 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">CSV</button>
+                  <button onClick={resetAll} className="ml-auto px-4 h-9 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-xs font-semibold hover:bg-red-500/15 transition">Reset arc</button>
+                </div>
+                <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 overflow-auto max-h-56"><pre className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-words font-mono">{llmPrompt}</pre></div>
+                <div className="mt-2 text-xs text-zinc-500">Paste this with your exported JSON. Nothing leaves the device until you do.</div>
+              </div>
+            )}
           </div>
         </main>
       )}
