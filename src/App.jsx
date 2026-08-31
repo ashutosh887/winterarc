@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef, Suspense, lazy } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, Suspense, lazy } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, User, Settings, Menu, LayoutGrid, Compass,
@@ -32,6 +32,13 @@ const ARC_PRESETS = [
   { label: '90 days', range: () => ({ start: todayYMD(), end: addDays(todayYMD(), 89) }) },
   { label: 'This month', range: () => { const d = new Date(); const y = d.getFullYear(), m = d.getMonth(); const p = x => String(x).padStart(2, '0'); return { start: `${y}-${p(m + 1)}-01`, end: `${y}-${p(m + 1)}-${p(new Date(y, m + 1, 0).getDate())}` } } },
 ]
+
+const WEEKDAYS = [
+  { i: 1, short: 'Mon' }, { i: 2, short: 'Tue' }, { i: 3, short: 'Wed' },
+  { i: 4, short: 'Thu' }, { i: 5, short: 'Fri' }, { i: 6, short: 'Sat' }, { i: 0, short: 'Sun' },
+]
+const ALL_WEEKDAYS = [0, 1, 2, 3, 4, 5, 6]
+const weekdayOf = d => parseYMD(d).getDay()
 
 const ROUTES = {
   '/': 'landing',
@@ -144,6 +151,7 @@ export default function App() {
   const [tmpSelected, setTmpSelected] = useState(new Set())
   const [customName, setCustomName] = useState('')
   const [customList, setCustomList] = useState([])
+  const [tmpDays, setTmpDays] = useState(ALL_WEEKDAYS)
   const arcLength = useMemo(() => daysBetween(tmpStart, tmpEnd), [tmpStart, tmpEnd])
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [stars, setStars] = useState(null)
@@ -207,6 +215,11 @@ export default function App() {
   const start = settings?.start ?? DEFAULT_START
   const end = settings?.end ?? DEFAULT_END
   const totalDays = useMemo(() => daysBetween(start, end), [start, end])
+  const activeDays = useMemo(() => {
+    const raw = settings?.activeDays
+    return Array.isArray(raw) && raw.length > 0 ? raw : ALL_WEEKDAYS
+  }, [settings])
+  const isActiveDay = useCallback(d => activeDays.includes(weekdayOf(d)), [activeDays])
   const allDates = useMemo(() => Array.from({ length: totalDays }, (_, i) => addDays(start, i)), [start, totalDays])
 
   useEffect(() => {
@@ -239,28 +252,35 @@ export default function App() {
   }, [start, end])
 
   const stats = useMemo(() => {
-    let perfect = 0, totalChecked = 0, totalPossible = 0, cur = 0, best = 0, c = 0
-    allDates.forEach(d => {
+    let perfect = 0, totalChecked = 0, totalPossible = 0, cur = 0, best = 0, c = 0, scheduled = 0
+    const isPerfect = d => {
       const e = entries[d] || {}
-      const done = effectiveHabits.filter(h => e[h.id]).length
-      totalChecked += done; totalPossible += effectiveHabits.length
-      if (effectiveHabits.length && done === effectiveHabits.length) perfect++
-    })
-    const today = todayYMD()
-    for (let i = allDates.length - 1; i >= 0; i--) {
-      const d = allDates[i]; if (d > today) continue
-      const e = entries[d] || {}
-      if (effectiveHabits.length && effectiveHabits.every(h => e[h.id])) cur++; else break
+      return effectiveHabits.length > 0 && effectiveHabits.every(h => e[h.id])
     }
     allDates.forEach(d => {
       const e = entries[d] || {}
-      if (effectiveHabits.length && effectiveHabits.every(h => e[h.id])) { c++; best = Math.max(best, c) } else c = 0
+      totalChecked += effectiveHabits.filter(h => e[h.id]).length
+      if (!isActiveDay(d)) return
+      scheduled++
+      totalPossible += effectiveHabits.length
+      if (isPerfect(d)) perfect++
+    })
+    const today = todayYMD()
+    for (let i = allDates.length - 1; i >= 0; i--) {
+      const d = allDates[i]
+      if (d > today) continue
+      if (!isActiveDay(d)) continue
+      if (isPerfect(d)) cur++; else break
+    }
+    allDates.forEach(d => {
+      if (!isActiveDay(d)) return
+      if (isPerfect(d)) { c++; best = Math.max(best, c) } else c = 0
     })
     const pct = totalPossible ? Math.round((totalChecked / totalPossible) * 100) : 0
-    const perfectPct = allDates.length ? Math.round((perfect / allDates.length) * 100) : 0
+    const perfectPct = scheduled ? Math.round((perfect / scheduled) * 100) : 0
     const dayNum = (() => { const t = todayYMD(); if (t < start) return 0; if (t > end) return totalDays; return daysBetween(start, t) })()
-    return { perfect, totalChecked, totalPossible, pct, perfectPct, streak: cur, bestStreak: best, dayNum, remaining: Math.max(0, totalDays - (() => { const t = todayYMD(); if (t < start) return 0; if (t > end) return totalDays; return daysBetween(start, t) })()) }
-  }, [allDates, entries, effectiveHabits, start, end, totalDays])
+    return { perfect, scheduled, totalChecked, totalPossible, pct, perfectPct, streak: cur, bestStreak: best, dayNum, remaining: Math.max(0, totalDays - (() => { const t = todayYMD(); if (t < start) return 0; if (t > end) return totalDays; return daysBetween(start, t) })()) }
+  }, [allDates, entries, effectiveHabits, start, end, totalDays, isActiveDay])
 
   const dailyPct = useMemo(() => {
     const e = entries[selectedDate] || {}
@@ -293,6 +313,7 @@ export default function App() {
     setTmpEnd(settings?.end ?? DEFAULT_END)
     setTmpSelected(new Set(effectiveHabits.map(h => h.id)))
     setCustomList(effectiveHabits.filter(h => h.tier === 'custom'))
+    setTmpDays(Array.isArray(settings?.activeDays) && settings.activeDays.length ? settings.activeDays : ALL_WEEKDAYS)
     setOnboardStep(1); setShowOnboarding(true)
   }
   function completeOnboarding() {
@@ -301,7 +322,7 @@ export default function App() {
     if (!tmpStart || !tmpEnd || isNaN(parseYMD(tmpStart).getTime()) || isNaN(parseYMD(tmpEnd).getTime())) { alert('Pick valid start and end dates'); return }
     if (parseYMD(tmpStart) > parseYMD(tmpEnd)) { alert('Start date must be before end date'); return }
     if (chosen.length > 10 && !confirm(`You picked ${chosen.length} habits. Recommended max is 10. Continue?`)) return
-    setSettings({ start: tmpStart, end: tmpEnd, name: tmpName.trim() || null })
+    setSettings({ start: tmpStart, end: tmpEnd, name: tmpName.trim() || null, activeDays: tmpDays.length ? tmpDays : ALL_WEEKDAYS })
     setHabitsV2(chosen); setHabits(chosen)
     setShowOnboarding(false); goTo('tracker'); setSelectedDate(tmpStart)
   }
@@ -613,6 +634,7 @@ export default function App() {
                     <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-white border border-white" /> perfect</span>
                     <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-zinc-300 border border-zinc-300" /> partial</span>
                     <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-red-500/15 border border-red-500/20" /> missed</span>
+                    {activeDays.length < 7 && <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-zinc-950 border border-zinc-800" /> rest</span>}
                   </div>
                 </div>
               </div>
@@ -942,7 +964,7 @@ export default function App() {
               <div className="min-w-0">
                 <div className="text-[11px] font-mono tracking-widest text-zinc-500">Completion</div>
                 <div className="text-lg font-bold text-white">{stats.totalChecked}<span className="text-xs font-mono text-zinc-500">/{stats.totalPossible}</span></div>
-                <div className="text-[10px] font-mono text-zinc-500">checks logged</div>
+                <div className="text-[10px] font-mono text-zinc-500">{activeDays.length < 7 ? `across ${stats.scheduled} scheduled days` : 'checks logged'}</div>
               </div>
             </motion.div>
           </motion.div>
@@ -966,7 +988,10 @@ export default function App() {
           <div className="mt-6 grid lg:grid-cols-[360px_1fr] gap-6 items-start">
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 h-fit lg:sticky lg:top-[calc(4.5rem+env(safe-area-inset-top))]">
               <div className="flex items-center justify-between">
-                <div className="text-[15px] font-semibold text-white">Daily check-in</div>
+                <div className="min-w-0">
+                  <div className="text-[15px] font-semibold text-white">Daily check-in</div>
+                  {!isActiveDay(selectedDate) && <div className="text-[11px] font-mono text-zinc-500">Rest day, nothing owed</div>}
+                </div>
                 <Ring pct={dailyPct} size={44} stroke={3}><span className="text-[11px] font-mono font-bold text-zinc-300">{dailyPct}%</span></Ring>
               </div>
               <input type="date" value={selectedDate} min={start} max={end} onChange={e => setSelectedDate(e.target.value)} className="mt-3 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 min-h-11 text-base sm:text-sm text-white" />
@@ -1017,7 +1042,7 @@ export default function App() {
                     <div
                       key={d}
                       title={d}
-                      className={`flex-1 h-8 rounded-md border ${!inArc ? 'bg-zinc-950 border-zinc-800' : full ? 'bg-white border-white' : some ? 'bg-zinc-500 border-zinc-500' : 'bg-zinc-800 border-zinc-700'}`}
+                      className={`flex-1 h-8 rounded-md border ${!inArc || !isActiveDay(d) ? 'bg-zinc-950 border-zinc-800' : full ? 'bg-white border-white' : some ? 'bg-zinc-500 border-zinc-500' : 'bg-zinc-800 border-zinc-700'}`}
                     />
                   )
                 })}
@@ -1025,7 +1050,7 @@ export default function App() {
               <div className="mt-2 text-[10px] font-mono text-zinc-500">last 7 days</div>
               {streakInfo && (
                 <p className="mt-3 pt-3 border-t border-zinc-800 text-[13px] leading-6 text-zinc-500">
-                  A day counts only when every habit you picked is checked. One partial day ends the streak. Backfilling a past day repairs it, because the streak reads the grid rather than a separate counter.
+                  A day counts only when every habit you picked is checked. Rest days are skipped, so they never break a streak and never count as a miss. One partial day on a scheduled day ends it. Backfilling repairs the streak, because it reads the grid rather than a stored counter.
                 </p>
               )}
             </div>
@@ -1036,13 +1061,14 @@ export default function App() {
               <div className="flex items-center justify-between"><div className="text-[15px] font-semibold text-white">{totalDays} day grid</div><div className="text-xs font-mono text-zinc-500">Missed stays visible · No restart</div></div>
               <div className="mt-4 grid grid-cols-7 gap-1 sm:gap-1.5">
                 {allDates.map(d => {
-                  const e = entries[d] || {}; const done = effectiveHabits.filter(h => e[h.id]).length; const perfect = effectiveHabits.length > 0 && done === effectiveHabits.length; const isToday = d === todayYMD(); const isSelected = d === selectedDate; const isFuture = d > todayYMD()
+                  const e = entries[d] || {}; const done = effectiveHabits.filter(h => e[h.id]).length; const perfect = effectiveHabits.length > 0 && done === effectiveHabits.length; const isToday = d === todayYMD(); const isSelected = d === selectedDate; const isFuture = d > todayYMD(); const rest = !isActiveDay(d)
                   let bg = 'bg-zinc-800 border-zinc-700'
-                  if (isFuture) bg = 'bg-zinc-900 border-zinc-800 opacity-40'
+                  if (rest) bg = 'bg-zinc-950 border-zinc-800/70'
+                  else if (isFuture) bg = 'bg-zinc-900 border-zinc-800 opacity-40'
                   else if (perfect) bg = 'bg-white border-white'
                   else if (done > 0) bg = 'bg-zinc-300 border-zinc-300'
                   else if (d < todayYMD()) bg = 'bg-red-500/15 border-red-500/20'
-                  return (<button key={d} onClick={() => setSelectedDate(d)} className={`relative aspect-square rounded-md border flex flex-col items-center justify-center transition active:scale-95 hover:scale-[1.04] ${bg} ${isSelected ? 'ring-2 ring-inset ring-white' : ''}`} aria-label={`${d}, ${done} of ${effectiveHabits.length} done`} title={`${d} - ${done}/${effectiveHabits.length}`}><span className={`text-[11px] font-mono tabular-nums ${perfect ? 'text-zinc-900' : done > 0 ? 'text-zinc-900' : d < todayYMD() ? 'text-red-300' : 'text-zinc-500'}`}>{d.slice(8, 10)}</span><span className={`hidden sm:block text-[9px] font-mono ${perfect ? 'text-zinc-700' : 'text-zinc-500'}`}>{done}/{effectiveHabits.length}</span>{isToday && <span className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full border border-zinc-900" />}</button>)
+                  return (<button key={d} onClick={() => setSelectedDate(d)} className={`relative aspect-square rounded-md border flex flex-col items-center justify-center transition active:scale-95 hover:scale-[1.04] ${bg} ${isSelected ? 'ring-2 ring-inset ring-white' : ''}`} aria-label={rest ? `${d}, rest day` : `${d}, ${done} of ${effectiveHabits.length} done`} title={rest ? `${d} - rest day` : `${d} - ${done}/${effectiveHabits.length}`}><span className={`text-[11px] font-mono tabular-nums ${rest ? 'text-zinc-700' : perfect ? 'text-zinc-900' : done > 0 ? 'text-zinc-900' : d < todayYMD() ? 'text-red-300' : 'text-zinc-500'}`}>{d.slice(8, 10)}</span><span className={`hidden sm:block text-[9px] font-mono ${rest ? 'text-zinc-700' : perfect ? 'text-zinc-700' : 'text-zinc-500'}`}>{rest ? 'rest' : `${done}/${effectiveHabits.length}`}</span>{isToday && <span className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full border border-zinc-900" />}</button>)
                 })}
               </div>
               <div className="mt-6">
@@ -1200,6 +1226,36 @@ export default function App() {
                           </button>
                         )
                       })}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-zinc-500">Which days</Label>
+                      <button type="button" onClick={() => setTmpDays(ALL_WEEKDAYS)} className="text-[11px] font-mono text-zinc-500 hover:text-white transition">Every day</button>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {WEEKDAYS.map(d => {
+                        const on = tmpDays.includes(d.i)
+                        return (
+                          <button
+                            key={d.i}
+                            type="button"
+                            aria-pressed={on}
+                            onClick={() => setTmpDays(prev => on ? prev.filter(x => x !== d.i) : [...prev, d.i])}
+                            className={`h-11 flex-1 min-w-11 px-2 rounded-full text-[13px] font-medium border transition ${on ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'}`}
+                          >
+                            {d.short}
+                          </button>
+                        )
+                      })}
+                    </div>
+                    <div className="text-xs text-zinc-500">
+                      {tmpDays.length === 7
+                        ? 'Every day counts. Miss one and the streak resets.'
+                        : tmpDays.length === 0
+                          ? 'Pick at least one day.'
+                          : `${tmpDays.length} days a week. The rest are rest days and never count as a miss.`}
                     </div>
                   </div>
 
