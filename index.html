@@ -9,9 +9,9 @@
     <meta name="apple-mobile-web-app-title" content="WinterArc" />
     <meta name="author" content="Ashutosh Jha" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
-    <meta name="description" content="Habit tracker for the 92-day winter arc, October 1 to December 31. Pick a few daily habits and mark them off. Free, open source, and stored only in your browser." />
+    <meta name="description" content="A local-first habit tracker for your winter arc that saves everything in your browser and needs no account." />
     <link rel="canonical" href="https://trywinterarc.vercel.app/" />
-    <title>WinterArc | 92 Day Habit Tracker for Oct 1 to Dec 31</title>
+    <title>WinterArc | Winter Arc Habit Tracker</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -23,23 +23,23 @@
     <meta property="og:site_name" content="WinterArc" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:url" content="https://trywinterarc.vercel.app/" />
-    <meta property="og:title" content="WinterArc | 92 Day Habit Tracker" />
-    <meta property="og:description" content="Habit tracker for the 92-day winter arc, October 1 to December 31. Pick a few daily habits and mark them off. Free, open source, and stored only in your browser." />
+    <meta property="og:title" content="WinterArc | Winter Arc Habit Tracker" />
+    <meta property="og:description" content="A local-first habit tracker for your winter arc that saves everything in your browser and needs no account." />
     <meta property="og:image" content="https://trywinterarc.vercel.app/og-image.png" />
     <meta property="og:image:secure_url" content="https://trywinterarc.vercel.app/og-image.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="WinterArc 92-day habit grid for October to December" />
+    <meta property="og:image:alt" content="WinterArc habit grid on a dark background" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@ashutosh887_" />
     <meta name="twitter:creator" content="@ashutosh887_" />
-    <meta name="twitter:title" content="WinterArc | 92 Day Habit Tracker" />
-    <meta name="twitter:description" content="Habit tracker for the 92-day winter arc, October 1 to December 31. Pick a few daily habits and mark them off. Free, open source, and stored only in your browser." />
+    <meta name="twitter:title" content="WinterArc | Winter Arc Habit Tracker" />
+    <meta name="twitter:description" content="A local-first habit tracker for your winter arc that saves everything in your browser and needs no account." />
     <meta name="twitter:image" content="https://trywinterarc.vercel.app/og-image.png" />
-    <meta name="twitter:image:alt" content="WinterArc 92-day habit grid for October to December" />
+    <meta name="twitter:image:alt" content="WinterArc habit grid on a dark background" />
 
     <!-- Structured data -->
     <script type="application/ld+json">
@@ -71,31 +71,33 @@
           "operatingSystem": "Any",
           "browserRequirements": "Requires a modern browser with JavaScript enabled",
           "inLanguage": "en-US",
-          "description": "Habit tracker for the 92-day winter arc, October 1 to December 31. Pick a few daily habits and mark them off. Data is saved in the browser, works offline as a PWA, and needs no account.",
+          "description": "A local-first habit tracker for your winter arc that saves everything in your browser and needs no account. You choose the habits you want to run and the start and end dates of the arc, then mark each day on a grid that keeps missed days visible.",
           "license": "https://opensource.org/licenses/MIT",
           "isAccessibleForFree": true,
           "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
           "author": { "@id": "https://trywinterarc.vercel.app/#author" },
           "codeRepository": "https://github.com/ashutosh887/winterarc",
           "featureList": [
-            "92-day habit grid from October 1 to December 31",
-            "Habit templates and a custom option",
-            "Streaks, completion rings and achievements",
+            "Start and end dates you set yourself in setup",
+            "Habit grid covering every day of your arc",
+            "Habit templates plus custom habits of your own",
+            "Streak counts and daily completion rings",
+            "Achievements as the arc goes on",
             "Backfill any past day",
-            "Export to JSON, CSV and image",
-            "Offline PWA with local storage only"
+            "Export to JSON, CSV or an image",
+            "Installs as an offline PWA",
+            "Local storage only, with no account and no server"
           ]
         },
         {
           "@type": "FAQPage",
           "@id": "https://trywinterarc.vercel.app/#faq",
           "mainEntity": [
-            { "@type": "Question", "name": "What is a winter arc?", "acceptedAnswer": { "@type": "Answer", "text": "A 92-day stretch from October 1 to December 31. You pick a few daily habits and mark them each day. Missed days stay visible and there is no restart." } },
-            { "@type": "Question", "name": "Why 92 days and not 90?", "acceptedAnswer": { "@type": "Answer", "text": "October has 31 days, November has 30 and December has 31, which is 92 in total. January 1 is graduation day." } },
-            { "@type": "Question", "name": "Is my data private?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Everything is kept in your browser using localStorage. There is no account and no server. You can export JSON or CSV if you want a copy." } },
-            { "@type": "Question", "name": "Is WinterArc free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. It is free and open source under the MIT license. There is no paid tier." } },
+            { "@type": "Question", "name": "What is a winter arc?", "acceptedAnswer": { "@type": "Answer", "text": "A stretch of the colder months that you commit to a short list of daily habits. You mark each habit off every day. Missed days stay visible on the grid and there is no restart." } },
+            { "@type": "Question", "name": "Are the dates fixed?", "acceptedAnswer": { "@type": "Answer", "text": "No. Setup defaults to October 1 through December 31, and you can change the start and end dates to whatever window you want your arc to run." } },
+            { "@type": "Question", "name": "Where is my data stored?", "acceptedAnswer": { "@type": "Answer", "text": "In your own browser, using localStorage. There is no account and no server, so nothing is uploaded. You can export JSON or CSV whenever you want a copy." } },
             { "@type": "Question", "name": "Can I fill in past days?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Pick any date inside your arc and toggle the habits for that day." } },
-            { "@type": "Question", "name": "Does it work offline?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. It installs as a progressive web app and keeps working without a connection." } }
+            { "@type": "Question", "name": "Does it work offline and install as an app?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. It installs as a progressive web app from your browser and keeps working without a connection." } }
           ]
         }
       ]
