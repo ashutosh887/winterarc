@@ -1,4 +1,8 @@
 import { useEffect, useMemo, useState, useRef } from 'react'
+import { motion } from 'framer-motion'
+import { Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap } from 'lucide-react'
+import { Canvas } from '@react-three/fiber'
+import { Float, Icosahedron } from '@react-three/drei'
 
 const DEFAULT_START = '2026-10-01'
 const DEFAULT_END = '2026-12-31'
@@ -62,14 +66,30 @@ function todayYMD() { return ymd(new Date()) }
 function Ring({ pct, size = 44, stroke = 4, children }) {
   const r = (size - stroke) / 2
   const c = 2 * Math.PI * r
-  const dash = (pct / 100) * c
   return (
     <div className="relative grid place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#1e293b" strokeWidth={stroke} />
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#38bdf8" strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${dash} ${c}`} className="transition-all duration-700" />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#27272a" strokeWidth={stroke} />
+        <motion.circle
+          cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#fafafa" strokeWidth={stroke} strokeLinecap="round"
+          strokeDasharray={c} initial={{ strokeDashoffset: c }} animate={{ strokeDashoffset: c - (pct / 100) * c }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+        />
       </svg>
       <div className="absolute inset-0 grid place-items-center">{children}</div>
+    </div>
+  )
+}
+
+function ThreeHero() {
+  return (
+    <div className="absolute inset-0 -z-10 opacity-[0.08] pointer-events-none">
+      <Canvas camera={{ position: [0, 0, 6], fov: 45 }}>
+        <ambientLight intensity={0.8} />
+        <directionalLight position={[4, 4, 4]} intensity={1.2} />
+        <Float speed={1.2} rotationIntensity={0.6} floatIntensity={0.8}>
+          <Icosahedron args={[1.6, 1]}><meshStandardMaterial color="#e4e4e7" wireframe transparent opacity={0.9} /></Icosahedron>
+        </Float>
+      </Canvas>
     </div>
   )
 }
@@ -97,6 +117,7 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState(todayYMD())
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [onboardStep, setOnboardStep] = useState(1)
+  const [tmpName, setTmpName] = useState('')
   const [tmpStart, setTmpStart] = useState(DEFAULT_START)
   const [tmpEnd, setTmpEnd] = useState(DEFAULT_END)
   const [tmpSelected, setTmpSelected] = useState(new Set())
@@ -187,6 +208,7 @@ export default function App() {
     })
   }
   function startOnboarding() {
+    setTmpName(settings?.name ?? '')
     setTmpStart(settings?.start ?? DEFAULT_START)
     setTmpEnd(settings?.end ?? DEFAULT_END)
     setTmpSelected(new Set(effectiveHabits.map(h => h.id)))
@@ -197,7 +219,7 @@ export default function App() {
     const chosen = [...PRESETS.filter(p => tmpSelected.has(p.id)), ...customList]
     if (!chosen.length) { alert('Pick at least 1 habit (recommended 3–5)'); return }
     if (chosen.length > 10 && !confirm(`You picked ${chosen.length} habits. Recommended max is 10 — continue?`)) return
-    setSettings({ start: tmpStart, end: tmpEnd })
+    setSettings({ start: tmpStart, end: tmpEnd, name: tmpName.trim() || null })
     setHabitsV2(chosen); setHabits(chosen)
     setShowOnboarding(false); setView('tracker'); setSelectedDate(tmpStart)
   }
@@ -278,44 +300,45 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-30 backdrop-blur bg-[#020617]/70 border-b border-slate-800/60">
+      <header className="sticky top-0 z-30 backdrop-blur bg-zinc-950/70 border-b border-zinc-800/60">
         <div className="max-w-[980px] mx-auto px-6 h-[60px] flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView(hasData ? 'tracker' : 'landing')}>
+          <button onClick={() => setView(hasData ? 'tracker' : 'landing')} aria-label="Go home" className="flex items-center gap-3">
             <Logo size={28} />
-            <div className="leading-none">
+            <div className="leading-none text-left">
               <div className="font-semibold tracking-[0.14em] text-[12px] text-white">TRYWINTERARC</div>
-              <div className="text-[11px] tracking-wide text-slate-500 font-mono">{hasData ? `${start} → ${end}` : 'Oct 1 → Dec 31'}</div>
+              <div className="text-[11px] tracking-wide text-zinc-500 font-mono">{hasData ? (settings?.name ? `Hey ${settings.name} • ${start} → ${end}` : `${start} → ${end}`) : 'Oct 1 → Dec 31'}</div>
             </div>
-          </div>
+          </button>
           <nav className="flex items-center gap-2">
             {hasData && (<>
-              <button onClick={() => setView('tracker')} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'tracker' ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'}`}>Tracker</button>
-              <button onClick={() => setView('dashboard')} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'dashboard' ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'}`}>Dashboard</button>
+              <button onClick={() => setView('tracker')} aria-current={view === 'tracker'} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'tracker' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>Tracker</button>
+              <button onClick={() => setView('dashboard')} aria-current={view === 'dashboard'} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'dashboard' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>Dashboard</button>
             </>)}
-            <button onClick={startOnboarding} className="ml-1 px-4 py-2 rounded-full bg-white text-slate-900 font-semibold text-[13px] hover:bg-slate-100 transition">{hasData ? 'Edit arc' : 'Start your arc'}</button>
+            <button onClick={startOnboarding} className="ml-1 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-zinc-900 font-semibold text-[13px] hover:bg-zinc-100 transition"><Sparkles size={14} /> {hasData ? 'Edit arc' : 'Start your arc'}</button>
           </nav>
         </div>
       </header>
 
       {/* quote bar */}
       {hasData && (
-        <div className="max-w-[1120px] mx-auto px-4 sm:px-6 pt-3">
-          <div className="rounded-full bg-slate-900 border border-slate-800 px-4 py-2 flex items-center gap-3 overflow-hidden">
-            <span className="text-sky-400">❝</span>
-            <span className="text-sm text-slate-300 truncate">“{quote.q}”</span>
-            <span className="hidden sm:inline text-xs font-mono text-slate-500 whitespace-nowrap">— {quote.a}</span>
-            <span className="ml-auto hidden sm:inline text-[11px] font-mono text-slate-500">Day {stats.dayNum}</span>
-          </div>
+        <div className="max-w-[980px] mx-auto px-6 pt-3">
+          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="rounded-full bg-zinc-900 border border-zinc-800 px-4 py-2 flex items-center gap-3 overflow-hidden">
+            <span className="text-white">❝</span>
+            <span className="text-sm text-zinc-300 truncate">“{quote.q}”</span>
+            <span className="hidden sm:inline text-xs font-mono text-zinc-500 whitespace-nowrap">— {quote.a}</span>
+            <span className="ml-auto hidden sm:inline text-[11px] font-mono text-zinc-500">Day {stats.dayNum}</span>
+          </motion.div>
         </div>
       )}
 
       {view === 'landing' && (
         <main>
-          {/* HERO — premium, spacious, product-like */}
-          <section className="max-w-[980px] mx-auto px-6 pt-16 sm:pt-24 pb-12">
+          {/* HERO — premium, spacious, Three.js */}
+          <section id="main" className="relative max-w-[980px] mx-auto px-6 pt-16 sm:pt-24 pb-12 overflow-hidden">
+            <ThreeHero />
             <div className="flex justify-center">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-slate-800 bg-slate-900/60 text-[11px] font-mono tracking-widest text-slate-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" /> WINTER ARC 2026 — OCT 1 → DEC 31 — 92 DAYS
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/60 text-[11px] font-mono tracking-widest text-zinc-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> WINTER ARC 2026 — OCT 1 → DEC 31 — 92 DAYS
               </div>
             </div>
 
@@ -335,7 +358,7 @@ export default function App() {
                 <button onClick={startOnboarding} className="px-6 py-3 rounded-full bg-white text-slate-900 font-semibold text-[14px] hover:bg-slate-100 transition">Start your arc →</button>
                 <button onClick={() => { if (!hasData) startOnboarding(); else setView('tracker') }} className="px-6 py-3 rounded-full border border-slate-800 bg-transparent text-slate-300 font-medium text-[14px] hover:bg-slate-900 transition">View demo</button>
               </div>
-              <div className="mt-3 text-[11px] font-mono tracking-wide text-slate-600">Free & open source • trywinterarc.vercel.app • Install as PWA</div>
+              <div className="mt-3 inline-flex items-center gap-2 text-[11px] font-mono tracking-wide text-zinc-600"><Shield size={12} /> Free forever • No paywall • Install as PWA • trywinterarc.vercel.app</div>
             </div>
 
             {/* PRODUCT MOCK — not crowded, one clean window */}
@@ -384,23 +407,27 @@ export default function App() {
           </section>
 
           {/* FEATURE STRIP — thin, editorial, not boxed overload */}
-          <section className="max-w-[980px] mx-auto px-6 py-10 border-y border-slate-800/60">
-            <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-800">
+          <section className="max-w-[980px] mx-auto px-6 py-10 border-y border-zinc-800/60">
+            <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-zinc-800">
               <div className="py-6 md:py-2 md:pr-8">
-                <div className="text-[11px] font-mono tracking-widest text-slate-500">01 — NON-NEGOTIABLES</div>
+                <div className="text-[11px] font-mono tracking-widest text-zinc-500 flex items-center gap-1.5"><Zap size={12} /> 01 — NON-NEGOTIABLES</div>
                 <div className="mt-2 text-[14px] font-medium text-white">What actually changes you</div>
-                <div className="mt-2 text-[13px] leading-5 text-slate-500">Gym • Steps • Sleep • No sugar • Protein • Water • Deep work. Pick 3–5. Binary yes/no.</div>
+                <div className="mt-2 text-[13px] leading-5 text-zinc-500">Gym • Steps • Sleep • No sugar • Protein • Water • Deep work. Pick 3–5. Binary yes/no.</div>
               </div>
               <div className="py-6 md:py-2 md:px-8">
-                <div className="text-[11px] font-mono tracking-widest text-slate-500">02 — GOOD EXTRAS</div>
+                <div className="text-[11px] font-mono tracking-widest text-zinc-500">02 — GOOD EXTRAS</div>
                 <div className="mt-2 text-[14px] font-medium text-white">High-leverage adds</div>
-                <div className="mt-2 text-[13px] leading-5 text-slate-500">Reading • Meditation • Journaling • Sunlight • Phone limits.</div>
+                <div className="mt-2 text-[13px] leading-5 text-zinc-500">Reading • Meditation • Journaling • Sunlight • Phone limits.</div>
               </div>
               <div className="py-6 md:py-2 md:pl-8">
-                <div className="text-[11px] font-mono tracking-widest text-slate-500">03 — AESTHETIC (optional)</div>
+                <div className="text-[11px] font-mono tracking-widest text-zinc-500 flex items-center gap-1.5"><Snowflake size={12} /> 03 — AESTHETIC (optional)</div>
                 <div className="mt-2 text-[14px] font-medium text-white">You don’t need this to win</div>
-                <div className="mt-2 text-[13px] leading-5 text-slate-500">Cold shower • 5am wake • 100 pushups. Discipline reps, not requirements.</div>
+                <div className="mt-2 text-[13px] leading-5 text-zinc-500">Cold shower • 5am wake • 100 pushups. Discipline reps, not requirements.</div>
               </div>
+            </div>
+            <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900/40 px-5 py-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-white"><span className="w-6 h-6 rounded-full bg-white grid place-items-center"><Check size={14} className="text-zinc-900" /></span> Free forever — no paywall, no pro plan</div>
+              <div className="text-xs font-mono text-zinc-500">Open source (MIT) • 100% local • Export anytime</div>
             </div>
           </section>
 
@@ -604,41 +631,50 @@ export default function App() {
       )}
 
       {showOnboarding && (
-        <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-slate-950/70 backdrop-blur">
-          <div className="w-full max-w-[760px] max-h-[90vh] overflow-auto rounded-[20px] bg-slate-900 border border-slate-800 p-6">
-            <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={28} /><span className="font-black tracking-widest text-sm text-white">SET UP YOUR ARC</span> <span className="text-xs font-mono text-slate-500">Step {onboardStep}/2</span></div><button onClick={() => setShowOnboarding(false)} className="w-8 h-8 grid place-items-center rounded-full bg-slate-800 text-slate-400">✕</button></div>
+        <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-slate-950/70 backdrop-blur" role="dialog" aria-modal="true">
+          <div className="w-full max-w-[760px] max-h-[90vh] overflow-auto rounded-[20px] bg-zinc-900 border border-zinc-800 p-6">
+            <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={28} /><span className="font-semibold tracking-[0.14em] text-sm text-white">SET UP YOUR ARC</span> <span className="text-xs font-mono text-zinc-500">Step {onboardStep}/3</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-8 h-8 grid place-items-center rounded-full bg-zinc-800 text-zinc-400">✕</button></div>
             {onboardStep === 1 && (
               <div className="mt-6">
-                <h2 className="text-xl font-bold text-white">When is your Winter Arc?</h2>
-                <p className="text-sm text-slate-400 mt-1">Defaults Oct 1 → Dec 31 (92 days). Adjust if late — finish stays Dec 31. Jan 1 graduation.</p>
-                <div className="mt-4 grid sm:grid-cols-2 gap-4"><label className="space-y-1"><span className="text-xs font-mono text-slate-400">START</span><input type="date" value={tmpStart} onChange={e => setTmpStart(e.target.value)} className="w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2.5 text-white" /></label><label className="space-y-1"><span className="text-xs font-mono text-slate-400">END</span><input type="date" value={tmpEnd} onChange={e => setTmpEnd(e.target.value)} className="w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2.5 text-white" /></label></div>
-                <div className="mt-3 rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 flex items-center justify-between"><span className="text-sm text-slate-300">Duration</span><span className="font-mono text-sky-400">{daysBetween(tmpStart, tmpEnd)} days</span></div>
-                <div className="mt-6 flex justify-end"><button onClick={() => setOnboardStep(2)} className="px-6 py-2.5 rounded-full bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold">Next — pick habits →</button></div>
+                <h2 className="text-xl font-bold text-white">What should we call you?</h2>
+                <p className="text-sm text-zinc-400 mt-1">Personalises your arc. Stored locally only.</p>
+                <input value={tmpName} onChange={e => setTmpName(e.target.value)} placeholder="e.g., Ashutosh" className="mt-4 w-full rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-3 text-white placeholder:text-zinc-500" autoFocus />
+                <div className="mt-3 text-xs font-mono text-zinc-500">You can skip — we’ll just say “your arc”.</div>
+                <div className="mt-6 flex justify-end"><button onClick={() => setOnboardStep(2)} className="px-6 py-2.5 rounded-full bg-white text-zinc-900 font-semibold">Continue →</button></div>
               </div>
             )}
             {onboardStep === 2 && (
               <div className="mt-6">
+                <h2 className="text-xl font-bold text-white">When is your Winter Arc?</h2>
+                <p className="text-sm text-zinc-400 mt-1">Defaults Oct 1 → Dec 31 (92 days). Adjust if late — finish stays Dec 31. Jan 1 graduation.</p>
+                <div className="mt-4 grid sm:grid-cols-2 gap-4"><label className="space-y-1"><span className="text-xs font-mono text-zinc-400">START</span><input type="date" value={tmpStart} onChange={e => setTmpStart(e.target.value)} className="w-full rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-2.5 text-white" /></label><label className="space-y-1"><span className="text-xs font-mono text-zinc-400">END</span><input type="date" value={tmpEnd} onChange={e => setTmpEnd(e.target.value)} className="w-full rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-2.5 text-white" /></label></div>
+                <div className="mt-3 rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-2 flex items-center justify-between"><span className="text-sm text-zinc-300">Duration</span><span className="font-mono text-white">{daysBetween(tmpStart, tmpEnd)} days</span></div>
+                <div className="mt-6 flex items-center justify-between"><button onClick={() => setOnboardStep(1)} className="px-5 py-2.5 rounded-full bg-zinc-800 text-zinc-200 border border-zinc-700">← Back</button><button onClick={() => setOnboardStep(3)} className="px-6 py-2.5 rounded-full bg-white text-zinc-900 font-semibold">Next — pick habits →</button></div>
+              </div>
+            )}
+            {onboardStep === 3 && (
+              <div className="mt-6">
                 <h2 className="text-xl font-bold text-white">Pick your habits</h2>
-                <p className="text-sm text-slate-400 mt-1">Choose 3–10 max. Shown in 3 tiers.</p>
+                <p className="text-sm text-zinc-400 mt-1">Choose 3–10 max. Shown in 3 tiers. Free forever.</p>
                 <div className="mt-2 text-xs font-mono text-amber-300">Selected: {tmpSelected.size} {tmpSelected.size > 10 && '⚠ over 10'}</div>
-                {['non-neg', 'extra', 'aesthetic'].map(tier => (<div key={tier} className="mt-5"><div className="text-[11px] font-mono tracking-widest text-slate-400">{TIER_LABELS[tier]}</div><div className="mt-2 grid sm:grid-cols-2 gap-2">{PRESETS.filter(p => p.tier === tier).map(p => { const sel = tmpSelected.has(p.id); return (<button key={p.id} onClick={() => setTmpSelected(s => { const n = new Set(s); sel ? n.delete(p.id) : n.add(p.id); return n })} className={`text-left rounded-xl border p-3 flex gap-3 items-start transition ${sel ? 'bg-sky-500/15 border-sky-500/40' : 'bg-slate-950 border-slate-800 hover:border-slate-700'}`}><span className="text-lg">{p.icon}</span><span className="flex-1"><span className={`text-sm font-medium block ${sel ? 'text-white' : 'text-slate-200'}`}>{p.name}</span><span className="text-xs text-slate-500">{p.desc}</span></span><span className={`mt-1 w-5 h-5 rounded-full grid place-items-center border text-xs ${sel ? 'bg-sky-500 border-sky-500 text-slate-950' : 'border-slate-600 text-transparent'}`}>✓</span></button>) })}</div></div>))}
-                <div className="mt-6 rounded-xl bg-slate-950 border border-slate-800 p-3"><div className="text-xs font-mono tracking-widest text-slate-400">CUSTOM HABIT</div><div className="mt-2 flex gap-2"><input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g., No sugar, 3L water" className="flex-1 rounded-xl bg-slate-900 border border-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500" onKeyDown={e => e.key === 'Enter' && addCustom()} /><button onClick={addCustom} className="px-4 py-2 rounded-full bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium border border-slate-700">Add</button></div>{customList.length > 0 && (<div className="mt-3 flex flex-wrap gap-2">{customList.map(c => (<span key={c.id} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/15 border border-sky-500/30 text-sm text-sky-200">{c.name} <button onClick={() => { setCustomList(prev => prev.filter(x => x.id !== c.id)); setTmpSelected(s => { const n = new Set(s); n.delete(c.id); return n }) }} className="text-sky-300">✕</button></span>))}</div>)}</div>
-                <div className="mt-6 flex items-center justify-between"><button onClick={() => setOnboardStep(1)} className="px-5 py-2.5 rounded-full bg-slate-800 text-slate-200 border border-slate-700">← Back</button><button onClick={completeOnboarding} className="px-6 py-2.5 rounded-full bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold">Save Arc • {tmpSelected.size} habits</button></div>
+                {['non-neg', 'extra', 'aesthetic'].map(tier => (<div key={tier} className="mt-5"><div className="text-[11px] font-mono tracking-widest text-zinc-400">{TIER_LABELS[tier]}</div><div className="mt-2 grid sm:grid-cols-2 gap-2">{PRESETS.filter(p => p.tier === tier).map(p => { const sel = tmpSelected.has(p.id); return (<button key={p.id} onClick={() => setTmpSelected(s => { const n = new Set(s); sel ? n.delete(p.id) : n.add(p.id); return n })} className={`text-left rounded-xl border p-3 flex gap-3 items-start transition ${sel ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}><span className="text-lg">{p.icon}</span><span className="flex-1"><span className={`text-sm font-medium block ${sel ? 'text-zinc-900' : 'text-zinc-200'}`}>{p.name}</span><span className="text-xs text-zinc-500">{p.desc}</span></span><span className={`mt-1 w-5 h-5 rounded-full grid place-items-center border text-xs ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'border-zinc-600 text-transparent'}`}><Check size={12} /></span></button>) })}</div></div>))}
+                <div className="mt-6 rounded-xl bg-zinc-950 border border-zinc-800 p-3"><div className="text-xs font-mono tracking-widest text-zinc-400">CUSTOM HABIT</div><div className="mt-2 flex gap-2"><input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g., No sugar, 3L water" className="flex-1 rounded-xl bg-zinc-900 border border-zinc-800 px-3 py-2 text-sm text-white placeholder:text-zinc-500" onKeyDown={e => e.key === 'Enter' && addCustom()} /><button onClick={addCustom} className="px-4 py-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium border border-zinc-700">Add</button></div>{customList.length > 0 && (<div className="mt-3 flex flex-wrap gap-2">{customList.map(c => (<span key={c.id} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-zinc-200 text-sm text-zinc-900">{c.name} <button onClick={() => { setCustomList(prev => prev.filter(x => x.id !== c.id)); setTmpSelected(s => { const n = new Set(s); n.delete(c.id); return n }) }} className="text-zinc-500">✕</button></span>))}</div>)}</div>
+                <div className="mt-6 flex items-center justify-between"><button onClick={() => setOnboardStep(2)} className="px-5 py-2.5 rounded-full bg-zinc-800 text-zinc-200 border border-zinc-700">← Back</button><button onClick={completeOnboarding} className="px-6 py-2.5 rounded-full bg-white text-zinc-900 font-bold">Save Arc • {tmpSelected.size} habits</button></div>
               </div>
             )}
           </div>
         </div>
       )}
 
-      <footer className="max-w-[980px] mx-auto px-6 py-10 border-t border-slate-800/60 mt-8">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] font-mono tracking-wide text-slate-600">
-          <span>© 2026 TryWinterArc — Lock in while they coast.</span>
+      <footer className="max-w-[980px] mx-auto px-6 py-10 border-t border-zinc-800/60 mt-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] font-mono tracking-wide text-zinc-600">
+          <span className="flex items-center gap-1.5">© 2026 TryWinterArc • Built by <a href="https://ashutosh887.in" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-white transition">Ashutosh Jha <ExternalLink size={10} /></a> • Lock in while they coast.</span>
           <span className="flex items-center gap-3">
-            <a href="https://github.com/ashutosh887/winterarc" className="hover:text-slate-400">GitHub</a>
+            <a href="https://github.com/ashutosh887/winterarc" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-zinc-300"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.85v2.74c0 .26.18.58.69.48A10 10 0 0 0 12 2z" /></svg> GitHub</a>
             <span className="opacity-30">•</span>
             <span>trywinterarc.vercel.app</span>
             <span className="opacity-30">•</span>
-            <span>100% local</span>
+            <span className="flex items-center gap-1"><Trophy size={12} /> Free forever</span>
           </span>
         </div>
       </footer>

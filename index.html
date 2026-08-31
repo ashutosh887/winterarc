@@ -4,21 +4,77 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#020617" />
-    <meta name="description" content="TryWinterArc — Disappear for 90 days. Come back unrecognizable. Oct 1 → Dec 31. 92 days. No restart. Free, open source, 100% local." />
-    <title>TryWinterArc — Lock in while they coast. ❄️</title>
+    <meta name="color-scheme" content="dark" />
+    <meta name="author" content="Ashutosh Jha" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="description" content="TryWinterArc — Disappear for 90 days. Come back unrecognizable. Oct 1 → Dec 31. 92 days. No restart. Free, open source, 100% local PWA tracker." />
+    <link rel="canonical" href="https://trywinterarc.vercel.app/" />
+    <title>TryWinterArc — Lock in while they coast.</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://trywinterarc.vercel.app" />
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TryWinterArc" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://trywinterarc.vercel.app/" />
     <meta property="og:title" content="TryWinterArc — Lock in while they coast." />
     <meta property="og:description" content="Disappear for 90 days. Come back unrecognizable. Oct 1 → Dec 31 (92 days). Free, open source, PWA, 100% local." />
-    <meta property="og:image" content="/og-image.png" />
-    <meta property="og:url" content="https://trywinterarc.app" />
+    <meta property="og:image" content="https://trywinterarc.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="TryWinterArc — 92-day Winter Arc tracker" />
+
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@ashutosh887" />
+    <meta name="twitter:creator" content="@ashutosh887" />
     <meta name="twitter:title" content="TryWinterArc — Lock in while they coast." />
-    <meta name="twitter:description" content="92 days. No excuses. TryWinterArc — free, open source, offline." />
-    <meta name="twitter:image" content="/og-image.png" />
+    <meta name="twitter:description" content="92 days. No excuses. Free, open source, offline. Disappear for 90 days." />
+    <meta name="twitter:image" content="https://trywinterarc.vercel.app/og-image.png" />
+    <meta name="twitter:image:alt" content="TryWinterArc tracker preview" />
+
+    <!-- JSON-LD for AEO/SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "TryWinterArc",
+      "applicationCategory": "LifestyleApplication",
+      "operatingSystem": "Web",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "description": "Free, open source Winter Arc tracker — Oct 1 to Dec 31 (92 days). No login, 100% local, PWA.",
+      "url": "https://trywinterarc.vercel.app/",
+      "author": { "@type": "Person", "name": "Ashutosh Jha", "url": "https://ashutosh887.in" },
+      "isAccessibleForFree": true
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "What is Winter Arc?", "acceptedAnswer": { "@type": "Answer", "text": "Winter Arc is a 92-day self-improvement challenge from Oct 1 to Dec 31. You pick 3-5 daily habits and track them with no restart — missed days stay visible." } },
+        { "@type": "Question", "name": "Why 92 days not 90?", "acceptedAnswer": { "@type": "Answer", "text": "Oct (31) + Nov (30) + Dec (31) = 92 days. Jan 1 is graduation." } },
+        { "@type": "Question", "name": "Is my data private?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. 100% localStorage, no account, no cloud. Export JSON/CSV and share only if you choose." } },
+        { "@type": "Question", "name": "Is it free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Free forever, open source (MIT). No paywall." } },
+        { "@type": "Question", "name": "Can I backfill past days?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Pick any date in your arc and toggle habits — the grid stays truthful." } }
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "TryWinterArc",
+      "url": "https://trywinterarc.vercel.app/",
+      "potentialAction": { "@type": "SearchAction", "target": "https://trywinterarc.vercel.app/?q={search_term_string}", "query-input": "required name=search_term_string" }
+    }
+    </script>
   </head>
   <body>
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-3 focus:py-2 focus:rounded-full focus:bg-white focus:text-slate-900">Skip to content</a>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
