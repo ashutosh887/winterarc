@@ -181,6 +181,7 @@ export default function App() {
   const [promptOpen, setPromptOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [streakInfo, setStreakInfo] = useState(false)
+  const [weeksOpen, setWeeksOpen] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
   const [backupBeforeReset, setBackupBeforeReset] = useState(true)
   const [promptCopied, setPromptCopied] = useState(false)
@@ -379,7 +380,13 @@ export default function App() {
       : c.metric === 'streak' ? stats.bestStreak
       : stats.pct
     const target = c.target || stats.scheduled || totalDays
-    return { ...c, value, target, unlock: value >= target, pct: Math.min(100, Math.round((value / target) * 100)) }
+    const isPct = c.metric === 'pct'
+    return {
+      ...c, value, target, isPct,
+      unlock: value >= target,
+      pct: Math.min(100, Math.round((value / target) * 100)),
+      progress: isPct ? `${value}% of ${target}%` : `${value} of ${target}`,
+    }
   }), [stats, totalDays])
 
   function toggleHabit(date, habitId) {
@@ -463,58 +470,92 @@ export default function App() {
   function drawShareCard({ achievement } = {}) {
     const canvas = canvasRef.current; if (!canvas) return
     const ctx = canvas.getContext('2d')
-    const W = 1200, H = 630
+    const W = 1200, H = 630, PAD = 64
     canvas.width = W; canvas.height = H
+
     ctx.fillStyle = '#09090b'; ctx.fillRect(0, 0, W, H)
     ctx.strokeStyle = '#27272a'; ctx.lineWidth = 2; ctx.strokeRect(1, 1, W - 2, H - 2)
 
-    ctx.fillStyle = '#fafafa'; ctx.font = '700 22px ui-sans-serif,system-ui'
-    ctx.fillText('WINTERARC', 64, 78)
-    ctx.fillStyle = '#71717a'; ctx.font = '400 18px ui-monospace,monospace'
-    ctx.fillText(site.tagline, 210, 78)
-
-    if (achievement) {
-      ctx.fillStyle = '#fafafa'; ctx.font = '800 62px ui-sans-serif,system-ui'
-      ctx.fillText(achievement.label, 64, 176)
-      ctx.fillStyle = '#a1a1aa'; ctx.font = '400 24px ui-sans-serif,system-ui'
-      ctx.fillText(achievement.desc, 64, 214)
-    } else {
-      ctx.fillStyle = '#fafafa'; ctx.font = '800 62px ui-sans-serif,system-ui'
-      ctx.fillText(`Day ${stats.dayNum} of ${totalDays}`, 64, 176)
-      ctx.fillStyle = '#a1a1aa'; ctx.font = '400 24px ui-sans-serif,system-ui'
-      ctx.fillText(effectiveHabits.map(h => h.name).join(', ').slice(0, 78), 64, 214)
+    const box = (x, y, w, h, r, fill) => {
+      ctx.fillStyle = fill
+      ctx.beginPath()
+      if (typeof ctx.roundRect === 'function') ctx.roundRect(x, y, w, h, r)
+      else ctx.rect(x, y, w, h)
+      ctx.fill()
     }
 
-    const stat = (label, value, x) => {
-      ctx.fillStyle = '#71717a'; ctx.font = '500 14px ui-monospace,monospace'
-      ctx.fillText(label.toUpperCase(), x, 268)
-      ctx.fillStyle = '#fafafa'; ctx.font = '700 38px ui-sans-serif,system-ui'
-      ctx.fillText(value, x, 310)
-    }
-    stat('perfect days', `${stats.perfect}`, 64)
-    stat('completion', `${stats.pct}%`, 304)
-    stat('streak', `${stats.streak}`, 544)
-    stat('best streak', `${stats.bestStreak}`, 784)
+    ctx.fillStyle = '#fafafa'; ctx.font = '700 21px ui-sans-serif,system-ui'
+    ctx.fillText('WINTERARC', PAD, 70)
+    const markWidth = ctx.measureText('WINTERARC').width
+    ctx.fillStyle = '#52525b'; ctx.font = '400 17px ui-monospace,monospace'
+    ctx.fillText(site.tagline, PAD + markWidth + 18, 70)
 
-    const cols = 31, cell = 26, gap = 8, gx = 64, gy = 358
+    ctx.fillStyle = '#fafafa'; ctx.font = '800 58px ui-sans-serif,system-ui'
+    ctx.fillText(achievement ? achievement.label : `Day ${stats.dayNum} of ${totalDays}`, PAD, 148)
+    ctx.fillStyle = '#a1a1aa'; ctx.font = '400 21px ui-sans-serif,system-ui'
+    const sub = achievement ? achievement.desc : effectiveHabits.map(h => h.name).join(', ')
+    ctx.fillText(sub.length > 74 ? `${sub.slice(0, 71)}...` : sub, PAD, 184)
+
+    const cells = [
+      ['PERFECT', `${stats.perfect}`],
+      ['COMPLETION', `${stats.pct}%`],
+      ['STREAK', `${stats.streak}`],
+      ['BEST', `${stats.bestStreak}`],
+    ]
+    const cw = (W - PAD * 2 - 12 * 3) / 4
+    cells.forEach(([label, value], i) => {
+      const x = PAD + i * (cw + 12)
+      box(x, 214, cw, 88, 16, '#18181b')
+      ctx.fillStyle = '#71717a'; ctx.font = '500 12px ui-monospace,monospace'
+      ctx.fillText(label, x + 18, 244)
+      ctx.fillStyle = '#fafafa'; ctx.font = '700 34px ui-sans-serif,system-ui'
+      ctx.fillText(value, x + 18, 284)
+    })
+
+    // the grid reflows so any arc length lands inside the same band
+    const gy = 330, bandH = 170, gap = 5
+    const n = allDates.length
+    let cols = Math.ceil(Math.sqrt(n * (W - PAD * 2) / bandH))
+    cols = Math.max(14, Math.min(cols, n))
+    let cell = Math.floor((W - PAD * 2 - gap * (cols - 1)) / cols)
+    let rows = Math.ceil(n / cols)
+    while (rows * (cell + gap) > bandH && cell > 4) {
+      cell -= 1
+      cols = Math.floor((W - PAD * 2 + gap) / (cell + gap))
+      rows = Math.ceil(n / cols)
+    }
+    const gridW = cols * cell + (cols - 1) * gap
+    const gx = Math.round((W - gridW) / 2)
+
     allDates.forEach((d, i) => {
       const e = entries[d] || {}
       const done = effectiveHabits.filter(h => e[h.id]).length
-      const future = d > today
-      const color = future ? '#18181b' : done === 0 ? '#3f1d1d' : done === effectiveHabits.length ? '#fafafa' : '#a1a1aa'
-      const x = gx + (i % cols) * (cell + gap)
-      const y = gy + Math.floor(i / cols) * (cell + gap)
-      ctx.fillStyle = color
-      ctx.beginPath()
-      if (typeof ctx.roundRect === 'function') ctx.roundRect(x, y, cell, cell, 6)
-      else ctx.rect(x, y, cell, cell)
-      ctx.fill()
+      let color
+      if (!isActiveDay(d)) color = '#151517'
+      else if (d > today) color = '#27272a'
+      else if (done === 0) color = '#4c1d1d'
+      else if (done === effectiveHabits.length) color = '#fafafa'
+      else color = '#a1a1aa'
+      box(gx + (i % cols) * (cell + gap), gy + Math.floor(i / cols) * (cell + gap), cell, cell, Math.min(5, cell / 3), color)
     })
 
-    ctx.fillStyle = '#a1a1aa'; ctx.font = 'italic 19px ui-sans-serif,system-ui'
-    ctx.fillText(quote.slice(0, 76), 64, 552)
-    ctx.fillStyle = '#52525b'; ctx.font = '500 15px ui-monospace,monospace'
-    ctx.fillText('trywinterarc.vercel.app', 64, 588)
+    ctx.fillStyle = '#d4d4d8'; ctx.font = '400 20px ui-sans-serif,system-ui'
+    ctx.fillText(quote.length > 78 ? `${quote.slice(0, 75)}...` : quote, PAD, 552)
+
+    ctx.fillStyle = '#52525b'; ctx.font = '500 14px ui-monospace,monospace'
+    ctx.fillText(site.domain.replace('https://', ''), PAD, 586)
+    const legend = [['#fafafa', 'all'], ['#a1a1aa', 'some'], ['#4c1d1d', 'none']]
+    let lx = W - PAD
+    for (let i = legend.length - 1; i >= 0; i--) {
+      const [c, label] = legend[i]
+      const tw = ctx.measureText(label).width
+      lx -= tw
+      ctx.fillStyle = '#52525b'
+      ctx.fillText(label, lx, 586)
+      lx -= 10
+      box(lx - 10, 575, 10, 10, 3, c)
+      lx -= 26
+    }
     return canvas.toDataURL('image/png')
   }
   function shareCardBlob({ achievement } = {}) {
@@ -1435,22 +1476,54 @@ export default function App() {
                   <div className="text-center"><div className="text-3xl font-bold text-white">{stats.pct}%</div><div className="text-xs font-mono text-zinc-500">{stats.totalChecked}/{stats.totalPossible}</div></div>
                 </Ring>
               </div>
-              <div className="mt-4 text-sm text-zinc-300">{stats.perfect} perfect of {totalDays} · {stats.perfectPct}%</div>
+              <div className="mt-4 text-sm text-zinc-400">{stats.perfect} perfect {stats.perfect === 1 ? "day" : "days"} of {stats.scheduled} scheduled</div>
               <div className="mt-auto pt-4 w-full grid grid-cols-2 gap-2">
                 <button onClick={() => shareToX()} className="h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Share X</button>
                 <button onClick={() => downloadImage()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">Download PNG</button>
               </div>
             </div>
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col">
-              <div className="text-[11px] font-mono tracking-widest text-zinc-500">Weekly</div>
-              <div className="mt-4 space-y-2">
-                {(() => { const weeks = []; for (let i = 0; i < allDates.length; i += 7)weeks.push(allDates.slice(i, i + 7)); return weeks.map((week, wi) => {
-                  const perfectInWeek = week.filter(d => isActiveDay(d) && effectiveHabits.length && effectiveHabits.every(h => (entries[d] || {})[h.id])).length
-                  const checks = week.filter(isActiveDay).reduce((acc, d) => acc + effectiveHabits.filter(h => (entries[d] || {})[h.id]).length, 0)
-                  const sched = week.filter(isActiveDay); const pct = sched.length * effectiveHabits.length ? Math.round((checks / (sched.length * effectiveHabits.length)) * 100) : 0
-                  return (<div key={wi} className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 flex items-center gap-3"><span className="text-xs font-mono text-zinc-500 w-9 shrink-0">W{wi + 1}</span><span className="text-xs text-zinc-400 flex-1">{week[0]?.slice(5)} to {week[week.length - 1]?.slice(5)}</span><span className="text-xs font-mono text-white">{perfectInWeek}/{week.filter(isActiveDay).length}</span><span className="text-xs font-mono text-zinc-400 w-10 text-right">{pct}%</span></div>)
-                }) })()}
+              <div className="flex items-center justify-between">
+                <div className="text-[11px] font-mono tracking-widest text-zinc-500">Weekly</div>
+                <button onClick={() => setWeeksOpen(v => !v)} aria-expanded={weeksOpen} className="text-[11px] font-mono text-zinc-500 hover:text-white transition">
+                  {weeksOpen ? 'Chart' : 'List'}
+                </button>
               </div>
+              {(() => {
+                const weeks = []
+                for (let i = 0; i < allDates.length; i += 7) weeks.push(allDates.slice(i, i + 7))
+                const rows = weeks.map((week, wi) => {
+                  const sched = week.filter(isActiveDay)
+                  const checks = sched.reduce((acc, d) => acc + effectiveHabits.filter(h => (entries[d] || {})[h.id]).length, 0)
+                  const perfect = sched.filter(isPerfectDay).length
+                  const pct = sched.length * effectiveHabits.length ? Math.round((checks / (sched.length * effectiveHabits.length)) * 100) : 0
+                  return { wi, week, sched, perfect, pct }
+                })
+                if (!weeksOpen) {
+                  return (
+                    <div className="mt-4 flex-1 flex items-end gap-[3px] min-h-[120px]">
+                      {rows.map(r => (
+                        <div key={r.wi} title={`W${r.wi + 1}: ${r.perfect}/${r.sched.length} perfect, ${r.pct}%`} className="flex-1 flex flex-col justify-end h-full">
+                          <div className="w-full rounded-sm bg-white transition-all" style={{ height: `${Math.max(2, r.pct)}%` }} />
+                        </div>
+                      ))}
+                    </div>
+                  )
+                }
+                return (
+                  <div className="mt-4 flex-1 space-y-1.5 max-h-[240px] overflow-y-auto overscroll-contain">
+                    {rows.map(r => (
+                      <div key={r.wi} className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 flex items-center gap-3">
+                        <span className="text-xs font-mono text-zinc-500 w-9 shrink-0">W{r.wi + 1}</span>
+                        <span className="flex-1 h-1.5 rounded-full bg-zinc-800 overflow-hidden"><span className="block h-full bg-white" style={{ width: `${r.pct}%` }} /></span>
+                        <span className="text-xs font-mono text-white tabular-nums shrink-0">{r.perfect}/{r.sched.length}</span>
+                        <span className="text-xs font-mono text-zinc-500 w-10 text-right tabular-nums shrink-0">{r.pct}%</span>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
+              <div className="mt-3 text-[10px] font-mono text-zinc-500">{Math.ceil(allDates.length / 7)} weeks</div>
             </div>
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col">
               <div className="text-[11px] font-mono tracking-widest text-zinc-500">Quote of the day</div>
@@ -1491,13 +1564,16 @@ export default function App() {
                     </div>
                   </div>
                   <div className={`mt-3 text-[11px] font-mono ${a.unlock ? 'text-zinc-700' : 'text-zinc-500'}`}>
-                    {a.unlock ? 'Unlocked' : `${a.value}/${a.target} · ${a.pct}%`}
+                    {a.unlock ? 'Unlocked' : a.progress}
                   </div>
-                  <div className="mt-auto pt-3 flex gap-1.5">
-                    <button disabled={!a.unlock} onClick={() => shareToX(a)} className={`flex-1 h-10 rounded-full text-xs font-semibold border transition ${a.unlock ? 'bg-zinc-900 border-zinc-900 text-white hover:bg-zinc-800' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>X</button>
-                    <button disabled={!a.unlock} onClick={() => shareToWhatsApp(a)} className={`flex-1 h-10 rounded-full text-xs border transition ${a.unlock ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>WhatsApp</button>
-                    <button disabled={!a.unlock} onClick={() => downloadImage(a)} className={`px-3 h-10 rounded-full text-xs border transition ${a.unlock ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>PNG</button>
-                  </div>
+                  {a.unlock && (
+                    <button
+                      onClick={() => nativeShare(a)}
+                      className={`mt-auto pt-3 self-start inline-flex items-center gap-1.5 text-xs font-medium ${a.unlock ? 'text-zinc-700 hover:text-zinc-900' : 'text-zinc-600'}`}
+                    >
+                      <Share2 size={12} /> Share
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
