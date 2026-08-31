@@ -278,22 +278,21 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-30 backdrop-blur bg-[#020617]/80 border-b border-slate-800">
-        <div className="max-w-[1120px] mx-auto px-4 sm:px-6 h-[56px] flex items-center justify-between">
+      <header className="sticky top-0 z-30 backdrop-blur bg-[#020617]/70 border-b border-slate-800/60">
+        <div className="max-w-[980px] mx-auto px-6 h-[60px] flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView(hasData ? 'tracker' : 'landing')}>
-            <Logo size={34} />
+            <Logo size={28} />
             <div className="leading-none">
-              <div className="font-black tracking-[0.18em] text-[13px] text-white">TRYWINTERARC</div>
-              <div className="text-[11px] tracking-wide text-slate-400 font-mono">{hasData ? `${start} → ${end} • ${totalDays}d` : 'Oct 1 → Dec 31 • 92 days'}</div>
+              <div className="font-semibold tracking-[0.14em] text-[12px] text-white">TRYWINTERARC</div>
+              <div className="text-[11px] tracking-wide text-slate-500 font-mono">{hasData ? `${start} → ${end}` : 'Oct 1 → Dec 31'}</div>
             </div>
-            <span className="hidden md:inline ml-2 text-[10px] px-2 py-1 rounded-full bg-sky-500/15 text-sky-300 border border-sky-500/30 font-mono">PWA • LOCAL ONLY • OSS</span>
           </div>
-          <nav className="flex items-center gap-1 sm:gap-2">
+          <nav className="flex items-center gap-2">
             {hasData && (<>
-              <button onClick={() => setView('tracker')} className={`px-3 py-1.5 rounded-full text-sm font-medium transition ${view === 'tracker' ? 'bg-white text-slate-900' : 'text-slate-300 hover:bg-slate-800'}`}>Tracker</button>
-              <button onClick={() => setView('dashboard')} className={`px-3 py-1.5 rounded-full text-sm font-medium transition ${view === 'dashboard' ? 'bg-white text-slate-900' : 'text-slate-300 hover:bg-slate-800'}`}>Dashboard</button>
+              <button onClick={() => setView('tracker')} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'tracker' ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'}`}>Tracker</button>
+              <button onClick={() => setView('dashboard')} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'dashboard' ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'}`}>Dashboard</button>
             </>)}
-            <button onClick={startOnboarding} className="ml-1 px-3.5 py-1.5 rounded-full bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-sm">{hasData ? 'Edit Arc' : 'Start your arc'}</button>
+            <button onClick={startOnboarding} className="ml-1 px-4 py-2 rounded-full bg-white text-slate-900 font-semibold text-[13px] hover:bg-slate-100 transition">{hasData ? 'Edit arc' : 'Start your arc'}</button>
           </nav>
         </div>
       </header>
@@ -312,51 +311,112 @@ export default function App() {
 
       {view === 'landing' && (
         <main>
-          <section className="max-w-[1120px] mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-10 text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs font-mono text-slate-400">❄️ WINTER ARC 2026 • 92 DAYS • NO EXCUSES</div>
-            <h1 className="mt-6 font-black tracking-tight leading-[0.9] text-[42px] sm:text-[64px] lg:text-[78px]">
-              <span className="block text-white">Disappear for</span>
-              <span className="block text-sky-400">90 days.</span>
-              <span className="block text-white">Come back</span>
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-200">unrecognizable.</span>
-            </h1>
-            <p className="mt-3 text-lg font-medium text-sky-300">Lock in while they coast.</p>
-            <p className="mt-4 max-w-[640px] mx-auto text-slate-400 leading-relaxed">Oct 1 → Dec 31: a 90-day lock-in where you track fitness, nutrition, sleep, work/learning, screen time, bad habits, reading, mindfulness & daily discipline. No login. 100% local. Install as PWA. Export to LLMs.</p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <button onClick={startOnboarding} className="px-7 py-3 rounded-full bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold">Start your arc →</button>
-              <button onClick={() => { if (!hasData) startOnboarding(); else setView('tracker') }} className="px-7 py-3 rounded-full bg-slate-800 hover:bg-slate-700 text-white font-semibold border border-slate-700">View demo tracker</button>
+          {/* HERO — premium, spacious, product-like */}
+          <section className="max-w-[980px] mx-auto px-6 pt-16 sm:pt-24 pb-12">
+            <div className="flex justify-center">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-slate-800 bg-slate-900/60 text-[11px] font-mono tracking-widest text-slate-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" /> WINTER ARC 2026 — OCT 1 → DEC 31 — 92 DAYS
+              </div>
             </div>
-            <div className="mt-4 text-xs font-mono text-slate-500">Free & open source • Offline • trywinterarc.app • Data never leaves your device</div>
 
-            <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-              <div className="rounded-2xl bg-slate-900 border border-slate-800 p-5">
-                <div className="text-xs font-mono tracking-widest text-emerald-400">NON-NEGOTIABLES</div>
-                <div className="text-sm text-slate-400 mt-1">Things that change your life</div>
-                <ul className="mt-3 space-y-1.5 text-sm text-slate-200"><li>💪 Gym • 🚶 Steps • 😴 Sleep</li><li>🥗 No sugar/junk • 🍳 Protein</li><li>💧 Water • 🎯 Deep work • 🚫 Bad habits</li></ul>
+            <div className="mt-10 text-center">
+              <h1 className="font-[800] tracking-[-0.04em] leading-[0.88] text-[44px] sm:text-[68px] text-white">
+                Disappear for<br />
+                <span className="text-slate-500">90 days.</span><br />
+                Come back<br />
+                <span className="text-white">unrecognizable.</span>
+              </h1>
+              <p className="mt-4 text-[18px] font-medium text-slate-400">Lock in while they coast.</p>
+              <p className="mt-5 max-w-[560px] mx-auto text-[15px] leading-6 text-slate-500">
+                A minimal, private tracker for your 90-day lock-in. No account. No cloud.<br className="hidden sm:block" /> Your data lives on your device — forever.
+              </p>
+
+              <div className="mt-8 flex items-center justify-center gap-3">
+                <button onClick={startOnboarding} className="px-6 py-3 rounded-full bg-white text-slate-900 font-semibold text-[14px] hover:bg-slate-100 transition">Start your arc →</button>
+                <button onClick={() => { if (!hasData) startOnboarding(); else setView('tracker') }} className="px-6 py-3 rounded-full border border-slate-800 bg-transparent text-slate-300 font-medium text-[14px] hover:bg-slate-900 transition">View demo</button>
               </div>
-              <div className="rounded-2xl bg-slate-900 border border-slate-800 p-5">
-                <div className="text-xs font-mono tracking-widest text-sky-400">GOOD EXTRAS</div>
-                <div className="text-sm text-slate-400 mt-1">High leverage adds</div>
-                <ul className="mt-3 space-y-1.5 text-sm text-slate-200"><li>📚 Reading • 🧘 Meditation</li><li>📓 Journaling • ☀️ Morning sunlight</li><li>📵 Phone limits • 🌙 No phone before bed</li></ul>
-              </div>
-              <div className="rounded-2xl bg-slate-900 border border-slate-800 p-5 opacity-80">
-                <div className="text-xs font-mono tracking-widest text-slate-400">AESTHETIC STUFF</div>
-                <div className="text-sm text-slate-400 mt-1">Optional</div>
-                <ul className="mt-3 space-y-1.5 text-sm text-slate-200"><li>🚿 Cold showers • ⏰ 5 AM wake</li><li>🔥 100 pushups</li></ul>
-                <div className="mt-3 text-xs text-amber-300/80">You don’t need this tier to win.</div>
-              </div>
+              <div className="mt-3 text-[11px] font-mono tracking-wide text-slate-600">Free & open source • trywinterarc.vercel.app • Install as PWA</div>
             </div>
-            <div className="mt-8 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 p-6 text-left">
-              <div className="font-semibold text-white">How it works</div>
-              <ol className="mt-3 grid sm:grid-cols-3 gap-4 text-sm text-slate-300 list-decimal list-inside"><li>Pick 3–10 habits (cap 10)</li><li>Check daily — backfill past days</li><li>Share achievements on X / WhatsApp / Image</li></ol>
+
+            {/* PRODUCT MOCK — not crowded, one clean window */}
+            <div className="mt-14 rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-950">
+                <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-slate-800" /><span className="w-3 h-3 rounded-full bg-slate-800" /><span className="w-3 h-3 rounded-full bg-slate-800" /></div>
+                <div className="text-[11px] font-mono tracking-widest text-slate-500">TRYWINTERARC — PREVIEW</div>
+                <div className="text-[11px] font-mono text-slate-600">92 days</div>
+              </div>
+              <div className="grid md:grid-cols-[280px_1fr] gap-0">
+                <div className="p-5 border-r border-slate-800 bg-slate-950/50">
+                  <div className="text-[11px] font-mono tracking-widest text-slate-500">TODAY — OCT 14</div>
+                  <div className="mt-3 space-y-2">
+                    {[
+                      { n: 'Gym 45m', d: true },
+                      { n: 'Sleep 7.5h', d: true },
+                      { n: 'No sugar', d: true },
+                      { n: 'Deep work 90m', d: false },
+                      { n: 'Reading 10p', d: false },
+                    ].map(r => (
+                      <div key={r.n} className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-sm ${r.d ? 'bg-white text-slate-900 border-white' : 'bg-slate-900 text-slate-400 border-slate-800'}`}>
+                        <span className={`w-4 h-4 rounded-full border grid place-items-center text-[11px] ${r.d ? 'bg-slate-900 text-white border-slate-900' : 'border-slate-700'}`}>{r.d ? '✓' : ''}</span>
+                        {r.n}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 flex items-center justify-between text-[11px] font-mono"><span className="text-slate-500">3 / 5</span><span className="text-slate-400">60% — keep going</span></div>
+                </div>
+                <div className="p-5">
+                  <div className="flex items-center justify-between"><span className="text-[11px] font-mono tracking-widest text-slate-500">OCT → DEC GRID</span><span className="text-[11px] font-mono text-slate-600">Missed stays red • No restart</span></div>
+                  <div className="mt-4 grid grid-cols-14 gap-1.5">
+                    {Array.from({ length: 42 }, (_, i) => {
+                      const v = i < 11 ? 'perfect' : i < 14 ? 'partial' : i < 16 ? 'miss' : i < 28 ? 'future' : 'empty'
+                      const cls = v === 'perfect' ? 'bg-white border-white' : v === 'partial' ? 'bg-slate-400 border-slate-400' : v === 'miss' ? 'bg-red-500/20 border-red-500/30' : 'bg-slate-800 border-slate-800'
+                      return <div key={i} className={`aspect-square rounded-md border ${cls}`} />
+                    })}
+                  </div>
+                  <div className="mt-4 flex gap-3 text-[11px] font-mono text-slate-600">
+                    <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-white border border-white" /> perfect</span>
+                    <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-slate-400" /> partial</span>
+                    <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-red-500/20 border border-red-500/30" /> missed</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
-          <section className="max-w-[1120px] mx-auto px-4 sm:px-6 pb-16">
-            <div className="rounded-[20px] border border-slate-800 bg-slate-900/50 p-4 sm:p-6">
-              <div className="flex items-center justify-between"><div className="font-mono text-xs text-slate-400">PREVIEW • Oct 1–7</div><div className="text-xs text-slate-500">Backfill enabled</div></div>
-              <div className="mt-4 grid grid-cols-7 gap-2">
-                {Array.from({ length: 7 }, (_, i) => (<div key={i} className={`rounded-xl border p-3 ${i < 4 ? 'bg-emerald-500/10 border-emerald-500/20' : i === 4 ? 'bg-amber-500/10 border-amber-500/20' : 'bg-slate-800 border-slate-700'}`}><div className="text-xs font-mono text-slate-400">Oct {i + 1}</div><div className={`mt-2 h-2 rounded ${i < 4 ? 'bg-emerald-500' : i === 4 ? 'bg-amber-500' : 'bg-slate-600'}`} /><div className="mt-2 text-[11px] font-semibold text-white">{i < 4 ? 'PERFECT' : i === 4 ? '6/8' : '—'}</div></div>))}
+
+          {/* FEATURE STRIP — thin, editorial, not boxed overload */}
+          <section className="max-w-[980px] mx-auto px-6 py-10 border-y border-slate-800/60">
+            <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-800">
+              <div className="py-6 md:py-2 md:pr-8">
+                <div className="text-[11px] font-mono tracking-widest text-slate-500">01 — NON-NEGOTIABLES</div>
+                <div className="mt-2 text-[14px] font-medium text-white">What actually changes you</div>
+                <div className="mt-2 text-[13px] leading-5 text-slate-500">Gym • Steps • Sleep • No sugar • Protein • Water • Deep work. Pick 3–5. Binary yes/no.</div>
               </div>
+              <div className="py-6 md:py-2 md:px-8">
+                <div className="text-[11px] font-mono tracking-widest text-slate-500">02 — GOOD EXTRAS</div>
+                <div className="mt-2 text-[14px] font-medium text-white">High-leverage adds</div>
+                <div className="mt-2 text-[13px] leading-5 text-slate-500">Reading • Meditation • Journaling • Sunlight • Phone limits.</div>
+              </div>
+              <div className="py-6 md:py-2 md:pl-8">
+                <div className="text-[11px] font-mono tracking-widest text-slate-500">03 — AESTHETIC (optional)</div>
+                <div className="mt-2 text-[14px] font-medium text-white">You don’t need this to win</div>
+                <div className="mt-2 text-[13px] leading-5 text-slate-500">Cold shower • 5am wake • 100 pushups. Discipline reps, not requirements.</div>
+              </div>
+            </div>
+          </section>
+
+          {/* HOW IT WORKS — numbered, airy */}
+          <section className="max-w-[980px] mx-auto px-6 py-12">
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                { n: '01', t: 'Pick habits', d: 'Choose 3–10. We suggest 4–5. Add custom ones. Keep it binary.' },
+                { n: '02', t: 'Check daily', d: 'Backfill past days honestly. Missed stays red. No restart — the grid is truth.' },
+                { n: '03', t: 'Share & export', d: 'PNG cards for X/WA, achievements, CSV/JSON + LLM prompt.' },
+              ].map(s => (
+                <div key={s.n} className="flex gap-4">
+                  <div className="text-[13px] font-mono tracking-widest text-sky-400 pt-1">{s.n}</div>
+                  <div><div className="text-[14px] font-semibold text-white">{s.t}</div><div className="mt-1 text-[13px] leading-5 text-slate-500">{s.d}</div></div>
+                </div>
+              ))}
             </div>
           </section>
         </main>
@@ -570,9 +630,17 @@ export default function App() {
         </div>
       )}
 
-      <footer className="max-w-[1120px] mx-auto px-4 sm:px-6 py-10 text-center text-xs font-mono text-slate-500 border-t border-slate-800/60 mt-8">
-        <div>TryWinterArc — Lock in while they coast. ❄️ — Disappear for 90 days. Come back unrecognizable.</div>
-        <div className="mt-1">Oct 1 → Dec 31 (92 days) • Jan 1 graduation • No restart • 100% local • <a href="https://github.com" className="underline decoration-slate-600 hover:text-slate-300">Open source</a> • PWA</div>
+      <footer className="max-w-[980px] mx-auto px-6 py-10 border-t border-slate-800/60 mt-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] font-mono tracking-wide text-slate-600">
+          <span>© 2026 TryWinterArc — Lock in while they coast.</span>
+          <span className="flex items-center gap-3">
+            <a href="https://github.com/ashutosh887/winterarc" className="hover:text-slate-400">GitHub</a>
+            <span className="opacity-30">•</span>
+            <span>trywinterarc.vercel.app</span>
+            <span className="opacity-30">•</span>
+            <span>100% local</span>
+          </span>
+        </div>
       </footer>
     </div>
   )
