@@ -343,7 +343,7 @@ export default function App() {
     })
 
     ctx.fillStyle = '#a1a1aa'; ctx.font = 'italic 19px ui-sans-serif,system-ui'
-    ctx.fillText(quote.q.slice(0, 76), 64, 552)
+    ctx.fillText(quote.slice(0, 76), 64, 552)
     ctx.fillStyle = '#52525b'; ctx.font = '500 15px ui-monospace,monospace'
     ctx.fillText('trywinterarc.vercel.app', 64, 588)
     return canvas.toDataURL('image/png')
@@ -397,10 +397,10 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950">
-      <header className="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+    <div className="min-h-[100dvh] bg-zinc-950">
+      <header className="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800 pt-[env(safe-area-inset-top)]">
         <div className="max-w-[1040px] mx-auto px-5 sm:px-6 h-14 flex items-center justify-between gap-3">
-          <button onClick={() => goTo('landing')} aria-label="WinterArc home" className="flex items-center gap-2.5 shrink-0">
+          <button onClick={() => goTo('landing')} aria-label="WinterArc home" className="flex h-full items-center gap-2.5 shrink-0">
             <Logo size={26} />
             <span className="font-semibold tracking-[0.16em] text-[13px] text-white">WINTERARC</span>
           </button>
@@ -422,11 +422,13 @@ export default function App() {
               <Star size={13} /> {stars === null ? 'Star' : stars}
             </a>
 
-            <button onClick={startOnboarding} className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold text-[13px] transition whitespace-nowrap">
-              {hasData ? 'Edit arc' : 'Start your arc'} <ArrowRight size={14} />
+            <button onClick={startOnboarding} className="inline-flex shrink-0 items-center gap-1.5 h-9 px-3 sm:px-4 rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold text-[13px] transition whitespace-nowrap">
+              <span className="sm:hidden">{hasData ? 'Edit' : 'Start'}</span>
+              <span className="hidden sm:inline">{hasData ? 'Edit arc' : 'Start your arc'}</span>
+              <ArrowRight size={14} />
             </button>
 
-            <button onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" aria-expanded={mobileMenuOpen} className="lg:hidden w-9 h-9 grid place-items-center rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
+            <button onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" aria-expanded={mobileMenuOpen} className="lg:hidden shrink-0 w-11 h-11 grid place-items-center rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
               {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
@@ -435,8 +437,8 @@ export default function App() {
 
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="lg:hidden sticky top-14 z-20 bg-zinc-950 border-b border-zinc-800">
-            <div className="max-w-[1040px] mx-auto px-5 sm:px-6 py-3 grid grid-cols-2 gap-2">
+          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="lg:hidden sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-20 bg-zinc-950 border-b border-zinc-800">
+            <div className="max-w-[1040px] mx-auto px-5 sm:px-6 py-3 grid grid-cols-2 gap-2 [&>*:last-of-type]:col-span-2">
               {navLinks.map(l => (
                 <button
                   key={l.label}
@@ -457,8 +459,7 @@ export default function App() {
       {hasData && view === 'tracker' && (
         <div className="max-w-[1040px] mx-auto px-5 sm:px-6 pt-4">
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 flex items-center gap-3">
-            <span className="text-sm text-zinc-300 truncate">{quote.q}</span>
-            <span className="hidden sm:inline text-xs font-mono text-zinc-500 whitespace-nowrap">- {quote.a}</span>
+            <span className="text-sm text-zinc-300 line-clamp-2 sm:truncate">{quote}</span>
             <span className="ml-auto hidden md:inline text-[11px] font-mono text-zinc-500">Day {stats.dayNum}/{totalDays}</span>
           </motion.div>
         </div>
@@ -474,8 +475,8 @@ export default function App() {
           <div className="max-w-[1040px] mx-auto px-5 sm:px-6 pt-3">
             <div className={`rounded-2xl border px-4 py-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-mono ${perfect ? 'bg-white text-zinc-900 border-white' : done > 0 ? 'bg-zinc-900 text-zinc-200 border-zinc-800' : 'bg-zinc-900/60 text-zinc-500 border-zinc-800'}`}>
               <span className="font-medium">Yesterday {prev}:</span>
-              <span className="font-semibold">{perfect ? 'Perfect. Streak lives' : `${done}/${effectiveHabits.length} done`}</span>
-              <button onClick={() => setSelectedDate(prev)} className="ml-auto text-[11px] px-3 py-2 -my-1 rounded-full underline decoration-zinc-600 hover:text-white transition">View</button>
+              <span className="font-semibold">{perfect ? 'Perfect' : `${done}/${effectiveHabits.length} done`}</span>
+              <button onClick={() => setSelectedDate(prev)} className="ml-auto text-xs px-4 h-9 inline-flex items-center rounded-full underline decoration-zinc-600 hover:text-white transition">View</button>
             </div>
           </div>
         )
@@ -514,7 +515,7 @@ export default function App() {
                 <div className="text-[11px] font-mono text-zinc-600">Honest grid</div>
               </div>
               <div className="grid md:grid-cols-[300px_1fr] gap-0">
-                <div className="p-5 border-r border-zinc-800 bg-zinc-950/40">
+                <div className="p-5 border-b md:border-b-0 md:border-r border-zinc-800 bg-zinc-950/40">
                   <div className="text-[11px] font-mono tracking-widest text-zinc-500">Day 14 · 3 of 5 done</div>
                   <div className="mt-3 space-y-2">
                     {[
@@ -553,7 +554,7 @@ export default function App() {
             </div>
           </section>
 
-          <section id="features" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-14">
+          <section id="features" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-[calc(3.5rem+env(safe-area-inset-top))]">
             <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><LayoutGrid size={12} /> Features</div>
             <h2 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Stay honest.</h2>
             <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">A grid that stays honest, a ring per habit, and a share card you can ignore.</p>
@@ -609,14 +610,14 @@ export default function App() {
                     <div className="text-[11px] font-mono tracking-widest text-zinc-500">WINTERARC · Day 34/92</div>
                     <div className="mt-2 text-sm font-semibold text-white">18 perfect · 64% · streak 5</div>
                     <div className="mt-2 h-2 rounded-full bg-zinc-800 overflow-hidden"><div className="h-full w-[64%] bg-white" /></div>
-                    <div className="mt-3 text-xs italic text-zinc-500">"You are what you do when no one is clapping."</div>
+                    <div className="mt-3 text-xs text-zinc-500">Nobody is watching in October. That is the point.</div>
                   </div>
                 </div>
               </div>
             </div>
           </section>
 
-          <section id="how" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-14">
+          <section id="how" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-[calc(3.5rem+env(safe-area-inset-top))]">
             <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={stagger}>
               <motion.div variants={fadeUp} className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Zap size={12} /> How it works</motion.div>
               <motion.h2 variants={fadeUp} className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Set it up once. Then it is ten seconds a day.</motion.h2>
@@ -660,7 +661,7 @@ export default function App() {
                       return <span key={hid} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700">{h ? <><HabitIcon name={h.icon} size={11} /> {h.name}</> : hid}</span>
                     })}
                   </div>
-                  <button onClick={() => applyTemplate(t.id)} className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition self-start">Use template <ArrowRight size={14} /></button>
+                  <button onClick={() => applyTemplate(t.id)} className="mt-4 inline-flex items-center gap-1.5 px-5 h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition self-start">Use template <ArrowRight size={14} /></button>
                 </motion.div>
               ))}
             </motion.div>
@@ -693,8 +694,7 @@ export default function App() {
               <h2 className="font-semibold text-white flex items-center gap-2"><Star size={14} /> Quote of the day</h2>
               <span className="text-xs font-mono text-zinc-500">{QUOTES.length} quotes</span>
             </div>
-            <blockquote className="mt-3 text-[15px] leading-6 text-zinc-200">{quote.q}</blockquote>
-            <div className="mt-2 text-xs font-mono text-zinc-500">{quote.a}</div>
+            <blockquote className="mt-3 text-[15px] leading-6 text-zinc-200">{quote}</blockquote>
           </div>
         </main>
       )}
@@ -822,7 +822,7 @@ export default function App() {
               <div key={c.title} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col">
                 <div className="text-sm font-semibold text-white">{c.title}</div>
                 <p className="mt-1.5 text-[13px] leading-5 text-zinc-500 flex-1">{c.body}</p>
-                <a href={c.href} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1.5 self-start px-4 py-2 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-200 text-sm hover:bg-zinc-800 hover:border-zinc-700 transition">
+                <a href={c.href} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1.5 self-start px-5 h-11 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-200 text-sm hover:bg-zinc-800 hover:border-zinc-700 transition">
                   {c.label} <ExternalLink size={12} />
                 </a>
               </div>
@@ -841,7 +841,7 @@ export default function App() {
             <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 text-white grid place-items-center mx-auto"><ArrowRight size={18} /></div>
             <h2 className="mt-4 text-[22px] font-bold tracking-tight text-white">No arc yet</h2>
             <p className="mt-2 text-sm text-zinc-500">Start your arc to see the tracker. It takes 30 seconds.</p>
-            <Button onClick={startOnboarding} className="mt-6">Start your arc <ArrowRight size={14} /></Button>
+            <Button onClick={startOnboarding} className="mt-6 h-11 px-5">Start your arc <ArrowRight size={14} /></Button>
           </div>
         </main>
       )}
@@ -850,7 +850,7 @@ export default function App() {
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
           <motion.div initial="hidden" animate="show" variants={stagger} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex items-center gap-3">
-              <Ring pct={Math.round((stats.dayNum / totalDays) * 100)} size={54}><span className="text-xs font-mono font-bold text-white">{stats.dayNum}/{totalDays}</span></Ring>
+              <Ring pct={Math.round((stats.dayNum / totalDays) * 100)} size={56}><span className="text-[10px] font-mono font-bold tabular-nums text-white">{stats.dayNum}/{totalDays}</span></Ring>
               <div className="min-w-0"><div className="text-[11px] font-mono tracking-widest text-zinc-500">Day</div><div className="text-sm text-zinc-300">{stats.remaining} left</div><div className="text-[10px] font-mono text-zinc-500 truncate">{start} to {end}</div></div>
             </motion.div>
             <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex items-center gap-3">
@@ -863,14 +863,14 @@ export default function App() {
             </motion.div>
             <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex flex-col justify-center gap-2">
               <div className="grid grid-cols-3 gap-1.5">
-                <button onClick={() => shareToX()} className="py-2 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition">X Post</button>
-                <button onClick={() => shareToWhatsApp()} className="py-2 rounded-full bg-emerald-500 text-white font-semibold text-xs hover:bg-emerald-600 transition">WhatsApp</button>
-                <button onClick={() => downloadImage()} className="py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">PNG</button>
+                <button onClick={() => shareToX()} className="h-11 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition">X Post</button>
+                <button onClick={() => shareToWhatsApp()} className="h-11 rounded-full bg-emerald-500 text-white font-semibold text-xs hover:bg-emerald-600 transition">WhatsApp</button>
+                <button onClick={() => downloadImage()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">PNG</button>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => nativeShare()} className="flex-1 py-1.5 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700 hover:bg-zinc-700 transition">More</button>
-                <button onClick={exportJSON} className="px-3 py-1.5 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700 hover:bg-zinc-700 transition">JSON</button>
-                <button onClick={exportCSV} className="px-3 py-1.5 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700 hover:bg-zinc-700 transition">CSV</button>
+                <button onClick={() => nativeShare()} className="flex-1 h-10 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700 hover:bg-zinc-700 transition">More</button>
+                <button onClick={exportJSON} className="px-3 h-10 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700 hover:bg-zinc-700 transition">JSON</button>
+                <button onClick={exportCSV} className="px-3 h-10 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700 hover:bg-zinc-700 transition">CSV</button>
               </div>
             </motion.div>
           </motion.div>
@@ -882,7 +882,7 @@ export default function App() {
                 <Ring pct={dailyPct} size={44} stroke={3}><span className="text-[11px] font-mono font-bold text-zinc-300">{dailyPct}%</span></Ring>
               </div>
               <div className="text-xs text-zinc-500 -mt-1">Pick any past date. Rings update live.</div>
-              <input type="date" value={selectedDate} min={start} max={end} onChange={e => setSelectedDate(e.target.value)} className="mt-3 w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white" />
+              <input type="date" value={selectedDate} min={start} max={end} onChange={e => setSelectedDate(e.target.value)} className="mt-3 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 min-h-11 text-base sm:text-sm text-white" />
               <div className="mt-4 space-y-2">
                 {effectiveHabits.map(h => {
                   const done = !!(entries[selectedDate] || {})[h.id]
@@ -898,14 +898,14 @@ export default function App() {
               </div>
               <div className="mt-3 flex items-center justify-between text-xs font-mono"><span className="text-zinc-400">{Object.keys(entries[selectedDate] || {}).length}/{effectiveHabits.length} done</span><span className={`${effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'text-white inline-flex items-center gap-1' : 'text-zinc-500'}`}>{effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? <><Check size={12} /> Perfect day</> : 'keep going'}</span></div>
               <div className="mt-3 flex gap-2">
-                <button onClick={() => { const e = entries[selectedDate] || {}; const allDone = effectiveHabits.every(h => e[h.id]); const next = {}; effectiveHabits.forEach(h => next[h.id] = !allDone ? true : false); setEntries(prev => ({ ...prev, [selectedDate]: !allDone ? next : {} })) }} className="flex-1 py-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium border border-zinc-700 transition">{effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'Clear day' : 'Mark all done'}</button>
-                <button onClick={() => setSelectedDate(todayYMD())} className="px-4 py-2 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Today</button>
+                <button onClick={() => { const e = entries[selectedDate] || {}; const allDone = effectiveHabits.every(h => e[h.id]); const next = {}; effectiveHabits.forEach(h => next[h.id] = !allDone ? true : false); setEntries(prev => ({ ...prev, [selectedDate]: !allDone ? next : {} })) }} className="flex-1 h-11 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium border border-zinc-700 transition">{effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'Clear day' : 'Mark all done'}</button>
+                <button onClick={() => setSelectedDate(todayYMD())} className="px-5 h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Today</button>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 sm:p-4">
               <div className="flex items-center justify-between"><div className="text-[15px] font-semibold text-white">{totalDays} day grid</div><div className="text-xs font-mono text-zinc-500">Missed stays visible · No restart</div></div>
-              <div className="mt-4 grid grid-cols-7 sm:grid-cols-14 gap-1.5">
+              <div className="mt-4 grid grid-cols-7 gap-1 sm:gap-1.5">
                 {allDates.map(d => {
                   const e = entries[d] || {}; const done = effectiveHabits.filter(h => e[h.id]).length; const perfect = effectiveHabits.length > 0 && done === effectiveHabits.length; const isToday = d === todayYMD(); const isSelected = d === selectedDate; const isFuture = d > todayYMD()
                   let bg = 'bg-zinc-800 border-zinc-700'
@@ -913,19 +913,19 @@ export default function App() {
                   else if (perfect) bg = 'bg-white border-white'
                   else if (done > 0) bg = 'bg-zinc-300 border-zinc-300'
                   else if (d < todayYMD()) bg = 'bg-red-500/15 border-red-500/20'
-                  return (<button key={d} onClick={() => setSelectedDate(d)} className={`relative aspect-square rounded-lg border flex flex-col items-center justify-center transition hover:scale-[1.04] ${bg} ${isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-zinc-900' : ''}`} title={`${d} - ${done}/${effectiveHabits.length}`}><span className={`text-[10px] font-mono ${perfect ? 'text-zinc-900' : done > 0 ? 'text-zinc-900' : d < todayYMD() ? 'text-red-300' : 'text-zinc-500'}`}>{d.slice(8, 10)}</span><span className={`text-[9px] font-mono ${perfect ? 'text-zinc-700' : 'text-zinc-500'}`}>{done}/{effectiveHabits.length}</span>{isToday && <span className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full border border-zinc-900" />}</button>)
+                  return (<button key={d} onClick={() => setSelectedDate(d)} className={`relative aspect-square rounded-md border flex flex-col items-center justify-center transition active:scale-95 hover:scale-[1.04] ${bg} ${isSelected ? 'ring-2 ring-inset ring-white' : ''}`} aria-label={`${d}, ${done} of ${effectiveHabits.length} done`} title={`${d} - ${done}/${effectiveHabits.length}`}><span className={`text-[11px] font-mono tabular-nums ${perfect ? 'text-zinc-900' : done > 0 ? 'text-zinc-900' : d < todayYMD() ? 'text-red-300' : 'text-zinc-500'}`}>{d.slice(8, 10)}</span><span className={`hidden sm:block text-[9px] font-mono ${perfect ? 'text-zinc-700' : 'text-zinc-500'}`}>{done}/{effectiveHabits.length}</span>{isToday && <span className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full border border-zinc-900" />}</button>)
                 })}
               </div>
               <div className="mt-6">
                 <div className="text-[11px] font-mono tracking-widest text-zinc-500">Habit rings</div>
-                <div className="mt-3 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
                   {effectiveHabits.map(h => {
                     const hits = allDates.filter(d => (entries[d] || {})[h.id]).length
                     const pct = Math.round((hits / totalDays) * 100)
                     return (
-                      <div key={h.id} className="rounded-xl border border-zinc-800 bg-zinc-950 p-2.5 flex flex-col items-center gap-1.5 hover:border-zinc-700 transition">
+                      <div key={h.id} className="rounded-xl border border-zinc-800 bg-zinc-950 p-2.5 flex flex-col items-center gap-1.5">
                         <Ring pct={pct} size={56} stroke={4}><span className="text-zinc-200"><HabitIcon name={h.icon} size={16} /></span></Ring>
-                        <div className="text-[11px] text-center leading-tight text-zinc-200 line-clamp-2">{h.name}</div>
+                        <div className="text-[11px] text-center leading-tight text-zinc-200 line-clamp-2" title={h.name}>{h.name}</div>
                         <div className="text-[11px] font-mono text-zinc-400">{pct}% · {hits}/{totalDays}</div>
                       </div>
                     )
@@ -936,7 +936,7 @@ export default function App() {
           </div>
 
           <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2"><div className="text-[15px] font-semibold text-white">Export and LLM prompt</div><div className="flex items-center gap-2"><button onClick={() => navigator.clipboard.writeText(llmPrompt)} className="px-3 py-1.5 rounded-full bg-white text-zinc-900 text-xs font-semibold hover:bg-zinc-100 transition">Copy prompt</button><button onClick={resetAll} className="px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-xs font-semibold hover:bg-red-500/15 transition">Reset</button></div></div>
+            <div className="flex flex-wrap items-center justify-between gap-2"><div className="text-[15px] font-semibold text-white">Export and LLM prompt</div><div className="flex items-center gap-2"><button onClick={() => navigator.clipboard.writeText(llmPrompt)} className="px-4 h-9 rounded-full bg-white text-zinc-900 text-xs font-semibold hover:bg-zinc-100 transition">Copy prompt</button><button onClick={resetAll} className="px-4 h-9 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-xs font-semibold hover:bg-red-500/15 transition">Reset</button></div></div>
             <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 overflow-auto"><pre className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-words font-mono">{llmPrompt}</pre></div>
             <div className="mt-2 text-xs text-zinc-500">Paste with exported JSON into your LLM. Data stays local until you paste.</div>
           </div>
@@ -955,8 +955,8 @@ export default function App() {
               </div>
               <div className="mt-4 text-sm text-zinc-300">{stats.perfect} perfect of {totalDays} · {stats.perfectPct}%</div>
               <div className="mt-auto pt-4 w-full grid grid-cols-2 gap-2">
-                <button onClick={() => shareToX()} className="py-2 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Share X</button>
-                <button onClick={() => downloadImage()} className="py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">Download PNG</button>
+                <button onClick={() => shareToX()} className="h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Share X</button>
+                <button onClick={() => downloadImage()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">Download PNG</button>
               </div>
             </div>
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col">
@@ -966,28 +966,27 @@ export default function App() {
                   const perfectInWeek = week.filter(d => effectiveHabits.length && effectiveHabits.every(h => (entries[d] || {})[h.id])).length
                   const checks = week.reduce((acc, d) => acc + effectiveHabits.filter(h => (entries[d] || {})[h.id]).length, 0)
                   const pct = week.length * effectiveHabits.length ? Math.round((checks / (week.length * effectiveHabits.length)) * 100) : 0
-                  return (<div key={wi} className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 flex items-center gap-3"><span className="text-xs font-mono text-zinc-500 w-14">W{wi + 1}</span><span className="text-xs text-zinc-400 flex-1">{week[0]?.slice(5)} → {week[week.length - 1]?.slice(5)}</span><span className="text-xs font-mono text-white">{perfectInWeek}/7</span><span className="text-xs font-mono text-zinc-400 w-10 text-right">{pct}%</span></div>)
+                  return (<div key={wi} className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 flex items-center gap-3"><span className="text-xs font-mono text-zinc-500 w-9 shrink-0">W{wi + 1}</span><span className="text-xs text-zinc-400 flex-1">{week[0]?.slice(5)} → {week[week.length - 1]?.slice(5)}</span><span className="text-xs font-mono text-white">{perfectInWeek}/7</span><span className="text-xs font-mono text-zinc-400 w-10 text-right">{pct}%</span></div>)
                 }) })()}
               </div>
             </div>
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col">
               <div className="text-[11px] font-mono tracking-widest text-zinc-500">Quote of the day</div>
               <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-                <div className="text-sm text-zinc-200">{quote.q}</div>
-                <div className="text-xs font-mono text-zinc-500 mt-1">- {quote.a}</div>
+                <div className="text-sm leading-6 text-zinc-200">{quote}</div>
               </div>
               <div className="mt-4 flex-1 flex flex-col space-y-3 text-sm">
                 <div className="flex items-center justify-between"><span className="text-zinc-400 flex items-center gap-1.5"><User size={12} /> Name</span>
                   <span className="flex items-center gap-1.5">
-                    <input value={settings?.name ?? ''} onChange={e => setSettings(s => ({ ...s, name: e.target.value || null }))} placeholder="Add name" className="w-28 h-9 rounded-full bg-zinc-950 border border-zinc-800 px-3 text-xs text-white placeholder:text-zinc-500 text-right" />
-                    <button onClick={() => setShowOnboarding(true)} className="p-2.5 rounded-full bg-zinc-800 hover:bg-zinc-700 transition"><Settings size={12} className="text-zinc-400" /></button>
+                    <input value={settings?.name ?? ''} onChange={e => setSettings(s => ({ ...s, name: e.target.value || null }))} placeholder="Add name" className="w-28 h-10 rounded-full bg-zinc-950 border border-zinc-800 px-3 text-base sm:text-xs text-white placeholder:text-zinc-500 text-right" />
+                    <button onClick={startOnboarding} aria-label="Edit arc" className="w-10 h-10 grid place-items-center rounded-full bg-zinc-800 hover:bg-zinc-700 transition"><Settings size={12} className="text-zinc-400" /></button>
                   </span>
                 </div>
                 <div className="flex justify-between"><span className="text-zinc-400">Habits</span><span className="text-white font-mono">{effectiveHabits.length}</span></div>
                 <div className="flex justify-between"><span className="text-zinc-400">Range</span><span className="text-white font-mono text-xs truncate ml-2">{start} to {end}</span></div>
                 <div className="flex justify-between"><span className="text-zinc-400">Best streak</span><span className="text-white font-mono">{stats.bestStreak}</span></div>
-                <div className="mt-auto pt-3 flex gap-2"><button onClick={exportJSON} className="flex-1 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">JSON</button><button onClick={exportCSV} className="flex-1 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">CSV</button></div>
-                <button onClick={resetAll} className="w-full py-2 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-sm hover:bg-red-500/15 transition">Reset</button>
+                <div className="mt-auto pt-3 flex gap-2"><button onClick={exportJSON} className="flex-1 h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">JSON</button><button onClick={exportCSV} className="flex-1 h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">CSV</button></div>
+                <button onClick={resetAll} className="w-full h-11 rounded-full bg-red-500/10 border border-red-500/15 text-red-300 text-sm hover:bg-red-500/15 transition">Reset</button>
               </div>
             </div>
           </div>
@@ -1013,9 +1012,9 @@ export default function App() {
                     {a.unlock ? 'Unlocked' : `${a.value}/${a.target} · ${a.pct}%`}
                   </div>
                   <div className="mt-auto pt-3 flex gap-1.5">
-                    <button disabled={!a.unlock} onClick={() => shareToX(a)} className={`flex-1 py-2 rounded-full text-xs font-semibold border transition ${a.unlock ? 'bg-zinc-900 border-zinc-900 text-white hover:bg-zinc-800' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>X</button>
-                    <button disabled={!a.unlock} onClick={() => shareToWhatsApp(a)} className={`flex-1 py-2 rounded-full text-xs border transition ${a.unlock ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>WhatsApp</button>
-                    <button disabled={!a.unlock} onClick={() => downloadImage(a)} className={`px-3 py-2 rounded-full text-xs border transition ${a.unlock ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>PNG</button>
+                    <button disabled={!a.unlock} onClick={() => shareToX(a)} className={`flex-1 h-10 rounded-full text-xs font-semibold border transition ${a.unlock ? 'bg-zinc-900 border-zinc-900 text-white hover:bg-zinc-800' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>X</button>
+                    <button disabled={!a.unlock} onClick={() => shareToWhatsApp(a)} className={`flex-1 h-10 rounded-full text-xs border transition ${a.unlock ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>WhatsApp</button>
+                    <button disabled={!a.unlock} onClick={() => downloadImage(a)} className={`px-3 h-10 rounded-full text-xs border transition ${a.unlock ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>PNG</button>
                   </div>
                 </div>
               ))}
@@ -1028,7 +1027,7 @@ export default function App() {
       {showOnboarding && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowOnboarding(false)} className="fixed inset-0 z-50 grid place-items-center p-4 sm:p-6 bg-zinc-950/80 backdrop-blur-xl" role="dialog" aria-modal="true">
           <motion.div initial={{ opacity: 0, scale: 0.97, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 8 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} onClick={e => e.stopPropagation()} className="w-full max-w-[760px] max-h-[90dvh] overflow-y-auto overscroll-contain rounded-3xl bg-zinc-900 border border-zinc-800 p-4 sm:p-6 shadow-2xl">
-            <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={26} /><span className="font-semibold tracking-[0.16em] text-[13px] text-white">Set up your arc</span> <span className="text-xs font-mono text-zinc-500">Step {onboardStep}/2</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-10 h-10 grid place-items-center rounded-full bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition"><X size={14} /></button></div>
+            <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={26} /><span className="font-semibold tracking-[0.16em] text-[13px] text-white">Set up your arc</span> <span className="text-xs font-mono text-zinc-500">Step {onboardStep}/2</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-11 h-11 shrink-0 grid place-items-center rounded-full bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition"><X size={14} /></button></div>
             {onboardStep === 1 && (
               <div className="mt-6">
                 <h2 className="text-[22px] font-bold tracking-tight text-white">Name and dates</h2>
@@ -1065,7 +1064,7 @@ export default function App() {
 
       <AnimatePresence>
         {showScrollTop && (
-          <motion.button initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top" className="fixed right-5 z-40 w-11 h-11 rounded-full border border-zinc-800 bg-zinc-900/90 backdrop-blur text-zinc-300 grid place-items-center shadow-lg hover:bg-zinc-800 hover:text-white hover:border-zinc-700 transition" style={{ bottom: 'calc(1.25rem + env(safe-area-inset-bottom))' }}>
+          <motion.button initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top" className="fixed right-5 z-40 w-11 h-11 rounded-full border border-zinc-800 bg-zinc-900/90 backdrop-blur text-zinc-300 grid place-items-center shadow-lg hover:bg-zinc-800 hover:text-white hover:border-zinc-700 transition" style={{ bottom: showInstallHint ? 'calc(9.5rem + env(safe-area-inset-bottom))' : 'calc(1.25rem + env(safe-area-inset-bottom))' }}>
             <ArrowUp size={16} />
           </motion.button>
         )}
@@ -1084,13 +1083,13 @@ export default function App() {
                 <div className="text-[13px] font-semibold text-white">Keep it on your home screen</div>
                 <div className="mt-0.5 text-[12px] leading-5 text-zinc-500">Installs like an app, opens offline, still no account.</div>
                 <div className="mt-3 flex gap-2">
-                  <button onClick={runInstall} className="h-9 px-4 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">
+                  <button onClick={runInstall} className="h-11 px-5 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">
                     {installEvent ? 'Install' : 'How'}
                   </button>
-                  <button onClick={dismissInstallHint} className="h-9 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 text-[13px] hover:text-white transition">Not now</button>
+                  <button onClick={dismissInstallHint} className="h-11 px-5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 text-[13px] hover:text-white transition">Not now</button>
                 </div>
               </div>
-              <button onClick={dismissInstallHint} aria-label="Dismiss" className="w-8 h-8 shrink-0 grid place-items-center rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition"><X size={14} /></button>
+              <button onClick={dismissInstallHint} aria-label="Dismiss" className="w-10 h-10 shrink-0 grid place-items-center rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition"><X size={14} /></button>
             </div>
           </motion.div>
         )}
@@ -1112,16 +1111,16 @@ export default function App() {
             </div>
             <div className="grid grid-cols-2 gap-x-10 gap-y-2 sm:ml-auto text-[13px]">
               <div className="space-y-2">
-                <button onClick={() => goTo('about')} className="block text-zinc-400 hover:text-white transition">What is a winter arc</button>
-                <button onClick={() => goTo('templates')} className="block text-zinc-400 hover:text-white transition">Templates</button>
-                <button onClick={() => goTo('resources')} className="block text-zinc-400 hover:text-white transition">Resources</button>
-                <button onClick={() => goTo('install')} className="block text-zinc-400 hover:text-white transition">Install as app</button>
-                <button onClick={() => goTo('feedback')} className="block text-zinc-400 hover:text-white transition">Feedback</button>
+                <button onClick={() => goTo('about')} className="block py-1.5 text-zinc-400 hover:text-white transition">What is a winter arc</button>
+                <button onClick={() => goTo('templates')} className="block py-1.5 text-zinc-400 hover:text-white transition">Templates</button>
+                <button onClick={() => goTo('resources')} className="block py-1.5 text-zinc-400 hover:text-white transition">Resources</button>
+                <button onClick={() => goTo('install')} className="block py-1.5 text-zinc-400 hover:text-white transition">Install as app</button>
+                <button onClick={() => goTo('feedback')} className="block py-1.5 text-zinc-400 hover:text-white transition">Feedback</button>
               </div>
               <div className="space-y-2">
-                <a href={site.support.github} target="_blank" rel="noreferrer" className="block text-zinc-400 hover:text-white transition">GitHub</a>
-                <a href={site.support.github + '/blob/main/CONTRIBUTING.md'} target="_blank" rel="noreferrer" className="block text-zinc-400 hover:text-white transition">Contribute</a>
-                <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="block text-zinc-400 hover:text-white transition">X</a>
+                <a href={site.support.github} target="_blank" rel="noreferrer" className="block py-1.5 text-zinc-400 hover:text-white transition">GitHub</a>
+                <a href={site.support.github + '/blob/main/CONTRIBUTING.md'} target="_blank" rel="noreferrer" className="block py-1.5 text-zinc-400 hover:text-white transition">Contribute</a>
+                <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="block py-1.5 text-zinc-400 hover:text-white transition">X</a>
               </div>
             </div>
           </div>

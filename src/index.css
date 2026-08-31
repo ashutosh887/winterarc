@@ -61,6 +61,7 @@
 
 * { scrollbar-width: thin; scrollbar-color: #27272a transparent; }
 button, a, [role="button"], label { cursor: pointer; }
+html { -webkit-tap-highlight-color: transparent; }
 
 .aurora {
   background:
