@@ -815,7 +815,7 @@ export default function App() {
                       <button onClick={() => downloadImage(a)} className="px-2 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-700 text-[11px] hover:bg-white transition">PNG</button>
                     </div>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-mono text-zinc-500"><Lock size={10} /> locked · {a.unlock ? '' : 'keep going'}</span>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-mono text-zinc-500 border border-zinc-800 px-2 py-0.5 rounded-full"><Lock size={10} /> In progress</span>
                   )}
                 </div>
               ))}
@@ -926,7 +926,7 @@ export default function App() {
             {onboardStep === 2 && (
               <div className="mt-6">
                 <h2 className="text-xl font-bold text-white">Pick your habits</h2>
-                <p className="text-sm text-zinc-400 mt-1">Choose 3–10. Three tiers. All free.</p>
+                <p className="text-sm text-zinc-400 mt-1">Choose 3–10. Three tiers.</p>
                 <div className="mt-2 text-xs font-mono text-zinc-400">Selected {tmpSelected.size} {tmpSelected.size > 10 && '· over 10'}</div>
                 {['non-neg', 'extra', 'aesthetic'].map(tier => (<div key={tier} className="mt-5"><div className="text-[11px] font-mono tracking-widest text-zinc-400">{TIER_LABELS[tier]}</div><div className="mt-2 grid sm:grid-cols-2 gap-2">{PRESETS.filter(p => p.tier === tier).map(p => { const sel = tmpSelected.has(p.id); return (<button key={p.id} onClick={() => setTmpSelected(s => { const n = new Set(s); sel ? n.delete(p.id) : n.add(p.id); return n })} className={`text-left rounded-xl border p-3 flex gap-3 items-start transition ${sel ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}><span className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-300 shrink-0"><HabitIcon name={p.icon} size={14} /></span><span className="flex-1 min-w-0"><span className={`text-sm font-medium block ${sel ? 'text-zinc-900' : 'text-zinc-200'}`}>{p.name}</span><span className="text-xs text-zinc-500">{p.desc}</span></span><span className={`mt-1 w-5 h-5 rounded-full grid place-items-center border text-xs shrink-0 ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'border-zinc-600 text-transparent'}`}><Check size={12} /></span></button>) })}</div></div>))}
                 <div className="mt-6 rounded-xl bg-zinc-950 border border-zinc-800 p-3"><div className="text-xs font-mono tracking-widest text-zinc-400">Custom habit</div><div className="mt-2 flex gap-2"><Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. No sugar, 3L water" onKeyDown={e => e.key === 'Enter' && addCustom()} /><Button variant="secondary" onClick={addCustom}>Add</Button></div>{customList.length > 0 && (<div className="mt-3 flex flex-wrap gap-2">{customList.map(c => (<Badge key={c.id} variant="secondary" className="gap-1.5">{c.name} <button onClick={() => { setCustomList(prev => prev.filter(x => x.id !== c.id)); setTmpSelected(s => { const n = new Set(s); n.delete(c.id); return n }) }} className="ml-1 hover:text-destructive"><X size={12} /></button></Badge>))}</div>)}</div>
