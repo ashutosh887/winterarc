@@ -163,5 +163,4 @@ export const quotes: { q: string; a: string }[] = [
   { q: "Escape competition through authenticity.", a: "Naval Ravikant" },
   { q: "Clarity about what matters provides clarity about what does not.", a: "Cal Newport" },
   { q: "The cost of being wrong is less than the cost of doing nothing.", a: "Seth Godin" },
-  { q: "You have to believe in yourself when no one else does.", a: "Serena Williams" },
 ]

@@ -40,7 +40,7 @@ const TIER_LABELS = { 'non-neg': 'Non negotiables', extra: 'Good extras', aesthe
 const PRESETS = [
   { id: 'gym', name: 'Gym / Train 45m', icon: 'dumbbell', tier: 'non-neg', desc: 'Minimum 30 min. Walk counts.' },
   { id: 'steps', name: '10k Steps', icon: 'footprints', tier: 'non-neg', desc: 'Half before lunch.' },
-  { id: 'sleep', name: 'Sleep 7.5h / In bed 22:30', icon: 'moon', tier: 'non-neg', desc: 'No snoozing — up when alarm rings.' },
+  { id: 'sleep', name: 'Sleep 7.5h / In bed 22:30', icon: 'moon', tier: 'non-neg', desc: 'No snoozing. Up when alarm rings.' },
   { id: 'nutrition', name: 'No sugar & junk', icon: 'salad', tier: 'non-neg', desc: 'No / low sugar, no junk food.' },
   { id: 'protein', name: 'Protein target', icon: 'egg', tier: 'non-neg', desc: 'Track grams per day.' },
   { id: 'water', name: 'Water 2–3L', icon: 'droplets', tier: 'non-neg', desc: 'Spread through day.' },
@@ -52,7 +52,7 @@ const PRESETS = [
   { id: 'sunlight', name: 'Morning sunlight', icon: 'sun', tier: 'extra', desc: 'Outside shortly after waking.' },
   { id: 'phone-am', name: 'No phone 60m AM', icon: 'phoneoff', tier: 'extra', desc: 'First 30–60 min.' },
   { id: 'phone-pm', name: 'No phone before bed', icon: 'moon', tier: 'extra', desc: 'Phone down by 21:00.' },
-  { id: 'outside', name: 'Outside 20m', icon: 'treepine', tier: 'extra', desc: 'Survives cold — indoor alt ok.' },
+  { id: 'outside', name: 'Outside 20m', icon: 'treepine', tier: 'extra', desc: 'Survives cold. Indoor alt ok.' },
   { id: 'money', name: 'No unnecessary spend', icon: 'coins', tier: 'extra', desc: 'Track spend / no-buy.' },
   { id: 'clean', name: 'Clean room/desk', icon: 'brushcleaning', tier: 'extra', desc: '2-min reset before bed.' },
   { id: 'cold', name: 'Cold shower', icon: 'showerhead', tier: 'aesthetic', desc: 'Discipline rep.' },
@@ -206,7 +206,7 @@ export default function App() {
       { id: 'perfect10', label: '10 Perfect', icon: 'gem', desc: '10 perfect days', unlock: stats.perfect >= 10 },
       { id: 'perfect30', label: '30 Perfect', icon: 'crown', desc: '30 perfect days', unlock: stats.perfect >= 30 },
       { id: 'complete75', label: '75% Done', icon: 'rocket', desc: '75% habits checked', unlock: stats.pct >= 75 },
-      { id: 'finish', label: 'Graduation', icon: 'graduationcap', desc: '92/92 perfect — Jan 1', unlock: stats.perfect >= totalDays },
+      { id: 'finish', label: 'Graduation', icon: 'graduationcap', desc: '92/92 perfect. Jan 1', unlock: stats.perfect >= totalDays },
     ]
     return defs
   }, [stats, totalDays])
@@ -414,7 +414,7 @@ export default function App() {
           <div className="max-w-[1040px] mx-auto px-5 sm:px-6 pt-3">
             <div className={`rounded-full border px-4 py-2 flex items-center gap-2 text-xs font-mono ${perfect ? 'bg-white text-zinc-900 border-white' : done > 0 ? 'bg-zinc-900 text-zinc-300 border-zinc-800' : 'bg-zinc-900/60 text-zinc-500 border-zinc-800'}`}>
               <span className="font-medium">Yesterday {prev}:</span>
-              <span className="font-semibold">{perfect ? 'Perfect — streak lives' : `${done}/${effectiveHabits.length} done`}</span>
+              <span className="font-semibold">{perfect ? 'Perfect. Streak lives' : `${done}/${effectiveHabits.length} done`}</span>
               <button onClick={() => setSelectedDate(prev)} className="ml-auto text-[11px] underline decoration-zinc-600 hover:text-white transition">View</button>
             </div>
           </div>
@@ -444,7 +444,7 @@ export default function App() {
               <motion.p variants={fadeUp} className="mt-4 text-[17px] font-medium text-zinc-400">Lock in while they coast.</motion.p>
               {todayYMD() < DEFAULT_START && (
                 <motion.div variants={fadeUp} className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-400">
-                  September is prep — {daysBetween(todayYMD(), DEFAULT_START)} days to Oct 1
+                  September is prep. {daysBetween(todayYMD(), DEFAULT_START)} days to Oct 1
                 </motion.div>
               )}
               <motion.p variants={fadeUp} className="mt-5 max-w-[560px] mx-auto text-[14.5px] leading-6 text-zinc-500">
@@ -468,7 +468,7 @@ export default function App() {
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.6, ease: [0.22,1,0.36,1] }} className="mt-12 rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800 bg-zinc-950">
                 <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-zinc-800" /><span className="w-2.5 h-2.5 rounded-full bg-zinc-800" /><span className="w-2.5 h-2.5 rounded-full bg-zinc-800" /></div>
-                <div className="text-[11px] font-mono tracking-widest text-zinc-500">Preview — your grid after 2 weeks</div>
+                <div className="text-[11px] font-mono tracking-widest text-zinc-500">Preview. Your grid after 2 weeks</div>
                 <div className="text-[11px] font-mono text-zinc-600 hidden sm:block">Honest grid · No restart</div>
               </div>
               <div className="grid md:grid-cols-[300px_1fr] gap-0">

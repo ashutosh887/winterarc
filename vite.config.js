@@ -16,7 +16,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'og-image.png', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
-        name: 'WinterArc — 92-Day Winter Arc Tracker',
+        name: 'WinterArc - 92-Day Winter Arc Tracker',
         short_name: 'WinterArc',
         description: 'Free, open-source tracker for the 92-day Winter Arc (Oct 1 - Dec 31). Pick 3-5 habits, keep the grid honest.',
         theme_color: '#09090b',
