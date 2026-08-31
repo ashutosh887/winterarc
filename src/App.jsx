@@ -1,17 +1,16 @@
-import { useEffect, useMemo, useState, useRef, Suspense } from 'react'
+import { useEffect, useMemo, useState, useRef, Suspense, lazy } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, Heart, X, User, Settings, Menu,
   Footprints, Moon, Salad, Egg, Droplets, Target, Ban, Wind, NotebookPen, Sun, PhoneOff, TreePine, Coins, BrushCleaning, ShowerHead, AlarmClock,
   MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock
 } from 'lucide-react'
-import { lazy } from 'react'
 import { site, resources, templates, challenges, quotes as QUOTES_CFG } from './config'
-const ThreeHero = lazy(() => import('./ThreeHero'))
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
+const ThreeHero = lazy(() => import('./ThreeHero'))
 
 const ICON_MAP = {
   dumbbell: Dumbbell, footprints: Footprints, moon: Moon, salad: Salad, egg: Egg, droplets: Droplets, target: Target, ban: Ban,
@@ -92,11 +91,12 @@ function Ring({ pct, size = 44, stroke = 4, children }) {
 
 
 
-function Logo({ size = 28 }) {
+function Logo({ size = 32 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden>
-      <rect width="32" height="32" rx="9" fill="#18181b" stroke="#27272a" strokeWidth="1" />
-      <path d="M6.5 21.5 L11 10.2 L16 16.6 L21 10.2 L25.5 21.5" fill="none" stroke="#fafafa" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden>
+      <rect width="64" height="64" rx="14" fill="#18181b" stroke="#27272a" strokeWidth="1.2" />
+      <path d="M14 44 L24 20 L32 32 L40 20 L50 44" fill="none" stroke="#fafafa" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M24 44 L32 32 L40 44" fill="none" stroke="#fafafa" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" opacity="0.2" />
     </svg>
   )
 }
