@@ -6,61 +6,61 @@ export const site = {
   domain: 'https://trywinterarc.vercel.app',
   tagline: 'Lock in while they coast.',
   hero: 'Disappear for 90 days. Come back unrecognizable.',
-  dates: { start: '2026-10-01', end: '2026-12-31', label: 'Oct 1 → Dec 31', days: 92 },
+  dates: { start: '2026-10-01', end: '2026-12-31', label: 'Oct 1 to Dec 31', days: 92 },
   author: { name: 'Ashutosh Jha', url: 'https://ashutosh887.in', github: 'https://github.com/ashutosh887/winterarc', handle: 'ashutosh887' },
   builtOn: 'Vercel',
-  support: { cta: 'Star on GitHub — it helps the community', github: 'https://github.com/ashutosh887/winterarc' },
+  support: { cta: 'Star on GitHub. It helps', github: 'https://github.com/ashutosh887/winterarc' },
 }
 
 export const resources: Record<string, { title: string; items: { name: string; url: string; desc: string; free: boolean }[] }> = {
   workout: {
-    title: 'Workout — free',
+    title: 'Workout',
     items: [
-      { name: 'workout.lol', url: 'https://workout.lol/', desc: 'Generate free workout plans', free: true },
-      { name: 'DAREBEE', url: 'https://darebee.com/', desc: '1000+ free no-equipment workouts', free: true },
-      { name: 'Hevy (free tier)', url: 'https://www.hevy.com/', desc: 'Track lifts, free plan', free: true },
+      { name: 'workout.lol', url: 'https://workout.lol/', desc: 'Generate workout plans', free: true },
+      { name: 'DAREBEE', url: 'https://darebee.com/', desc: '1000 plus no equipment workouts', free: true },
+      { name: 'Hevy', url: 'https://www.hevy.com/', desc: 'Track lifts. Free plan', free: true },
       { name: 'NerdFitness bodyweight', url: 'https://www.nerdfitness.com/blog/a-beginners-guide-to-bodyweight-workouts/', desc: 'Beginner bodyweight guide', free: true },
     ],
   },
   nutrition: {
-    title: 'Nutrition — free',
+    title: 'Nutrition',
     items: [
-      { name: 'MyFitnessPal (free)', url: 'https://www.myfitnesspal.com/', desc: 'Track protein & calories', free: true },
-      { name: 'Cronometer (free)', url: 'https://cronometer.com/', desc: 'Micronutrient tracker', free: true },
-      { name: 'EatThisMuch (free)', url: 'https://www.eatthismuch.com/', desc: 'Free meal planner', free: true },
+      { name: 'MyFitnessPal', url: 'https://www.myfitnesspal.com/', desc: 'Track protein and calories', free: true },
+      { name: 'Cronometer', url: 'https://cronometer.com/', desc: 'Micronutrient tracker', free: true },
+      { name: 'EatThisMuch', url: 'https://www.eatthismuch.com/', desc: 'Meal planner', free: true },
     ],
   },
   focus: {
-    title: 'Focus & Work — free',
+    title: 'Focus and work',
     items: [
-      { name: 'Pomofocus', url: 'https://pomofocus.io/', desc: 'Free pomodoro timer', free: true },
-      { name: 'Flow — free', url: 'https://flow.app/', desc: 'Minimal focus timer', free: true },
-      { name: 'Notion (free)', url: 'https://www.notion.so/', desc: 'Free workspace for arcs', free: true },
+      { name: 'Pomofocus', url: 'https://pomofocus.io/', desc: 'Pomodoro timer', free: true },
+      { name: 'Flow', url: 'https://flow.app/', desc: 'Minimal focus timer', free: true },
+      { name: 'Notion', url: 'https://www.notion.so/', desc: 'Workspace for arcs', free: true },
     ],
   },
   mind: {
-    title: 'Mind — free',
+    title: 'Mind',
     items: [
-      { name: 'Insight Timer (free)', url: 'https://insighttimer.com/', desc: 'Free meditation library', free: true },
-      { name: 'Waking Up intro (free)', url: 'https://www.wakingup.com/', desc: 'Intro meditations free', free: true },
-      { name: '5-min journal (free PDF)', url: 'https://www.intelligentchange.com/blogs/news/free-printable-journal', desc: 'Free gratitude templates', free: true },
+      { name: 'Insight Timer', url: 'https://insighttimer.com/', desc: 'Meditation library', free: true },
+      { name: 'Waking Up intro', url: 'https://www.wakingup.com/', desc: 'Intro meditations', free: true },
+      { name: '5 min journal', url: 'https://www.intelligentchange.com/blogs/news/free-printable-journal', desc: 'Gratitude templates', free: true },
     ],
   },
   sleep: {
-    title: 'Sleep — free',
+    title: 'Sleep',
     items: [
-      { name: 'Sleep Foundation guides', url: 'https://www.sleepfoundation.org/how-sleep-works', desc: 'Free sleep hygiene guides', free: true },
-      { name: 'Huberman sleep toolkit', url: 'https://www.hubermanlab.com/newsletter', desc: 'Free newsletter toolkit', free: true },
+      { name: 'Sleep Foundation guides', url: 'https://www.sleepfoundation.org/how-sleep-works', desc: 'Sleep hygiene guides', free: true },
+      { name: 'Huberman sleep toolkit', url: 'https://www.hubermanlab.com/newsletter', desc: 'Newsletter toolkit', free: true },
     ],
   },
 }
 
 export const templates: { id: string; name: string; icon: string; habitIds: string[]; desc: string }[] = [
-  { id: 'body', name: 'Body Arc', icon: '💪', habitIds: ['gym', 'steps', 'sleep', 'nutrition', 'water'], desc: 'Train, move, sleep, eat clean. Simple and brutal.' },
-  { id: 'mind', name: 'Mind Arc', icon: '🧘', habitIds: ['meditation', 'journaling', 'reading', 'sleep', 'phone-pm'], desc: 'Calm mornings, reading, journaling, phone curfew.' },
-  { id: 'grind', name: 'Grind Arc', icon: '🎯', habitIds: ['work', 'sleep', 'gym', 'reading', 'phone-am'], desc: 'Deep work 90m, train, read, no phone AM.' },
-  { id: 'no-sugar', name: 'No-Sugar Arc', icon: '🥗', habitIds: ['nutrition', 'protein', 'water', 'sleep', 'gym'], desc: 'No sugar/junk, protein target, water, sleep.' },
-  { id: 'minimal', name: 'Minimal (3)', icon: '❄️', habitIds: ['gym', 'sleep', 'work'], desc: 'Just 3 — perfect for starting. Add more later.' },
+  { id: 'body', name: 'Body arc', icon: '💪', habitIds: ['gym', 'steps', 'sleep', 'nutrition', 'water'], desc: 'Train. Move. Sleep. Eat clean.' },
+  { id: 'mind', name: 'Mind arc', icon: '🧘', habitIds: ['meditation', 'journaling', 'reading', 'sleep', 'phone-pm'], desc: 'Calm mornings. Reading. Journaling. Phone curfew.' },
+  { id: 'grind', name: 'Grind arc', icon: '🎯', habitIds: ['work', 'sleep', 'gym', 'reading', 'phone-am'], desc: 'Deep work 90 min. Train. Read. No phone in the morning.' },
+  { id: 'no-sugar', name: 'No sugar arc', icon: '🥗', habitIds: ['nutrition', 'protein', 'water', 'sleep', 'gym'], desc: 'No sugar or junk. Hit protein. Drink water. Sleep.' },
+  { id: 'minimal', name: 'Minimal', icon: '❄️', habitIds: ['gym', 'sleep', 'work'], desc: 'Just three. Good place to start. Add more later.' },
 ]
 
 export const challenges: { id: string; label: string; icon: string; days: number; type: 'streak' | 'week'; desc: string }[] = [
