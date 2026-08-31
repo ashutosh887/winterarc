@@ -346,8 +346,8 @@ export default function App() {
 
       {view === 'landing' && (
         <main>
-          {/* HERO — premium, spacious, Three.js */}
-          <section id="main" className="relative max-w-[980px] mx-auto px-6 pt-16 sm:pt-24 pb-12 overflow-hidden">
+          {/* HERO — premium, spacious, Three.js + aurora shine */}
+          <section id="main" className="relative max-w-[980px] mx-auto px-6 pt-16 sm:pt-24 pb-12 overflow-hidden aurora rounded-3xl card-glow">
             <ThreeHero />
             <div className="flex justify-center">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/60 text-[11px] font-mono tracking-widest text-zinc-400">
@@ -358,37 +358,37 @@ export default function App() {
             <div className="mt-10 text-center">
               <h1 className="font-[800] tracking-[-0.04em] leading-[0.88] text-[44px] sm:text-[68px] text-white">
                 Disappear for<br />
-                <span className="text-slate-500">90 days.</span><br />
+                <span className="text-zinc-500">90 days.</span><br />
                 Come back<br />
                 <span className="text-white">unrecognizable.</span>
               </h1>
-              <p className="mt-4 text-[18px] font-medium text-slate-400">Lock in while they coast.</p>
+              <p className="mt-4 text-[18px] font-medium text-zinc-400">Lock in while they coast.</p>
               {todayYMD() < DEFAULT_START && (
                 <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-mono text-amber-200">
                   September is preparation — {daysBetween(todayYMD(), DEFAULT_START)} days until Oct 1 • Set your arc now, start tracking on Day 1
                 </div>
               )}
-              <p className="mt-5 max-w-[560px] mx-auto text-[15px] leading-6 text-slate-500">
+              <p className="mt-5 max-w-[560px] mx-auto text-[15px] leading-6 text-zinc-500">
                 A minimal, private tracker for your 90-day lock-in. No account. No cloud.<br className="hidden sm:block" /> Your data lives on your device.
               </p>
 
               <div className="mt-8 flex items-center justify-center gap-3">
                 <button onClick={startOnboarding} className="px-6 py-3 rounded-full bg-white text-slate-900 font-semibold text-[14px] hover:bg-slate-100 transition">Start your arc →</button>
-                <button onClick={() => { if (!hasData) startOnboarding(); else setView('tracker') }} className="px-6 py-3 rounded-full border border-slate-800 bg-transparent text-slate-300 font-medium text-[14px] hover:bg-slate-900 transition">View demo</button>
+                <button onClick={() => { if (!hasData) startOnboarding(); else setView('tracker') }} className="px-6 py-3 rounded-full border border-zinc-800 bg-transparent text-zinc-300 font-medium text-[14px] hover:bg-zinc-900 transition">View demo</button>
               </div>
               <div className="mt-3 inline-flex items-center gap-2 text-[11px] font-mono tracking-wide text-zinc-600"><Shield size={12} /> Free • No paywall • Install as PWA • winterarc-khaki.vercel.app</div>
             </div>
 
-            {/* PRODUCT MOCK — not crowded, one clean window */}
-            <div className="mt-14 rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-950">
-                <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-slate-800" /><span className="w-3 h-3 rounded-full bg-slate-800" /><span className="w-3 h-3 rounded-full bg-slate-800" /></div>
-                <div className="text-[11px] font-mono tracking-widest text-slate-500">WINTERARC — PREVIEW</div>
-                <div className="text-[11px] font-mono text-slate-600">92 days</div>
+            {/* PRODUCT MOCK — premium glass + shine */}
+            <div className="mt-14 rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden card-glow shine">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800 bg-zinc-950">
+                <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-zinc-800" /><span className="w-3 h-3 rounded-full bg-zinc-800" /><span className="w-3 h-3 rounded-full bg-zinc-800" /></div>
+                <div className="text-[11px] font-mono tracking-widest text-zinc-500">WINTERARC — PREVIEW</div>
+                <div className="text-[11px] font-mono text-zinc-600">92 days</div>
               </div>
               <div className="grid md:grid-cols-[280px_1fr] gap-0">
-                <div className="p-5 border-r border-slate-800 bg-slate-950/50">
-                  <div className="text-[11px] font-mono tracking-widest text-slate-500">TODAY — OCT 14</div>
+                <div className="p-5 border-r border-zinc-800 bg-zinc-950/50">
+                  <div className="text-[11px] font-mono tracking-widest text-zinc-500">TODAY — OCT 14</div>
                   <div className="mt-3 space-y-2">
                     {[
                       { n: 'Gym 45m', d: true },
@@ -397,24 +397,24 @@ export default function App() {
                       { n: 'Deep work 90m', d: false },
                       { n: 'Reading 10p', d: false },
                     ].map(r => (
-                      <div key={r.n} className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-sm ${r.d ? 'bg-white text-slate-900 border-white' : 'bg-slate-900 text-slate-400 border-slate-800'}`}>
-                        <span className={`w-4 h-4 rounded-full border grid place-items-center text-[11px] ${r.d ? 'bg-slate-900 text-white border-slate-900' : 'border-slate-700'}`}>{r.d ? '✓' : ''}</span>
+                      <div key={r.n} className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-sm ${r.d ? 'bg-white text-slate-900 border-white' : 'bg-zinc-900 text-zinc-400 border-zinc-800'}`}>
+                        <span className={`w-4 h-4 rounded-full border grid place-items-center text-[11px] ${r.d ? 'bg-zinc-900 text-white border-slate-900' : 'border-zinc-700'}`}>{r.d ? '✓' : ''}</span>
                         {r.n}
                       </div>
                     ))}
                   </div>
-                  <div className="mt-4 flex items-center justify-between text-[11px] font-mono"><span className="text-slate-500">3 / 5</span><span className="text-slate-400">60% — keep going</span></div>
+                  <div className="mt-4 flex items-center justify-between text-[11px] font-mono"><span className="text-zinc-500">3 / 5</span><span className="text-zinc-400">60% — keep going</span></div>
                 </div>
                 <div className="p-5">
-                  <div className="flex items-center justify-between"><span className="text-[11px] font-mono tracking-widest text-slate-500">OCT → DEC GRID</span><span className="text-[11px] font-mono text-slate-600">Missed stays red • No restart</span></div>
+                  <div className="flex items-center justify-between"><span className="text-[11px] font-mono tracking-widest text-zinc-500">OCT → DEC GRID</span><span className="text-[11px] font-mono text-zinc-600">Missed stays red • No restart</span></div>
                   <div className="mt-4 grid grid-cols-14 gap-1.5">
                     {Array.from({ length: 42 }, (_, i) => {
                       const v = i < 11 ? 'perfect' : i < 14 ? 'partial' : i < 16 ? 'miss' : i < 28 ? 'future' : 'empty'
-                      const cls = v === 'perfect' ? 'bg-white border-white' : v === 'partial' ? 'bg-slate-400 border-slate-400' : v === 'miss' ? 'bg-red-500/20 border-red-500/30' : 'bg-slate-800 border-slate-800'
+                      const cls = v === 'perfect' ? 'bg-white border-white' : v === 'partial' ? 'bg-slate-400 border-slate-400' : v === 'miss' ? 'bg-red-500/20 border-red-500/30' : 'bg-zinc-800 border-zinc-800'
                       return <div key={i} className={`aspect-square rounded-md border ${cls}`} />
                     })}
                   </div>
-                  <div className="mt-4 flex gap-3 text-[11px] font-mono text-slate-600">
+                  <div className="mt-4 flex gap-3 text-[11px] font-mono text-zinc-600">
                     <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-white border border-white" /> perfect</span>
                     <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-slate-400" /> partial</span>
                     <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded bg-red-500/20 border border-red-500/30" /> missed</span>
@@ -459,7 +459,7 @@ export default function App() {
               ].map(s => (
                 <div key={s.n} className="flex gap-4">
                   <div className="text-[13px] font-mono tracking-widest text-sky-400 pt-1">{s.n}</div>
-                  <div><div className="text-[14px] font-semibold text-white">{s.t}</div><div className="mt-1 text-[13px] leading-5 text-slate-500">{s.d}</div></div>
+                  <div><div className="text-[14px] font-semibold text-white">{s.t}</div><div className="mt-1 text-[13px] leading-5 text-zinc-500">{s.d}</div></div>
                 </div>
               ))}
             </div>
@@ -474,7 +474,7 @@ export default function App() {
           <p className="mt-1 text-sm text-zinc-400">All habits are free. Config is in <code className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800">src/config.ts</code> — edit and redeploy.</p>
           <div className="mt-6 grid sm:grid-cols-2 gap-4">
             {templates.map(t => (
-              <div key={t.id} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col">
+              <div key={t.id} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col card-glow shine">
                 <div className="flex items-center gap-2"><span className="text-xl">{t.icon}</span><span className="font-semibold text-white">{t.name}</span><span className="ml-auto text-[11px] font-mono px-2 py-1 rounded-full bg-white text-zinc-900">Free</span></div>
                 <div className="mt-2 text-sm text-zinc-400">{t.desc}</div>
                 <div className="mt-3 flex flex-wrap gap-1.5">{t.habitIds.map(hid => { const h = PRESETS.find(p => p.id === hid); return <span key={hid} className="text-xs px-2 py-1 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700">{h ? `${h.icon} ${h.name}` : hid}</span> })}</div>
@@ -496,7 +496,7 @@ export default function App() {
           <p className="mt-1 text-sm text-zinc-400">All links are free. Edit <code className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800">src/config.ts → resources</code>.</p>
           <div className="mt-6 grid gap-6">
             {Object.entries(resources).map(([key, cat]) => (
-              <div key={key} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+              <div key={key} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 card-glow">
                 <div className="text-sm font-semibold text-white">{cat.title}</div>
                 <div className="mt-3 grid sm:grid-cols-2 gap-3">
                   {cat.items.map(it => (
@@ -511,7 +511,7 @@ export default function App() {
             ))}
           </div>
           {/* Quotes history & future */}
-          <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+          <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-5 card-glow">
             <div className="flex items-center justify-between"><h2 className="font-semibold text-white flex items-center gap-2"><Star size={14} /> Quotes — 120 days</h2><span className="text-xs font-mono text-zinc-500">Today: Day {stats.dayNum} • {totalDays} days arc + buffer</span></div>
             <p className="text-xs text-zinc-500 mt-1">Free tool — see past, today, and future quotes. After 92 days, buffer keeps you going.</p>
             <div className="mt-4 grid sm:grid-cols-2 gap-2 max-h-[420px] overflow-auto pr-1">
@@ -567,84 +567,84 @@ export default function App() {
       {view === 'tracker' && hasData && (
         <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-4 flex items-center gap-3">
+            <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-4 card-glow flex items-center gap-3">
               <Ring pct={Math.round((stats.dayNum / totalDays) * 100)} size={54}><span className="text-xs font-mono font-bold text-white">{stats.dayNum}/{totalDays}</span></Ring>
-              <div><div className="text-[11px] font-mono tracking-widest text-slate-400">DAY</div><div className="text-sm text-slate-300">{stats.remaining} left • Jan 1 🎓</div></div>
+              <div><div className="text-[11px] font-mono tracking-widest text-zinc-400">DAY</div><div className="text-sm text-zinc-300">{stats.remaining} left • Jan 1 🎓</div></div>
             </div>
-            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-4 flex items-center gap-3">
+            <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-4 card-glow flex items-center gap-3">
               <Ring pct={stats.streak ? Math.min(100, (stats.streak / 7) * 100) : 0} size={54}><span className="text-lg">🔥</span></Ring>
-              <div><div className="text-[11px] font-mono tracking-widest text-slate-400">STREAK</div><div className="text-lg font-black text-white">{stats.streak} <span className="text-xs font-mono text-slate-500">best {stats.bestStreak}</span></div><div className="text-xs text-slate-500">{stats.perfect} perfect ({stats.perfectPct}%)</div></div>
+              <div><div className="text-[11px] font-mono tracking-widest text-zinc-400">STREAK</div><div className="text-lg font-black text-white">{stats.streak} <span className="text-xs font-mono text-zinc-500">best {stats.bestStreak}</span></div><div className="text-xs text-zinc-500">{stats.perfect} perfect ({stats.perfectPct}%)</div></div>
             </div>
-            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-4 flex items-center gap-3">
+            <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-4 card-glow flex items-center gap-3">
               <Ring pct={stats.pct} size={54}><span className="text-xs font-bold text-sky-400">{stats.pct}%</span></Ring>
-              <div><div className="text-[11px] font-mono tracking-widest text-slate-400">COMPLETION</div><div className="text-xs text-slate-500">{stats.totalChecked}/{stats.totalPossible} checks</div><div className="w-20 h-1.5 bg-slate-800 rounded-full mt-1"><div className="h-1.5 bg-sky-500 rounded-full" style={{ width: `${stats.pct}%` }} /></div></div>
+              <div><div className="text-[11px] font-mono tracking-widest text-zinc-400">COMPLETION</div><div className="text-xs text-zinc-500">{stats.totalChecked}/{stats.totalPossible} checks</div><div className="w-20 h-1.5 bg-zinc-800 rounded-full mt-1"><div className="h-1.5 bg-sky-500 rounded-full" style={{ width: `${stats.pct}%` }} /></div></div>
             </div>
-            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-4 flex flex-col justify-center gap-2">
+            <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-4 card-glow flex flex-col justify-center gap-2">
               <div className="grid grid-cols-3 gap-1.5">
                 <button onClick={() => shareToX()} className="py-2 rounded-full bg-white text-slate-900 font-semibold text-xs">𝕏 Post</button>
                 <button onClick={() => shareToWhatsApp()} className="py-2 rounded-full bg-emerald-500 text-white font-semibold text-xs">WhatsApp</button>
-                <button onClick={() => downloadImage()} className="py-2 rounded-full bg-slate-800 border border-slate-700 text-white text-xs">PNG</button>
+                <button onClick={() => downloadImage()} className="py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs">PNG</button>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => nativeShare()} className="flex-1 py-1.5 rounded-full bg-slate-800 text-slate-200 text-xs font-mono border border-slate-700">Share…</button>
-                <button onClick={exportJSON} className="px-3 py-1.5 rounded-full bg-slate-800 text-slate-200 text-xs font-mono border border-slate-700">JSON</button>
-                <button onClick={exportCSV} className="px-3 py-1.5 rounded-full bg-slate-800 text-slate-200 text-xs font-mono border border-slate-700">CSV</button>
+                <button onClick={() => nativeShare()} className="flex-1 py-1.5 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700">Share…</button>
+                <button onClick={exportJSON} className="px-3 py-1.5 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700">JSON</button>
+                <button onClick={exportCSV} className="px-3 py-1.5 rounded-full bg-zinc-800 text-zinc-200 text-xs font-mono border border-zinc-700">CSV</button>
               </div>
               <canvas ref={canvasRef} className="hidden" />
             </div>
           </div>
 
           <div className="mt-6 grid lg:grid-cols-[360px_1fr] gap-6">
-            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-4 h-fit">
+            <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-4 card-glow h-fit">
               <div className="flex items-center justify-between">
                 <div className="font-semibold text-white">Daily check-in</div>
                 <Ring pct={dailyPct} size={44} stroke={3}><span className="text-[11px] font-mono font-bold text-sky-300">{dailyPct}%</span></Ring>
               </div>
-              <div className="text-xs text-slate-500 -mt-1">Backfill: pick any past date. Rings update live.</div>
-              <input type="date" value={selectedDate} min={start} max={end} onChange={e => setSelectedDate(e.target.value)} className="mt-3 w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-sm text-white" />
+              <div className="text-xs text-zinc-500 -mt-1">Backfill: pick any past date. Rings update live.</div>
+              <input type="date" value={selectedDate} min={start} max={end} onChange={e => setSelectedDate(e.target.value)} className="mt-3 w-full rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-2 text-sm text-white" />
               <div className="mt-4 space-y-2">
                 {effectiveHabits.map(h => {
                   const done = !!(entries[selectedDate] || {})[h.id]
                   return (
-                    <label key={h.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 cursor-pointer transition ${done ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-slate-950 border-slate-800 hover:border-slate-700'}`}>
+                    <label key={h.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 cursor-pointer transition ${done ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}>
                       <input type="checkbox" checked={done} onChange={() => toggleHabit(selectedDate, h.id)} className="accent-emerald-500 w-4 h-4" />
                       <span className="text-lg leading-none">{h.icon}</span>
-                      <span className={`text-sm flex-1 ${done ? 'text-emerald-200 line-through decoration-emerald-500/30' : 'text-slate-200'}`}>{h.name}</span>
+                      <span className={`text-sm flex-1 ${done ? 'text-emerald-200 line-through decoration-emerald-500/30' : 'text-zinc-200'}`}>{h.name}</span>
                       {done && <span className="text-xs font-mono text-emerald-400">✓</span>}
                     </label>
                   )
                 })}
               </div>
-              <div className="mt-3 flex items-center justify-between text-xs font-mono"><span className="text-slate-400">{Object.keys(entries[selectedDate] || {}).length}/{effectiveHabits.length} done</span><span className={`${effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'text-emerald-400' : 'text-slate-500'}`}>{effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'PERFECT DAY ✓' : 'keep going'}</span></div>
+              <div className="mt-3 flex items-center justify-between text-xs font-mono"><span className="text-zinc-400">{Object.keys(entries[selectedDate] || {}).length}/{effectiveHabits.length} done</span><span className={`${effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'text-emerald-400' : 'text-zinc-500'}`}>{effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'PERFECT DAY ✓' : 'keep going'}</span></div>
               <div className="mt-3 flex gap-2">
-                <button onClick={() => { const e = entries[selectedDate] || {}; const allDone = effectiveHabits.every(h => e[h.id]); const next = {}; effectiveHabits.forEach(h => next[h.id] = !allDone ? true : false); setEntries(prev => ({ ...prev, [selectedDate]: !allDone ? next : {} })) }} className="flex-1 py-2 rounded-full bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium border border-slate-700">{effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'Clear day' : 'Mark all done'}</button>
+                <button onClick={() => { const e = entries[selectedDate] || {}; const allDone = effectiveHabits.every(h => e[h.id]); const next = {}; effectiveHabits.forEach(h => next[h.id] = !allDone ? true : false); setEntries(prev => ({ ...prev, [selectedDate]: !allDone ? next : {} })) }} className="flex-1 py-2 rounded-full bg-zinc-800 hover:bg-slate-700 text-white text-sm font-medium border border-zinc-700">{effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'Clear day' : 'Mark all done'}</button>
                 <button onClick={() => setSelectedDate(todayYMD())} className="px-4 py-2 rounded-full bg-sky-500 hover:bg-sky-400 text-slate-950 text-sm font-semibold">Today</button>
               </div>
             </div>
 
-            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-4">
-              <div className="flex items-center justify-between"><div className="font-semibold text-white">92-day grid</div><div className="text-xs font-mono text-slate-400">Missed stays red — no restart</div></div>
+            <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-4 card-glow">
+              <div className="flex items-center justify-between"><div className="font-semibold text-white">92-day grid</div><div className="text-xs font-mono text-zinc-400">Missed stays red — no restart</div></div>
               <div className="mt-4 grid grid-cols-7 sm:grid-cols-14 lg:grid-cols-14 gap-1.5">
                 {allDates.map(d => {
                   const e = entries[d] || {}; const done = effectiveHabits.filter(h => e[h.id]).length; const perfect = effectiveHabits.length > 0 && done === effectiveHabits.length; const isToday = d === todayYMD(); const isSelected = d === selectedDate; const isFuture = d > todayYMD()
-                  let bg = 'bg-slate-800 border-slate-700'
-                  if (isFuture) bg = 'bg-slate-900 border-slate-800 opacity-50'
+                  let bg = 'bg-zinc-800 border-zinc-700'
+                  if (isFuture) bg = 'bg-zinc-900 border-zinc-800 opacity-50'
                   else if (perfect) bg = 'bg-emerald-500 border-emerald-400'
                   else if (done > 0) bg = 'bg-amber-500/80 border-amber-400/50'
                   else if (d < todayYMD()) bg = 'bg-red-500/20 border-red-500/30'
-                  return (<button key={d} onClick={() => setSelectedDate(d)} className={`relative aspect-square rounded-lg border flex flex-col items-center justify-center transition hover:scale-[1.03] ${bg} ${isSelected ? 'ring-2 ring-sky-400 ring-offset-2 ring-offset-slate-900' : ''}`} title={`${d} — ${done}/${effectiveHabits.length}`}><span className={`text-[10px] font-mono ${perfect ? 'text-white' : done > 0 ? 'text-slate-950' : d < todayYMD() ? 'text-red-300' : 'text-slate-400'}`}>{d.slice(8, 10)}</span><span className={`text-[9px] font-mono ${perfect ? 'text-white/90' : 'text-slate-500'}`}>{done}/{effectiveHabits.length}</span>{isToday && <span className="absolute -top-1 -right-1 w-2 h-2 bg-sky-400 rounded-full" />}</button>)
+                  return (<button key={d} onClick={() => setSelectedDate(d)} className={`relative aspect-square rounded-lg border flex flex-col items-center justify-center transition hover:scale-[1.03] ${bg} ${isSelected ? 'ring-2 ring-sky-400 ring-offset-2 ring-offset-slate-900' : ''}`} title={`${d} — ${done}/${effectiveHabits.length}`}><span className={`text-[10px] font-mono ${perfect ? 'text-white' : done > 0 ? 'text-slate-950' : d < todayYMD() ? 'text-red-300' : 'text-zinc-400'}`}>{d.slice(8, 10)}</span><span className={`text-[9px] font-mono ${perfect ? 'text-white/90' : 'text-zinc-500'}`}>{done}/{effectiveHabits.length}</span>{isToday && <span className="absolute -top-1 -right-1 w-2 h-2 bg-sky-400 rounded-full" />}</button>)
                 })}
               </div>
               <div className="mt-6">
-                <div className="text-xs font-mono tracking-widest text-slate-400">HABIT RINGS</div>
+                <div className="text-xs font-mono tracking-widest text-zinc-400">HABIT RINGS</div>
                 <div className="mt-3 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
                   {effectiveHabits.map(h => {
                     const hits = allDates.filter(d => (entries[d] || {})[h.id]).length
                     const pct = Math.round((hits / totalDays) * 100)
                     return (
-                      <div key={h.id} className="rounded-xl bg-slate-950 border border-slate-800 p-2.5 flex flex-col items-center gap-1.5">
+                      <div key={h.id} className="rounded-xl bg-zinc-950 border border-zinc-800 p-2.5 flex flex-col items-center gap-1.5">
                         <Ring pct={pct} size={56} stroke={4}><span className="text-sm">{h.icon}</span></Ring>
-                        <div className="text-[11px] text-center leading-tight text-slate-200 line-clamp-2">{h.name}</div>
+                        <div className="text-[11px] text-center leading-tight text-zinc-200 line-clamp-2">{h.name}</div>
                         <div className="text-[11px] font-mono text-sky-400">{pct}% • {hits}/{totalDays}</div>
                       </div>
                     )
@@ -655,24 +655,24 @@ export default function App() {
           </div>
 
           {/* achievements preview in tracker */}
-          <div className="mt-6 rounded-2xl bg-slate-900 border border-slate-800 p-4">
-            <div className="flex items-center justify-between"><div className="font-semibold text-white">Achievements</div><div className="text-xs font-mono text-slate-400">{achievements.filter(a => a.unlock).length}/{achievements.length} unlocked</div></div>
+          <div className="mt-6 rounded-2xl bg-zinc-900 border border-zinc-800 p-4 card-glow">
+            <div className="flex items-center justify-between"><div className="font-semibold text-white">Achievements</div><div className="text-xs font-mono text-zinc-400">{achievements.filter(a => a.unlock).length}/{achievements.length} unlocked</div></div>
             <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
               {achievements.map(a => (
-                <div key={a.id} className={`rounded-xl border p-3 flex flex-col gap-2 ${a.unlock ? 'bg-sky-500/10 border-sky-500/30' : 'bg-slate-950 border-slate-800 opacity-60'}`}>
-                  <div className="text-lg">{a.icon} <span className={`text-xs font-semibold ${a.unlock ? 'text-white' : 'text-slate-400'}`}>{a.label}</span></div>
-                  <div className="text-[11px] text-slate-400 leading-tight">{a.desc}</div>
-                  {a.unlock && <div className="flex gap-1"><button onClick={() => shareToX(a)} className="flex-1 py-1 rounded-full bg-white text-slate-900 text-[11px] font-semibold">𝕏</button><button onClick={() => shareToWhatsApp(a)} className="flex-1 py-1 rounded-full bg-emerald-500 text-white text-[11px]">WA</button><button onClick={() => downloadImage(a)} className="px-2 py-1 rounded-full bg-slate-800 border border-slate-700 text-white text-[11px]">PNG</button></div>}
-                  {!a.unlock && <span className="text-[11px] font-mono text-slate-500">locked</span>}
+                <div key={a.id} className={`rounded-xl border p-3 flex flex-col gap-2 ${a.unlock ? 'bg-sky-500/10 border-sky-500/30' : 'bg-zinc-950 border-zinc-800 opacity-60'}`}>
+                  <div className="text-lg">{a.icon} <span className={`text-xs font-semibold ${a.unlock ? 'text-white' : 'text-zinc-400'}`}>{a.label}</span></div>
+                  <div className="text-[11px] text-zinc-400 leading-tight">{a.desc}</div>
+                  {a.unlock && <div className="flex gap-1"><button onClick={() => shareToX(a)} className="flex-1 py-1 rounded-full bg-white text-slate-900 text-[11px] font-semibold">𝕏</button><button onClick={() => shareToWhatsApp(a)} className="flex-1 py-1 rounded-full bg-emerald-500 text-white text-[11px]">WA</button><button onClick={() => downloadImage(a)} className="px-2 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-white text-[11px]">PNG</button></div>}
+                  {!a.unlock && <span className="text-[11px] font-mono text-zinc-500">locked</span>}
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="mt-6 rounded-2xl bg-slate-900 border border-slate-800 p-4">
+          <div className="mt-6 rounded-2xl bg-zinc-900 border border-zinc-800 p-4 card-glow">
             <div className="flex items-center justify-between gap-2"><div className="font-semibold text-white">Export & LLM prompt</div><div className="flex items-center gap-2"><button onClick={() => navigator.clipboard.writeText(llmPrompt)} className="px-3 py-1.5 rounded-full bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-semibold">Copy prompt</button><button onClick={() => { if (confirm('Reset all WinterArc data? This cannot be undone. Are you sure?')) { localStorage.clear(); location.reload() } }} className="px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-semibold">Reset</button></div></div>
-            <div className="mt-3 rounded-xl bg-slate-950 border border-slate-800 p-3 overflow-auto"><pre className="text-xs leading-relaxed text-slate-300 whitespace-pre-wrap break-words font-mono">{llmPrompt}</pre></div>
-            <div className="mt-2 text-xs text-slate-500">Paste with exported JSON into ChatGPT/Claude. Data never leaves device until you paste. Reset asks for confirmation.</div>
+            <div className="mt-3 rounded-xl bg-zinc-950 border border-zinc-800 p-3 overflow-auto"><pre className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-words font-mono">{llmPrompt}</pre></div>
+            <div className="mt-2 text-xs text-zinc-500">Paste with exported JSON into ChatGPT/Claude. Data never leaves device until you paste. Reset asks for confirmation.</div>
           </div>
         </main>
       )}
@@ -680,58 +680,58 @@ export default function App() {
       {view === 'dashboard' && hasData && (
         <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-6">
           <div className="grid lg:grid-cols-3 gap-4">
-            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6 flex flex-col items-center">
-              <div className="text-xs font-mono tracking-widest text-slate-400">OVERALL</div>
+            <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6 flex flex-col items-center">
+              <div className="text-xs font-mono tracking-widest text-zinc-400">OVERALL</div>
               <div className="mt-4 relative w-40 h-40">
                 <svg className="w-40 h-40 -rotate-90" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="#1e293b" strokeWidth="10" /><circle cx="50" cy="50" r="44" fill="none" stroke="#38bdf8" strokeWidth="10" strokeLinecap="round" strokeDasharray={`${stats.pct * 2.76} 276`} /></svg>
-                <div className="absolute inset-0 grid place-items-center"><div className="text-center"><div className="text-3xl font-black text-white">{stats.pct}%</div><div className="text-xs font-mono text-slate-400">{stats.totalChecked}/{stats.totalPossible}</div></div></div>
+                <div className="absolute inset-0 grid place-items-center"><div className="text-center"><div className="text-3xl font-black text-white">{stats.pct}%</div><div className="text-xs font-mono text-zinc-400">{stats.totalChecked}/{stats.totalPossible}</div></div></div>
               </div>
-              <div className="mt-4 text-sm text-slate-300">{stats.perfect} perfect of {totalDays} • {stats.perfectPct}%</div>
+              <div className="mt-4 text-sm text-zinc-300">{stats.perfect} perfect of {totalDays} • {stats.perfectPct}%</div>
               <div className="mt-3 w-full grid grid-cols-2 gap-2">
                 <button onClick={() => shareToX()} className="py-2 rounded-full bg-white text-slate-900 text-sm font-semibold">Share 𝕏</button>
-                <button onClick={() => downloadImage()} className="py-2 rounded-full bg-slate-800 border border-slate-700 text-white text-sm">Download PNG</button>
+                <button onClick={() => downloadImage()} className="py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm">Download PNG</button>
               </div>
             </div>
-            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
-              <div className="text-xs font-mono tracking-widest text-slate-400">WEEKLY</div>
+            <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6">
+              <div className="text-xs font-mono tracking-widest text-zinc-400">WEEKLY</div>
               <div className="mt-4 space-y-2">
                 {(() => { const weeks = []; for (let i = 0; i < allDates.length; i += 7)weeks.push(allDates.slice(i, i + 7)); return weeks.map((week, wi) => {
                   const perfectInWeek = week.filter(d => effectiveHabits.length && effectiveHabits.every(h => (entries[d] || {})[h.id])).length
                   const checks = week.reduce((acc, d) => acc + effectiveHabits.filter(h => (entries[d] || {})[h.id]).length, 0)
                   const pct = week.length * effectiveHabits.length ? Math.round((checks / (week.length * effectiveHabits.length)) * 100) : 0
-                  return (<div key={wi} className="rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 flex items-center gap-3"><span className="text-xs font-mono text-slate-500 w-14">W{wi + 1}</span><span className="text-xs text-slate-400 flex-1">{week[0]?.slice(5)} → {week[week.length - 1]?.slice(5)}</span><span className="text-xs font-mono text-emerald-400">{perfectInWeek}/7</span><span className="text-xs font-mono text-sky-400 w-10 text-right">{pct}%</span></div>)
+                  return (<div key={wi} className="rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-2 flex items-center gap-3"><span className="text-xs font-mono text-zinc-500 w-14">W{wi + 1}</span><span className="text-xs text-zinc-400 flex-1">{week[0]?.slice(5)} → {week[week.length - 1]?.slice(5)}</span><span className="text-xs font-mono text-emerald-400">{perfectInWeek}/7</span><span className="text-xs font-mono text-sky-400 w-10 text-right">{pct}%</span></div>)
                 }) })()}
               </div>
             </div>
-            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
-              <div className="text-xs font-mono tracking-widest text-slate-400">QUOTE OF THE DAY</div>
-              <div className="mt-4 rounded-xl bg-slate-950 border border-slate-800 p-4">
+            <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-6">
+              <div className="text-xs font-mono tracking-widest text-zinc-400">QUOTE OF THE DAY</div>
+              <div className="mt-4 rounded-xl bg-zinc-950 border border-zinc-800 p-4">
                 <div className="text-sky-400 text-lg">❝</div>
-                <div className="text-sm text-slate-200 italic">“{quote.q}”</div>
-                <div className="text-xs font-mono text-slate-500 mt-1">— {quote.a}</div>
+                <div className="text-sm text-zinc-200 italic">“{quote.q}”</div>
+                <div className="text-xs font-mono text-zinc-500 mt-1">— {quote.a}</div>
               </div>
               <div className="mt-4 space-y-3 text-sm">
-                <div className="flex justify-between"><span className="text-slate-400">Habits</span><span className="text-white font-mono">{effectiveHabits.length}</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">Range</span><span className="text-white font-mono text-xs">{start} → {end}</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">Best streak</span><span className="text-amber-400 font-mono">{stats.bestStreak} 🔥</span></div>
-                <div className="pt-3 flex gap-2"><button onClick={exportJSON} className="flex-1 py-2 rounded-full bg-slate-800 border border-slate-700 text-white text-sm">JSON</button><button onClick={exportCSV} className="flex-1 py-2 rounded-full bg-slate-800 border border-slate-700 text-white text-sm">CSV</button></div>
+                <div className="flex justify-between"><span className="text-zinc-400">Habits</span><span className="text-white font-mono">{effectiveHabits.length}</span></div>
+                <div className="flex justify-between"><span className="text-zinc-400">Range</span><span className="text-white font-mono text-xs">{start} → {end}</span></div>
+                <div className="flex justify-between"><span className="text-zinc-400">Best streak</span><span className="text-amber-400 font-mono">{stats.bestStreak} 🔥</span></div>
+                <div className="pt-3 flex gap-2"><button onClick={exportJSON} className="flex-1 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm">JSON</button><button onClick={exportCSV} className="flex-1 py-2 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm">CSV</button></div>
                 <button onClick={() => { if (confirm('Reset all data?')) { localStorage.clear(); location.reload() } }} className="w-full py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-sm">Reset</button>
               </div>
             </div>
           </div>
 
-          <div className="mt-6 rounded-2xl bg-slate-900 border border-slate-800 p-4">
+          <div className="mt-6 rounded-2xl bg-zinc-900 border border-zinc-800 p-4 card-glow">
             <div className="font-semibold text-white">All achievements — shareable</div>
-            <div className="text-xs text-slate-500 mt-1">Static for everyone — same streak milestones. Post any unlocked badge to X / WhatsApp / PNG.</div>
+            <div className="text-xs text-zinc-500 mt-1">Static for everyone — same streak milestones. Post any unlocked badge to X / WhatsApp / PNG.</div>
             <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {achievements.map(a => (
-                <div key={a.id} className={`rounded-xl border p-3 ${a.unlock ? 'bg-sky-500/10 border-sky-500/30' : 'bg-slate-950 border-slate-800 opacity-60'}`}>
-                  <div className="flex items-center gap-2"><span className="text-xl">{a.icon}</span><span className={`text-sm font-semibold ${a.unlock ? 'text-white' : 'text-slate-400'}`}>{a.label}</span>{a.unlock && <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500 text-white font-mono">UNLOCKED</span>}</div>
-                  <div className="text-xs text-slate-400 mt-1">{a.desc}</div>
+                <div key={a.id} className={`rounded-xl border p-3 ${a.unlock ? 'bg-sky-500/10 border-sky-500/30' : 'bg-zinc-950 border-zinc-800 opacity-60'}`}>
+                  <div className="flex items-center gap-2"><span className="text-xl">{a.icon}</span><span className={`text-sm font-semibold ${a.unlock ? 'text-white' : 'text-zinc-400'}`}>{a.label}</span>{a.unlock && <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500 text-white font-mono">UNLOCKED</span>}</div>
+                  <div className="text-xs text-zinc-400 mt-1">{a.desc}</div>
                   <div className="mt-2 flex gap-1.5">
-                    <button disabled={!a.unlock} onClick={() => shareToX(a)} className={`flex-1 py-1.5 rounded-full text-xs font-semibold ${a.unlock ? 'bg-white text-slate-900' : 'bg-slate-800 text-slate-500'}`}>𝕏</button>
-                    <button disabled={!a.unlock} onClick={() => shareToWhatsApp(a)} className={`flex-1 py-1.5 rounded-full text-xs ${a.unlock ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-500'}`}>WhatsApp</button>
-                    <button disabled={!a.unlock} onClick={() => downloadImage(a)} className={`px-2 py-1.5 rounded-full border text-xs ${a.unlock ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-900 border-slate-800 text-slate-600'}`}>PNG</button>
+                    <button disabled={!a.unlock} onClick={() => shareToX(a)} className={`flex-1 py-1.5 rounded-full text-xs font-semibold ${a.unlock ? 'bg-white text-slate-900' : 'bg-zinc-800 text-zinc-500'}`}>𝕏</button>
+                    <button disabled={!a.unlock} onClick={() => shareToWhatsApp(a)} className={`flex-1 py-1.5 rounded-full text-xs ${a.unlock ? 'bg-emerald-500 text-white' : 'bg-zinc-800 text-zinc-500'}`}>WhatsApp</button>
+                    <button disabled={!a.unlock} onClick={() => downloadImage(a)} className={`px-2 py-1.5 rounded-full border text-xs ${a.unlock ? 'bg-zinc-800 border-zinc-700 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>PNG</button>
                   </div>
                 </div>
               ))}
@@ -746,7 +746,7 @@ export default function App() {
       )}
 
       {showOnboarding && (
-        <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-slate-950/70 backdrop-blur" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-zinc-950/70 backdrop-blur" role="dialog" aria-modal="true">
           <div className="w-full max-w-[760px] max-h-[90vh] overflow-auto rounded-[20px] bg-zinc-900 border border-zinc-800 p-6">
             <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={28} /><span className="font-semibold tracking-[0.14em] text-sm text-white">SET UP YOUR ARC</span> <span className="text-xs font-mono text-zinc-500">Step {onboardStep}/3</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-8 h-8 grid place-items-center rounded-full bg-zinc-800 text-zinc-400">✕</button></div>
             {onboardStep === 1 && (
