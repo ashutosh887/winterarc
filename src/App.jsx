@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, User, Settings, Menu, LayoutGrid, Compass,
   Footprints, Moon, Salad, Egg, Droplets, Target, Ban, Wind, NotebookPen, Sun, PhoneOff, TreePine, Coins, BrushCleaning, ShowerHead, AlarmClock,
-  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone, Copy, ChevronDown
+  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone, Copy, ChevronDown, Share2, MessageCircle, ImageDown, MoreHorizontal, Info
 } from 'lucide-react'
 import { site, resources, templates, challenges, quotes as QUOTES_CFG } from './config'
 import { Button } from '@/components/ui/button'
@@ -152,6 +152,8 @@ export default function App() {
   const [showInstallHint, setShowInstallHint] = useState(false)
   const [copied, setCopied] = useState(false)
   const [promptOpen, setPromptOpen] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
+  const [streakInfo, setStreakInfo] = useState(false)
   const [promptCopied, setPromptCopied] = useState(false)
   const canvasRef = useRef(null)
 
@@ -166,7 +168,6 @@ export default function App() {
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    if (window.innerWidth < 768) return
     const idle = window.requestIdleCallback || (cb => setTimeout(cb, 1200))
     const id = idle(() => setHeroReady(true))
     return () => (window.cancelIdleCallback || clearTimeout)(id)
@@ -471,24 +472,24 @@ export default function App() {
                 <button
                   key={l.label}
                   onClick={l.onClick}
-                  className={`h-9 px-3 rounded-full text-[13px] font-medium transition ${l.active ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
+                  className={`h-10 px-3 rounded-full text-[13px] font-medium transition ${l.active ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
                 >
                   {l.label}
                 </button>
               ))}
             </nav>
 
-            <a href={site.support.github} target="_blank" rel="noreferrer" aria-label="Star WinterArc on GitHub" className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-zinc-800 bg-zinc-900 text-[13px] font-medium text-zinc-400 hover:text-white hover:border-zinc-700 transition">
+            <a href={site.support.github} target="_blank" rel="noreferrer" aria-label="Star WinterArc on GitHub" className="hidden sm:inline-flex items-center gap-1.5 h-10 px-3 rounded-full border border-zinc-800 bg-zinc-900 text-[13px] font-medium text-zinc-400 hover:text-white hover:border-zinc-700 transition">
               <Star size={13} /> {stars === null ? 'Star' : stars.toLocaleString()}
             </a>
 
-            <button onClick={startOnboarding} className="inline-flex shrink-0 items-center gap-1.5 h-9 px-3 sm:px-4 rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold text-[13px] transition whitespace-nowrap">
+            <button onClick={startOnboarding} className="inline-flex shrink-0 items-center gap-1.5 h-10 px-4 rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold text-[13px] transition whitespace-nowrap">
               <span className="sm:hidden">{hasData ? 'Edit' : 'Set up'}</span>
               <span className="hidden sm:inline">{hasData ? 'Edit arc' : 'Set up your arc'}</span>
               <ArrowRight size={14} />
             </button>
 
-            <button onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" aria-expanded={mobileMenuOpen} className="lg:hidden shrink-0 w-9 h-9 grid place-items-center rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
+            <button onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" aria-expanded={mobileMenuOpen} className="lg:hidden shrink-0 w-10 h-10 grid place-items-center rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
               {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
@@ -519,8 +520,9 @@ export default function App() {
       {hasData && view === 'tracker' && (
         <div className="max-w-[1040px] mx-auto px-5 sm:px-6 pt-4">
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 flex items-center gap-3">
-            <span className="text-sm text-zinc-300 line-clamp-2 sm:truncate">{quote}</span>
-            <span className="ml-auto hidden md:inline text-[11px] font-mono text-zinc-500">Day {stats.dayNum}/{totalDays}</span>
+            <span className="w-7 h-7 shrink-0 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-400"><Snowflake size={13} /></span>
+            <span className="text-sm text-zinc-400 line-clamp-2 sm:truncate">{quote}</span>
+            <span className="ml-auto hidden md:inline shrink-0 text-[11px] font-mono text-zinc-500">Day {stats.dayNum}/{totalDays}</span>
           </motion.div>
         </div>
       )}
@@ -533,9 +535,10 @@ export default function App() {
         const perfect = effectiveHabits.length && done === effectiveHabits.length
         return (
           <div className="max-w-[1040px] mx-auto px-5 sm:px-6 pt-3">
-            <div className={`rounded-2xl border px-4 py-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-mono ${perfect ? 'bg-white text-zinc-900 border-white' : done > 0 ? 'bg-zinc-900 text-zinc-200 border-zinc-800' : 'bg-zinc-900/60 text-zinc-500 border-zinc-800'}`}>
-              <span className="font-medium">Yesterday {prev}:</span>
-              <span className="font-semibold">{perfect ? 'Perfect' : `${done}/${effectiveHabits.length} done`}</span>
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-mono">
+              <span className={`w-2 h-2 rounded-full shrink-0 ${perfect ? 'bg-white' : done > 0 ? 'bg-zinc-500' : 'bg-red-500/50'}`} />
+              <span className="text-zinc-500">Yesterday</span>
+              <span className={perfect ? 'text-white font-semibold' : 'text-zinc-300'}>{perfect ? 'Perfect' : `${done}/${effectiveHabits.length} done`}</span>
               <button onClick={() => setSelectedDate(prev)} className="ml-auto text-xs px-4 h-9 inline-flex items-center rounded-full underline decoration-zinc-600 hover:text-white transition">View</button>
             </div>
           </div>
@@ -544,11 +547,11 @@ export default function App() {
 
       {view === 'landing' && (
         <main id="main">
-          <section className="relative overflow-hidden aurora border-b border-zinc-800">
+          <section className="relative overflow-hidden aurora">
             {heroReady && <Suspense fallback={null}><ThreeHero /></Suspense>}
-            <div className="max-w-[1040px] mx-auto px-5 sm:px-6 min-h-[calc(100dvh-3.5rem)] flex flex-col justify-center py-16">
+            <div className="max-w-[1040px] mx-auto px-5 sm:px-6 min-h-[calc(100svh-3.5rem-env(safe-area-inset-top))] flex flex-col justify-center py-16">
             <motion.div variants={stagger} initial="hidden" animate="show" className="text-center">
-              <motion.h1 variants={fadeUp} className="font-[800] tracking-[-0.045em] leading-[0.88] text-[56px] sm:text-[88px] lg:text-[104px] text-white">
+              <motion.h1 variants={fadeUp} className="font-[800] tracking-[-0.045em] leading-[0.88] text-[48px] min-[380px]:text-[56px] sm:text-[88px] lg:text-[104px] text-white">
                 Lock in while<br />
                 they coast.
               </motion.h1>
@@ -723,7 +726,7 @@ export default function App() {
                       return <span key={hid} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700">{h ? <><HabitIcon name={h.icon} size={11} /> {h.name}</> : hid}</span>
                     })}
                   </div>
-                  <button onClick={() => applyTemplate(t.id)} className="mt-auto pt-4 inline-flex items-center gap-1.5 px-5 h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition self-start">Use template <ArrowRight size={14} /></button>
+                  <button onClick={() => applyTemplate(t.id)} className="mt-4 inline-flex items-center gap-1.5 px-5 h-11 shrink-0 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition self-start">Use template <ArrowRight size={14} /></button>
                 </motion.div>
               ))}
             </motion.div>
@@ -891,7 +894,7 @@ export default function App() {
               <div key={c.title} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col">
                 <div className="text-sm font-semibold text-white">{c.title}</div>
                 <p className="mt-1.5 text-[13px] leading-5 text-zinc-500 flex-1">{c.body}</p>
-                <a href={c.href} target="_blank" rel="noreferrer" className="mt-auto pt-4 inline-flex items-center gap-1.5 self-start px-5 h-11 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-200 text-sm hover:bg-zinc-800 hover:border-zinc-700 transition">
+                <a href={c.href} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1.5 self-start px-5 h-11 shrink-0 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-200 text-sm hover:bg-zinc-800 hover:border-zinc-700 transition">
                   {c.label} <ExternalLink size={12} />
                 </a>
               </div>
@@ -944,21 +947,28 @@ export default function App() {
             </motion.div>
           </motion.div>
 
-          <div className="mt-3 rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-mono tracking-widest text-zinc-500 px-2 hidden sm:inline">Share</span>
-            <button onClick={() => shareToX()} className="flex-1 sm:flex-none px-5 h-10 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition">X Post</button>
-            <button onClick={() => shareToWhatsApp()} className="flex-1 sm:flex-none px-5 h-10 rounded-full bg-emerald-500 text-white font-semibold text-xs hover:bg-emerald-600 transition">WhatsApp</button>
-            <button onClick={() => downloadImage()} className="flex-1 sm:flex-none px-5 h-10 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">PNG</button>
-            <button onClick={() => nativeShare()} className="flex-1 sm:flex-none sm:ml-auto px-5 h-10 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs hover:text-white hover:border-zinc-700 transition">More</button>
+          <div className="mt-3 rounded-2xl border border-zinc-800 bg-zinc-900 p-3">
+            <button onClick={() => setShareOpen(v => !v)} aria-expanded={shareOpen} aria-controls="share-actions" className="w-full flex items-center gap-2 text-left">
+              <span className="w-9 h-9 shrink-0 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-300"><Share2 size={15} /></span>
+              <span className="text-[15px] font-semibold text-white">Share your progress</span>
+              <ChevronDown size={16} className={`ml-auto shrink-0 text-zinc-500 transition-transform ${shareOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {shareOpen && (
+              <div id="share-actions" className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <button onClick={() => shareToX()} title="Share on X" className="h-11 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition inline-flex items-center justify-center gap-1.5"><Share2 size={14} /> X</button>
+                <button onClick={() => shareToWhatsApp()} title="Share on WhatsApp" className="h-11 rounded-full bg-emerald-500 text-white font-semibold text-xs hover:bg-emerald-600 transition inline-flex items-center justify-center gap-1.5"><MessageCircle size={14} /> WhatsApp</button>
+                <button onClick={() => downloadImage()} title="Download a PNG card" className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><ImageDown size={14} /> PNG</button>
+                <button onClick={() => nativeShare()} title="More share options" className="h-11 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs hover:text-white hover:border-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MoreHorizontal size={14} /> More</button>
+              </div>
+            )}
           </div>
 
-          <div className="mt-6 grid lg:grid-cols-[360px_1fr] gap-6">
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 h-fit">
+          <div className="mt-6 grid lg:grid-cols-[360px_1fr] gap-6 items-start">
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 h-fit lg:sticky lg:top-[calc(4.5rem+env(safe-area-inset-top))]">
               <div className="flex items-center justify-between">
                 <div className="text-[15px] font-semibold text-white">Daily check-in</div>
                 <Ring pct={dailyPct} size={44} stroke={3}><span className="text-[11px] font-mono font-bold text-zinc-300">{dailyPct}%</span></Ring>
               </div>
-              <div className="text-xs text-zinc-500 -mt-1">Pick any past date. Rings update live.</div>
               <input type="date" value={selectedDate} min={start} max={end} onChange={e => setSelectedDate(e.target.value)} className="mt-3 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 min-h-11 text-base sm:text-sm text-white" />
               <div className="mt-4 space-y-2">
                 {effectiveHabits.map(h => {
@@ -973,11 +983,53 @@ export default function App() {
                   )
                 })}
               </div>
-              <div className="mt-3 flex items-center justify-between text-xs font-mono"><span className="text-zinc-400">{Object.keys(entries[selectedDate] || {}).length}/{effectiveHabits.length} done</span><span className={`${effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'text-white inline-flex items-center gap-1' : 'text-zinc-500'}`}>{effectiveHabits.length && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? <><Check size={12} /> Perfect day</> : 'keep going'}</span></div>
+              <div className="mt-3 flex items-center justify-between text-xs font-mono"><span className="text-zinc-400">{Object.keys(entries[selectedDate] || {}).length}/{effectiveHabits.length} done</span>{effectiveHabits.length > 0 && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) && <span className="text-white inline-flex items-center gap-1"><Check size={12} /> Perfect day</span>}</div>
               <div className="mt-3 flex gap-2">
                 <button onClick={() => { const e = entries[selectedDate] || {}; const allDone = effectiveHabits.every(h => e[h.id]); const next = {}; effectiveHabits.forEach(h => next[h.id] = !allDone ? true : false); setEntries(prev => ({ ...prev, [selectedDate]: !allDone ? next : {} })) }} className="flex-1 h-11 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium border border-zinc-700 transition">{effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'Clear day' : 'Mark all done'}</button>
                 <button onClick={() => setSelectedDate(todayYMD())} className="px-5 h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Today</button>
+  
+            <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-mono tracking-widest text-zinc-500">Current streak</span>
+                <button
+                  type="button"
+                  onClick={() => setStreakInfo(v => !v)}
+                  aria-label="How streaks are counted"
+                  aria-expanded={streakInfo}
+                  className="w-6 h-6 grid place-items-center rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition"
+                >
+                  <Info size={13} />
+                </button>
               </div>
+              <div className="mt-2 flex items-end gap-3">
+                <span className="text-[40px] leading-none font-bold tabular-nums text-white">{stats.streak}</span>
+                <span className="pb-1 text-sm text-zinc-500">{stats.streak === 1 ? 'day' : 'days'} in a row</span>
+                <span className="ml-auto pb-1 text-xs font-mono text-zinc-500">best {stats.bestStreak}</span>
+              </div>
+              <div className="mt-3 flex gap-1">
+                {Array.from({ length: 7 }, (_, i) => {
+                  const d = addDays(todayYMD(), i - 6)
+                  const e = entries[d] || {}
+                  const full = effectiveHabits.length > 0 && effectiveHabits.every(h => e[h.id])
+                  const some = Object.values(e).some(Boolean)
+                  const inArc = d >= start && d <= end
+                  return (
+                    <div
+                      key={d}
+                      title={d}
+                      className={`flex-1 h-8 rounded-md border ${!inArc ? 'bg-zinc-950 border-zinc-800' : full ? 'bg-white border-white' : some ? 'bg-zinc-500 border-zinc-500' : 'bg-zinc-800 border-zinc-700'}`}
+                    />
+                  )
+                })}
+              </div>
+              <div className="mt-2 text-[10px] font-mono text-zinc-500">last 7 days</div>
+              {streakInfo && (
+                <p className="mt-3 pt-3 border-t border-zinc-800 text-[13px] leading-6 text-zinc-500">
+                  A day counts only when every habit you picked is checked. One partial day ends the streak. Backfilling a past day repairs it, because the streak reads the grid rather than a separate counter.
+                </p>
+              )}
+            </div>
+            </div>
             </div>
 
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 sm:p-4">
@@ -1013,14 +1065,14 @@ export default function App() {
           </div>
 
           <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-            <button onClick={() => setPromptOpen(v => !v)} aria-expanded={promptOpen} className="w-full flex items-center justify-between gap-3 text-left">
+            <button onClick={() => setPromptOpen(v => !v)} aria-expanded={promptOpen} aria-controls="llm-panel" className="w-full min-h-11 flex items-center justify-between gap-3 text-left">
               <span className="text-[15px] font-semibold text-white">Export and LLM prompt</span>
               <span className="shrink-0 inline-flex items-center gap-1.5 text-xs font-mono text-zinc-500">
                 {promptOpen ? 'Hide' : 'Show'} <ChevronDown size={14} className={`transition-transform ${promptOpen ? 'rotate-180' : ''}`} />
               </span>
             </button>
             {promptOpen && (
-              <div className="mt-4">
+              <div id="llm-panel" className="mt-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <button onClick={copyPrompt} className="px-4 h-9 rounded-full bg-white text-zinc-900 text-xs font-semibold hover:bg-zinc-100 transition">{promptCopied ? 'Copied' : 'Copy prompt'}</button>
                   <button onClick={exportJSON} className="px-4 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">JSON</button>
@@ -1142,7 +1194,7 @@ export default function App() {
                             key={preset.label}
                             type="button"
                             onClick={() => { setTmpStart(range.start); setTmpEnd(range.end) }}
-                            className={`h-9 px-4 rounded-full text-[13px] font-medium border transition ${active ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-950 text-zinc-300 border-zinc-800 hover:border-zinc-700 hover:text-white'}`}
+                            className={`h-11 px-4 rounded-full text-[13px] font-medium border transition ${active ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-950 text-zinc-300 border-zinc-800 hover:border-zinc-700 hover:text-white'}`}
                           >
                             {preset.label}
                           </button>
@@ -1172,8 +1224,8 @@ export default function App() {
                 <p className="mt-1 text-sm text-zinc-500">Three to five is enough. Ten is the cap.</p>
                 <div className="mt-2 text-[11px] font-mono tracking-widest text-zinc-500">Selected {tmpSelected.size} {tmpSelected.size > 10 && '· over 10'}</div>
                 {['non-neg', 'extra', 'aesthetic'].map(tier => (<div key={tier} className="mt-5"><div className="text-[11px] font-mono tracking-widest text-zinc-500">{TIER_LABELS[tier]}</div><div className="mt-2 grid sm:grid-cols-2 gap-2">{PRESETS.filter(p => p.tier === tier).map(p => { const sel = tmpSelected.has(p.id); return (<button key={p.id} onClick={() => setTmpSelected(s => { const n = new Set(s); sel ? n.delete(p.id) : n.add(p.id); return n })} className={`text-left rounded-xl border p-3 flex gap-3 items-start transition ${sel ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}><span className={`w-8 h-8 rounded-full grid place-items-center border shrink-0 ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'bg-zinc-800 border-zinc-700 text-zinc-300'}`}><HabitIcon name={p.icon} size={14} /></span><span className="flex-1 min-w-0"><span className={`text-sm font-medium block ${sel ? 'text-zinc-900' : 'text-zinc-200'}`}>{p.name}</span><span className="text-xs text-zinc-500">{p.desc}</span></span><span className={`mt-1 w-5 h-5 rounded-full grid place-items-center border text-xs shrink-0 ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'border-zinc-700 text-transparent'}`}><Check size={12} /></span></button>) })}</div></div>))}
-                <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950 p-3"><div className="text-[11px] font-mono tracking-widest text-zinc-500">Custom habit</div><div className="mt-2 flex gap-2"><Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. No sugar, 3L water" onKeyDown={e => e.key === 'Enter' && addCustom()} /><Button variant="secondary" onClick={addCustom}>Add</Button></div>{customList.length > 0 && (<div className="mt-3 flex flex-wrap gap-2">{customList.map(c => (<Badge key={c.id} variant="secondary" className="gap-1.5">{c.name} <button onClick={() => { setCustomList(prev => prev.filter(x => x.id !== c.id)); setTmpSelected(s => { const n = new Set(s); n.delete(c.id); return n }) }} className="ml-1 hover:text-destructive"><X size={12} /></button></Badge>))}</div>)}</div>
-                <div className="mt-6 flex items-center justify-between"><Button variant="outline" onClick={() => setOnboardStep(1)}>Back</Button><Button onClick={completeOnboarding}>Save arc · {tmpSelected.size} habits <ArrowRight size={14} /></Button></div>
+                <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950 p-3"><div className="text-[11px] font-mono tracking-widest text-zinc-500">Custom habit</div><div className="mt-2 flex gap-2"><Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. No sugar, 3L water" onKeyDown={e => e.key === 'Enter' && addCustom()} className="h-11" /><Button variant="secondary" className="h-11 px-5" onClick={addCustom}>Add</Button></div>{customList.length > 0 && (<div className="mt-3 flex flex-wrap gap-2">{customList.map(c => (<Badge key={c.id} variant="secondary" className="gap-1.5">{c.name} <button onClick={() => { setCustomList(prev => prev.filter(x => x.id !== c.id)); setTmpSelected(s => { const n = new Set(s); n.delete(c.id); return n }) }} className="ml-1 hover:text-destructive"><X size={12} /></button></Badge>))}</div>)}</div>
+                <div className="mt-6 flex items-center justify-between"><Button variant="outline" className="h-11 px-5" onClick={() => setOnboardStep(1)}>Back</Button><Button className="h-11 px-5" onClick={completeOnboarding}>Save arc · {tmpSelected.size} habits <ArrowRight size={14} /></Button></div>
               </div>
             )}
           </motion.div>
@@ -1183,7 +1235,7 @@ export default function App() {
 
       <AnimatePresence>
         {showScrollTop && (
-          <motion.button initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top" className="fixed right-5 z-40 w-11 h-11 rounded-full border border-zinc-800 bg-zinc-900/90 backdrop-blur text-zinc-300 grid place-items-center shadow-lg hover:bg-zinc-800 hover:text-white hover:border-zinc-700 transition" style={{ bottom: showInstallHint ? 'calc(9.5rem + env(safe-area-inset-bottom))' : 'calc(1.25rem + env(safe-area-inset-bottom))' }}>
+          <motion.button initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top" className="fixed right-5 z-40 w-11 h-11 rounded-full border border-zinc-800 bg-zinc-900/90 backdrop-blur text-zinc-300 grid place-items-center shadow-lg hover:bg-zinc-800 hover:text-white hover:border-zinc-700 transition" style={{ bottom: showInstallHint && view === 'landing' ? 'calc(12rem + env(safe-area-inset-bottom))' : 'calc(1.25rem + env(safe-area-inset-bottom))' }}>
             <ArrowUp size={16} />
           </motion.button>
         )}
