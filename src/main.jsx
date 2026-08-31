@@ -2,11 +2,14 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import ErrorBoundary from './ErrorBoundary.jsx'
 
 if ('serviceWorker' in navigator) {
+  // claiming an uncontrolled page fires controllerchange on a first visit; that is not an update
+  const hadController = !!navigator.serviceWorker.controller
   let reloading = false
   const reloadOnce = () => {
-    if (reloading) return
+    if (reloading || !hadController) return
     reloading = true
     window.location.reload()
   }
@@ -33,6 +36,8 @@ if ('serviceWorker' in navigator) {
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 )

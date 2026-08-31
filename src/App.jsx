@@ -89,12 +89,27 @@ const PRESETS = [
 
 const QUOTES = QUOTES_CFG
 
-function useLocalStorage(key, initial) {
+function readStore(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key)
+    return raw === null ? fallback : JSON.parse(raw)
+  } catch { return fallback }
+}
+function writeStore(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); return true } catch { storageBroken = true; return false }
+}
+
+function useLocalStorage(key, initial, validate) {
   const [val, setVal] = useState(() => {
-    try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : initial } catch { return initial }
+    const raw = readStore(key, initial)
+    if (validate && !validate(raw)) return initial
+    return raw
   })
-  useEffect(() => { try { localStorage.setItem(key, JSON.stringify(val)) } catch {} }, [key, val])
-  return [val, setVal]
+  const [broken, setBroken] = useState(false)
+  useEffect(() => {
+    if (!writeStore(key, val)) setBroken(true)
+  }, [key, val])
+  return [val, setVal, broken]
 }
 function ymd(d) { const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0'); return `${y}-${m}-${dd}` }
 function parseYMD(s) { const [y, m, dd] = s.split('-').map(Number); return new Date(y, m - 1, dd) }
@@ -138,12 +153,13 @@ const fadeUp = {
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } }
 
 export default function App() {
-  const [settings, setSettings] = useLocalStorage('wa_settings_v2', null)
-  const [habits, setHabits] = useLocalStorage('wa_habits', [])
-  const [habitsV2, setHabitsV2] = useLocalStorage('wa_habits_v2', null)
-  const [entries, setEntries] = useLocalStorage('wa_entries', {})
+  const [settings, setSettings] = useLocalStorage('wa_settings_v2', null, v => v === null || (typeof v === 'object' && !Array.isArray(v)))
+  const [habits, setHabits] = useLocalStorage('wa_habits', [], Array.isArray)
+  const [habitsV2, setHabitsV2] = useLocalStorage('wa_habits_v2', null, v => v === null || Array.isArray(v))
+  const [entries, setEntries, entriesBroken] = useLocalStorage('wa_entries', {}, v => v !== null && typeof v === 'object' && !Array.isArray(v))
   const [view, setView] = useState(() => viewForPath(window.location.pathname) ?? 'landing')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [today, setToday] = useState(todayYMD())
   const [selectedDate, setSelectedDate] = useState(todayYMD())
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [onboardStep, setOnboardStep] = useState(1)
@@ -166,10 +182,13 @@ export default function App() {
   const [streakInfo, setStreakInfo] = useState(false)
   const [promptCopied, setPromptCopied] = useState(false)
   const canvasRef = useRef(null)
+  const overlayDown = useRef(false)
 
   useEffect(() => {
     const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
-    if (standalone || sessionStorage.getItem('wa_install_hint') === 'dismissed') return
+    let dismissed = false
+    try { dismissed = sessionStorage.getItem('wa_install_hint') === 'dismissed' } catch {}
+    if (standalone || dismissed) return
     const onPrompt = e => { e.preventDefault(); setInstallEvent(e); setShowInstallHint(true) }
     window.addEventListener('beforeinstallprompt', onPrompt)
     const t = setTimeout(() => setShowInstallHint(true), 2500)
@@ -187,7 +206,7 @@ export default function App() {
     const DAY = 86400000
     try {
       const cached = JSON.parse(localStorage.getItem('wa_stars') || 'null')
-      if (cached && Date.now() - cached.at < DAY) { setStars(cached.n); return }
+      if (cached && typeof cached.n === 'number' && Date.now() - cached.at < DAY) { setStars(cached.n); return }
     } catch {}
     fetch('https://api.github.com/repos/ashutosh887/winterarc')
       .then(r => r.ok ? r.json() : null)
@@ -206,23 +225,41 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    const old = localStorage.getItem('wa_settings')
-    if (old && !settings) { try { setSettings(JSON.parse(old)); localStorage.removeItem('wa_settings') } catch {} }
-    const oldH = localStorage.getItem('wa_habits')
-    if (oldH && habitsV2 === null) { try { const h = JSON.parse(oldH); if (h.length) setHabitsV2(h) } catch {} }
+    try {
+      const old = localStorage.getItem('wa_settings')
+      if (old && !settings) { setSettings(JSON.parse(old)); localStorage.removeItem('wa_settings') }
+      const oldH = localStorage.getItem('wa_habits')
+      if (oldH && habitsV2 === null) { const h = JSON.parse(oldH); if (Array.isArray(h) && h.length) setHabitsV2(h) }
+    } catch {}
   }, [])
 
-  const effectiveHabits = habitsV2 ?? habits
+  const effectiveHabits = useMemo(() => {
+    const raw = habitsV2 ?? habits
+    return Array.isArray(raw) ? raw.filter(h => h && typeof h.id === 'string' && typeof h.name === 'string') : []
+  }, [habitsV2, habits])
   const hasData = settings && effectiveHabits.length > 0
   const start = settings?.start ?? DEFAULT_START
   const end = settings?.end ?? DEFAULT_END
   const totalDays = useMemo(() => daysBetween(start, end), [start, end])
-  const activeDays = useMemo(() => {
-    const raw = settings?.activeDays
-    return Array.isArray(raw) && raw.length > 0 ? raw : ALL_WEEKDAYS
-  }, [settings])
+  const activeDaysKey = Array.isArray(settings?.activeDays) && settings.activeDays.length
+    ? [...settings.activeDays].sort().join(',')
+    : ALL_WEEKDAYS.join(',')
+  const activeDays = useMemo(() => activeDaysKey.split(',').map(Number), [activeDaysKey])
   const isActiveDay = useCallback(d => activeDays.includes(weekdayOf(d)), [activeDays])
   const allDates = useMemo(() => Array.from({ length: totalDays }, (_, i) => addDays(start, i)), [start, totalDays])
+
+  useEffect(() => {
+    const tick = () => setToday(prev => {
+      const now = todayYMD()
+      if (now === prev) return prev
+      setSelectedDate(sel => (sel === prev ? now : sel))
+      return now
+    })
+    const id = setInterval(tick, 60000)
+    document.addEventListener('visibilitychange', tick)
+    window.addEventListener('focus', tick)
+    return () => { clearInterval(id); document.removeEventListener('visibilitychange', tick); window.removeEventListener('focus', tick) }
+  }, [])
 
   useEffect(() => {
     const onPop = () => setView(viewForPath(window.location.pathname) ?? 'landing')
@@ -250,8 +287,8 @@ export default function App() {
   }, [view, hasData])
   useEffect(() => {
     if (selectedDate < start) setSelectedDate(start)
-    if (selectedDate > end) setSelectedDate(todayYMD() < start ? start : todayYMD() > end ? end : todayYMD())
-  }, [start, end])
+    else if (selectedDate > end) setSelectedDate(today < start ? start : today > end ? end : today)
+  }, [start, end, selectedDate, today])
 
   const stats = useMemo(() => {
     let perfect = 0, totalChecked = 0, totalPossible = 0, cur = 0, best = 0, c = 0, scheduled = 0
@@ -261,18 +298,23 @@ export default function App() {
     }
     allDates.forEach(d => {
       const e = entries[d] || {}
-      totalChecked += effectiveHabits.filter(h => e[h.id]).length
       if (!isActiveDay(d)) return
+      totalChecked += effectiveHabits.filter(h => e[h.id]).length
       scheduled++
       totalPossible += effectiveHabits.length
       if (isPerfect(d)) perfect++
     })
-    const today = todayYMD()
-    for (let i = allDates.length - 1; i >= 0; i--) {
-      const d = allDates[i]
-      if (d > today) continue
-      if (!isActiveDay(d)) continue
-      if (isPerfect(d)) cur++; else break
+    const lastLogged = allDates.filter(d => Object.values(entries[d] || {}).some(Boolean)).pop()
+    let anchor = today >= allDates[0] ? (today > end ? end : today) : (lastLogged ?? null)
+    // today is still in progress, so an unfinished today should not zero a live streak
+    if (anchor === today && isActiveDay(today) && !isPerfect(today)) anchor = addDays(today, -1)
+    if (anchor) {
+      for (let i = allDates.length - 1; i >= 0; i--) {
+        const d = allDates[i]
+        if (d > anchor) continue
+        if (!isActiveDay(d)) continue
+        if (isPerfect(d)) cur++; else break
+      }
     }
     allDates.forEach(d => {
       if (!isActiveDay(d)) return
@@ -280,9 +322,9 @@ export default function App() {
     })
     const pct = totalPossible ? Math.round((totalChecked / totalPossible) * 100) : 0
     const perfectPct = scheduled ? Math.round((perfect / scheduled) * 100) : 0
-    const dayNum = (() => { const t = todayYMD(); if (t < start) return 0; if (t > end) return totalDays; return daysBetween(start, t) })()
-    return { perfect, scheduled, totalChecked, totalPossible, pct, perfectPct, streak: cur, bestStreak: best, dayNum, remaining: Math.max(0, totalDays - (() => { const t = todayYMD(); if (t < start) return 0; if (t > end) return totalDays; return daysBetween(start, t) })()) }
-  }, [allDates, entries, effectiveHabits, start, end, totalDays, isActiveDay])
+    const dayNum = today < start ? 0 : today > end ? totalDays : daysBetween(start, today)
+    return { perfect, scheduled, totalChecked, totalPossible, pct, perfectPct, streak: cur, bestStreak: best, dayNum, remaining: Math.max(0, totalDays - dayNum) }
+  }, [allDates, entries, effectiveHabits, start, end, totalDays, isActiveDay, today])
 
   const dailyPct = useMemo(() => {
     const e = entries[selectedDate] || {}
@@ -290,14 +332,14 @@ export default function App() {
     return effectiveHabits.length ? Math.round((done / effectiveHabits.length) * 100) : 0
   }, [entries, selectedDate, effectiveHabits])
 
-  const quote = useMemo(() => QUOTES[stats.dayNum % QUOTES.length], [stats.dayNum])
+  const quote = useMemo(() => (QUOTES.length ? QUOTES[stats.dayNum % QUOTES.length] : ''), [stats.dayNum])
 
   const achievements = useMemo(() => challenges.map(c => {
     const value = c.metric === 'checks' ? stats.totalChecked
       : c.metric === 'perfect' ? stats.perfect
       : c.metric === 'streak' ? stats.bestStreak
       : stats.pct
-    const target = c.target || totalDays
+    const target = c.target || stats.scheduled || totalDays
     return { ...c, value, target, unlock: value >= target, pct: Math.min(100, Math.round((value / target) * 100)) }
   }), [stats, totalDays])
 
@@ -323,6 +365,7 @@ export default function App() {
     if (!chosen.length) { alert('Pick at least one habit. Three to five works well.'); return }
     if (!tmpStart || !tmpEnd || isNaN(parseYMD(tmpStart).getTime()) || isNaN(parseYMD(tmpEnd).getTime())) { alert('Pick valid start and end dates'); return }
     if (parseYMD(tmpStart) > parseYMD(tmpEnd)) { alert('Start date must be before end date'); return }
+    if (arcLength > 730) { alert('Keep the arc under two years. Pick a closer end date.'); return }
     if (chosen.length > 10 && !confirm(`You picked ${chosen.length} habits. Recommended max is 10. Continue?`)) return
     setSettings({ start: tmpStart, end: tmpEnd, name: tmpName.trim() || null, activeDays: tmpDays.length ? tmpDays : ALL_WEEKDAYS })
     setHabitsV2(chosen); setHabits(chosen)
@@ -338,14 +381,20 @@ export default function App() {
     const t = templates.find(x => x.id === tid); if (!t) return
     setTmpName(settings?.name ?? tmpName)
     setTmpStart(settings?.start ?? DEFAULT_START); setTmpEnd(settings?.end ?? DEFAULT_END)
-    setTmpSelected(new Set(t.habitIds)); setCustomList([]); setOnboardStep(2); setShowOnboarding(true)
+    setTmpSelected(new Set(t.habitIds)); setCustomList([])
+    setTmpDays(Array.isArray(settings?.activeDays) && settings.activeDays.length ? settings.activeDays : ALL_WEEKDAYS)
+    setOnboardStep(2); setShowOnboarding(true)
   }
   function exportJSON() {
-    const data = { settings: { start, end, name: settings?.name ?? null }, habits: effectiveHabits, entries, exportedAt: new Date().toISOString() }
+    const data = { settings: { start, end, name: settings?.name ?? null, activeDays }, habits: effectiveHabits, entries, exportedAt: new Date().toISOString() }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `winter-arc-${start}_${end}.json`; a.click(); URL.revokeObjectURL(url)
   }
-  function csvEscape(s) { return `"${String(s).replace(/"/g, '""')}"` }
+  function csvEscape(s) {
+    const v = String(s)
+    const safe = /^[=+\-@\t\r]/.test(v) ? `'${v}` : v
+    return `"${safe.replace(/"/g, '""')}"`
+  }
   function exportCSV() {
     const header = ['date', ...effectiveHabits.map(h => csvEscape(h.name)), 'perfect']
     const rows = allDates.map(d => {
@@ -359,7 +408,7 @@ export default function App() {
   }
   function resetAll() {
     if (!confirm('Reset all WinterArc data? This cannot be undone. Are you sure?')) return
-    for (const k of ['wa_settings_v2','wa_habits','wa_habits_v2','wa_entries']) localStorage.removeItem(k)
+    for (const k of ['wa_settings','wa_settings_v2','wa_habits','wa_habits_v2','wa_entries','wa_stars']) { try { localStorage.removeItem(k) } catch {} }
     location.reload()
   }
   const llmPrompt = `Here is my habit data from ${start} to ${end}. Habits: ${effectiveHabits.map(h => h.name).join(', ')}. Days elapsed: ${stats.dayNum} of ${totalDays}. Perfect days: ${stats.perfect} (${stats.perfectPct}%). Checks completed: ${stats.pct}%. Current streak: ${stats.streak}, best ${stats.bestStreak}.\nRaw entries: ${JSON.stringify(entries).slice(0, 4000)}\n\nTell me which habit I miss most and on which weekdays. Then give me one change to make this week. Keep it under 150 words and skip the pep talk.`
@@ -404,12 +453,15 @@ export default function App() {
     allDates.forEach((d, i) => {
       const e = entries[d] || {}
       const done = effectiveHabits.filter(h => e[h.id]).length
-      const future = d > todayYMD()
+      const future = d > today
       const color = future ? '#18181b' : done === 0 ? '#3f1d1d' : done === effectiveHabits.length ? '#fafafa' : '#a1a1aa'
       const x = gx + (i % cols) * (cell + gap)
       const y = gy + Math.floor(i / cols) * (cell + gap)
       ctx.fillStyle = color
-      ctx.beginPath(); ctx.roundRect(x, y, cell, cell, 6); ctx.fill()
+      ctx.beginPath()
+      if (typeof ctx.roundRect === 'function') ctx.roundRect(x, y, cell, cell, 6)
+      else ctx.rect(x, y, cell, cell)
+      ctx.fill()
     })
 
     ctx.fillStyle = '#a1a1aa'; ctx.font = 'italic 19px ui-sans-serif,system-ui'
@@ -426,13 +478,13 @@ export default function App() {
       ? `${achievement.label}. Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done, streak ${stats.streak}.\n${site.tagline}\n`
       : `Day ${stats.dayNum}/${totalDays}. ${stats.perfect} perfect days, ${stats.pct}% done, streak ${stats.streak}.\n${site.hero}\n`
     const url = site.domain
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'width=600,height=400')
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'noopener,noreferrer,width=600,height=400')
   }
   function shareToWhatsApp(achievement) {
     const text = achievement
       ? `${achievement.label} unlocked. Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done, streak ${stats.streak}. ${site.domain}`
       : `WinterArc day ${stats.dayNum}/${totalDays}. ${stats.pct}% done, streak ${stats.streak}. ${site.domain}`
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer')
   }
   async function nativeShare(achievement) {
     const text = achievement ? `${achievement.label}. ${achievement.desc}` : `Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done`
@@ -482,6 +534,11 @@ export default function App() {
 
   return (
     <div className="min-h-[100dvh] bg-zinc-950">
+      {entriesBroken && (
+        <div role="alert" className="bg-red-500/10 border-b border-red-500/20 px-5 py-2.5 text-center text-[13px] text-red-200">
+          This browser is blocking storage, so nothing you check here will be saved. Private windows and blocked cookies both cause this.
+        </div>
+      )}
       <header className="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800 pt-[env(safe-area-inset-top)]">
         <div className="max-w-[1040px] mx-auto px-5 sm:px-6 h-14 flex items-center justify-between gap-3">
           <button onClick={() => goTo('landing')} aria-label="WinterArc home" className="flex h-full items-center gap-2.5 shrink-0">
@@ -690,7 +747,7 @@ export default function App() {
                   <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">A PNG for X or WhatsApp. Nothing leaves the device until you tap share.</p>
                   <div className="mt-4 flex gap-2">
                     <span className="px-3 py-1.5 rounded-full bg-white border border-white text-zinc-900 text-xs font-semibold">X Post</span>
-                    <span className="px-3 py-1.5 rounded-full bg-emerald-500 text-white text-xs font-semibold">WhatsApp</span>
+                    <span className="px-3 py-1.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold">WhatsApp</span>
                     <span className="px-3 py-1.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs">PNG</span>
                   </div>
                 </div>
@@ -843,7 +900,7 @@ export default function App() {
           <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">WinterArc is a web app that installs like a native one. It opens without browser chrome, works offline, and your data stays in the same place it already is.</p>
 
           <div className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-3">
-            <a href={site.domain} className="font-mono text-[13px] text-white underline decoration-zinc-700 hover:decoration-zinc-400 px-2">{site.domain.replace('https://', '')}</a>
+            <button onClick={() => goTo('landing')} className="font-mono text-[13px] text-white underline decoration-zinc-700 hover:decoration-zinc-400 px-2 h-11">{site.domain.replace('https://', '')}</button>
             <button onClick={copyLink} className="ml-auto inline-flex items-center gap-1.5 h-9 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">
               {copied ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy link</>}
             </button>
@@ -950,11 +1007,11 @@ export default function App() {
               </div>
             </motion.div>
             <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex items-center gap-3">
-              <Ring pct={stats.streak ? Math.min(100, (stats.streak / 7) * 100) : 0} size={56}><span className="text-zinc-300"><Flame size={18} /></span></Ring>
+              <Ring pct={stats.perfectPct} size={56}><span className="text-zinc-300"><Flame size={18} /></span></Ring>
               <div className="min-w-0">
-                <div className="text-[11px] font-mono tracking-widest text-zinc-500">Streak</div>
-                <div className="text-lg font-bold text-white">{stats.streak} <span className="text-xs font-mono text-zinc-500">best {stats.bestStreak}</span></div>
-                <div className="text-[10px] font-mono text-zinc-500">{stats.perfect} perfect days</div>
+                <div className="text-[11px] font-mono tracking-widest text-zinc-500">Perfect days</div>
+                <div className="text-lg font-bold text-white">{stats.perfect}<span className="text-xs font-mono text-zinc-500">/{stats.scheduled}</span></div>
+                <div className="text-[10px] font-mono text-zinc-500">{stats.perfectPct}% of scheduled</div>
               </div>
             </motion.div>
             <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 flex items-center gap-3">
@@ -976,42 +1033,15 @@ export default function App() {
             >
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <button onClick={() => shareToX()} title="Share on X" className="h-11 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition inline-flex items-center justify-center gap-1.5"><Share2 size={14} /> X</button>
-                <button onClick={() => shareToWhatsApp()} title="Share on WhatsApp" className="h-11 rounded-full bg-emerald-500 text-white font-semibold text-xs hover:bg-emerald-600 transition inline-flex items-center justify-center gap-1.5"><MessageCircle size={14} /> WhatsApp</button>
+                <button onClick={() => shareToWhatsApp()} title="Share on WhatsApp" className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MessageCircle size={14} /> WhatsApp</button>
                 <button onClick={() => downloadImage()} title="Download a PNG card" className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><ImageDown size={14} /> PNG</button>
                 <button onClick={() => nativeShare()} title="More share options" className="h-11 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs hover:text-white hover:border-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MoreHorizontal size={14} /> More</button>
               </div>
             </Disclosure>
           </div>
 
-          <div className="mt-6 grid lg:grid-cols-[360px_1fr] gap-6 items-start">
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 h-fit lg:sticky lg:top-[calc(4.5rem+env(safe-area-inset-top))]">
-              <div className="flex items-center justify-between">
-                <div className="min-w-0">
-                  <div className="text-[15px] font-semibold text-white">Daily check-in</div>
-                  {!isActiveDay(selectedDate) && <div className="text-[11px] font-mono text-zinc-500">Rest day, nothing owed</div>}
-                </div>
-                <Ring pct={dailyPct} size={44} stroke={3}><span className="text-[11px] font-mono font-bold text-zinc-300">{dailyPct}%</span></Ring>
-              </div>
-              <input type="date" value={selectedDate} min={start} max={end} onChange={e => setSelectedDate(e.target.value)} className="mt-3 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 min-h-11 text-base sm:text-sm text-white" />
-              <div className="mt-4 space-y-2">
-                {effectiveHabits.map(h => {
-                  const done = !!(entries[selectedDate] || {})[h.id]
-                  return (
-                    <label key={h.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 cursor-pointer transition ${done ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}>
-                      <input type="checkbox" checked={done} onChange={() => toggleHabit(selectedDate, h.id)} className="accent-zinc-900 w-4 h-4" />
-                      <span className={`w-7 h-7 rounded-full grid place-items-center border ${done ? 'bg-zinc-900 border-zinc-900 text-white' : 'bg-zinc-800 border-zinc-700 text-zinc-300'}`}><HabitIcon name={h.icon} size={14} /></span>
-                      <span className={`text-sm flex-1 ${done ? 'text-zinc-900 font-medium' : 'text-zinc-200'}`}>{h.name}</span>
-                      {done && <span className="text-zinc-900"><Check size={14} /></span>}
-                    </label>
-                  )
-                })}
-              </div>
-              <div className="mt-3 flex items-center justify-between text-xs font-mono"><span className="text-zinc-400">{Object.keys(entries[selectedDate] || {}).length}/{effectiveHabits.length} done</span>{effectiveHabits.length > 0 && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) && <span className="text-white inline-flex items-center gap-1"><Check size={12} /> Perfect day</span>}</div>
-              <div className="mt-3 flex gap-2">
-                <button onClick={() => { const e = entries[selectedDate] || {}; const allDone = effectiveHabits.every(h => e[h.id]); const next = {}; effectiveHabits.forEach(h => next[h.id] = !allDone ? true : false); setEntries(prev => ({ ...prev, [selectedDate]: !allDone ? next : {} })) }} className="flex-1 h-11 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium border border-zinc-700 transition">{effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'Clear day' : 'Mark all done'}</button>
-                <button onClick={() => setSelectedDate(todayYMD())} className="px-5 h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Today</button>
-  
-            <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+          <div className="mt-3">
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-mono tracking-widest text-zinc-500">Current streak</span>
                 <button
@@ -1031,7 +1061,7 @@ export default function App() {
               </div>
               <div className="mt-3 flex gap-1">
                 {Array.from({ length: 7 }, (_, i) => {
-                  const d = addDays(todayYMD(), i - 6)
+                  const d = addDays(today, i - 6)
                   const e = entries[d] || {}
                   const full = effectiveHabits.length > 0 && effectiveHabits.every(h => e[h.id])
                   const some = Object.values(e).some(Boolean)
@@ -1052,21 +1082,51 @@ export default function App() {
                 </p>
               )}
             </div>
+          </div>
+
+          <div className="mt-6 grid lg:grid-cols-[360px_1fr] gap-6 items-start">
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 h-fit lg:sticky lg:top-[calc(4.5rem+env(safe-area-inset-top))]">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0">
+                  <div className="text-[15px] font-semibold text-white">Daily check-in</div>
+                  {!isActiveDay(selectedDate) && <div className="text-[11px] font-mono text-zinc-500">Rest day, nothing owed</div>}
+                </div>
+                <Ring pct={dailyPct} size={44} stroke={3}><span className="text-[11px] font-mono font-bold text-zinc-300">{dailyPct}%</span></Ring>
+              </div>
+              <input type="date" value={selectedDate} min={start} max={end} onChange={e => { const v = e.target.value; if (v) setSelectedDate(v < start ? start : v > end ? end : v) }} className="mt-3 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 min-h-11 text-base sm:text-sm text-white" />
+              <div className="mt-4 space-y-2">
+                {effectiveHabits.map(h => {
+                  const done = !!(entries[selectedDate] || {})[h.id]
+                  return (
+                    <label key={h.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 cursor-pointer transition ${done ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}>
+                      <input type="checkbox" checked={done} onChange={() => toggleHabit(selectedDate, h.id)} className="accent-zinc-900 w-4 h-4" />
+                      <span className={`w-7 h-7 rounded-full grid place-items-center border ${done ? 'bg-zinc-900 border-zinc-900 text-white' : 'bg-zinc-800 border-zinc-700 text-zinc-300'}`}><HabitIcon name={h.icon} size={14} /></span>
+                      <span className={`text-sm flex-1 ${done ? 'text-zinc-900 font-medium' : 'text-zinc-200'}`}>{h.name}</span>
+                      {done && <span className="text-zinc-900"><Check size={14} /></span>}
+                    </label>
+                  )
+                })}
+              </div>
+              <div className="mt-3 flex items-center justify-between text-xs font-mono"><span className="text-zinc-400">{effectiveHabits.filter(h => (entries[selectedDate] || {})[h.id]).length}/{effectiveHabits.length} done</span>{effectiveHabits.length > 0 && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) && <span className="text-white inline-flex items-center gap-1"><Check size={12} /> Perfect day</span>}</div>
+              <div className="mt-3 flex gap-2">
+                <button onClick={() => { const e = entries[selectedDate] || {}; const allDone = effectiveHabits.every(h => e[h.id]); const next = {}; effectiveHabits.forEach(h => next[h.id] = !allDone ? true : false); setEntries(prev => ({ ...prev, [selectedDate]: !allDone ? next : {} })) }} className="flex-1 h-11 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium border border-zinc-700 transition">{effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'Clear day' : 'Mark all done'}</button>
+                <button onClick={() => setSelectedDate(today)} className="px-5 h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">Today</button>
+  
             </div>
             </div>
 
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 sm:p-4">
-              <div className="flex items-center justify-between"><div className="text-[15px] font-semibold text-white">{totalDays} day grid</div><div className="text-xs font-mono text-zinc-500">Missed stays visible · No restart</div></div>
+              <div className="flex items-center justify-between"><div className="text-[15px] font-semibold text-white">{totalDays} day grid</div></div>
               <div className="mt-4 grid grid-cols-7 gap-1 sm:gap-1.5">
                 {allDates.map(d => {
-                  const e = entries[d] || {}; const done = effectiveHabits.filter(h => e[h.id]).length; const perfect = effectiveHabits.length > 0 && done === effectiveHabits.length; const isToday = d === todayYMD(); const isSelected = d === selectedDate; const isFuture = d > todayYMD(); const rest = !isActiveDay(d)
+                  const e = entries[d] || {}; const done = effectiveHabits.filter(h => e[h.id]).length; const perfect = effectiveHabits.length > 0 && done === effectiveHabits.length; const isToday = d === today; const isSelected = d === selectedDate; const isFuture = d > today; const rest = !isActiveDay(d)
                   let bg = 'bg-zinc-800 border-zinc-700'
                   if (rest) bg = 'bg-zinc-950 border-zinc-800/70'
                   else if (isFuture) bg = 'bg-zinc-900 border-zinc-800 opacity-40'
                   else if (perfect) bg = 'bg-white border-white'
                   else if (done > 0) bg = 'bg-zinc-300 border-zinc-300'
-                  else if (d < todayYMD()) bg = 'bg-red-500/15 border-red-500/20'
-                  return (<button key={d} onClick={() => setSelectedDate(d)} className={`relative aspect-square rounded-md border flex flex-col items-center justify-center transition active:scale-95 hover:scale-[1.04] ${bg} ${isSelected ? 'ring-2 ring-inset ring-white' : ''}`} aria-label={rest ? `${d}, rest day` : `${d}, ${done} of ${effectiveHabits.length} done`} title={rest ? `${d} - rest day` : `${d} - ${done}/${effectiveHabits.length}`}><span className={`text-[11px] font-mono tabular-nums ${rest ? 'text-zinc-700' : perfect ? 'text-zinc-900' : done > 0 ? 'text-zinc-900' : d < todayYMD() ? 'text-red-300' : 'text-zinc-500'}`}>{d.slice(8, 10)}</span><span className={`hidden sm:block text-[9px] font-mono ${rest ? 'text-zinc-700' : perfect ? 'text-zinc-700' : 'text-zinc-500'}`}>{rest ? 'rest' : `${done}/${effectiveHabits.length}`}</span>{isToday && <span className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full border border-zinc-900" />}</button>)
+                  else if (d < today) bg = 'bg-red-500/15 border-red-500/20'
+                  return (<button key={d} onClick={() => setSelectedDate(d)} className={`relative aspect-square rounded-md border flex flex-col items-center justify-center transition active:scale-95 hover:scale-[1.04] ${bg} ${isSelected ? 'ring-2 ring-inset ring-white' : ''}`} aria-label={rest ? `${d}, rest day` : `${d}, ${done} of ${effectiveHabits.length} done`} title={rest ? `${d} - rest day` : `${d} - ${done}/${effectiveHabits.length}`}><span className={`text-[11px] font-mono tabular-nums ${rest ? 'text-zinc-700' : perfect ? 'text-zinc-900' : done > 0 ? 'text-zinc-900' : d < today ? 'text-red-300' : 'text-zinc-500'}`}>{d.slice(8, 10)}</span><span className={`hidden sm:block text-[9px] font-mono ${rest ? 'text-zinc-700' : perfect ? 'text-zinc-700' : 'text-zinc-500'}`}>{rest ? 'rest' : `${done}/${effectiveHabits.length}`}</span>{isToday && <span className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full border border-zinc-900" />}</button>)
                 })}
               </div>
               <div className="mt-6">
@@ -1125,10 +1185,10 @@ export default function App() {
               <div className="text-[11px] font-mono tracking-widest text-zinc-500">Weekly</div>
               <div className="mt-4 space-y-2">
                 {(() => { const weeks = []; for (let i = 0; i < allDates.length; i += 7)weeks.push(allDates.slice(i, i + 7)); return weeks.map((week, wi) => {
-                  const perfectInWeek = week.filter(d => effectiveHabits.length && effectiveHabits.every(h => (entries[d] || {})[h.id])).length
-                  const checks = week.reduce((acc, d) => acc + effectiveHabits.filter(h => (entries[d] || {})[h.id]).length, 0)
-                  const pct = week.length * effectiveHabits.length ? Math.round((checks / (week.length * effectiveHabits.length)) * 100) : 0
-                  return (<div key={wi} className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 flex items-center gap-3"><span className="text-xs font-mono text-zinc-500 w-9 shrink-0">W{wi + 1}</span><span className="text-xs text-zinc-400 flex-1">{week[0]?.slice(5)} to {week[week.length - 1]?.slice(5)}</span><span className="text-xs font-mono text-white">{perfectInWeek}/7</span><span className="text-xs font-mono text-zinc-400 w-10 text-right">{pct}%</span></div>)
+                  const perfectInWeek = week.filter(d => isActiveDay(d) && effectiveHabits.length && effectiveHabits.every(h => (entries[d] || {})[h.id])).length
+                  const checks = week.filter(isActiveDay).reduce((acc, d) => acc + effectiveHabits.filter(h => (entries[d] || {})[h.id]).length, 0)
+                  const sched = week.filter(isActiveDay); const pct = sched.length * effectiveHabits.length ? Math.round((checks / (sched.length * effectiveHabits.length)) * 100) : 0
+                  return (<div key={wi} className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 flex items-center gap-3"><span className="text-xs font-mono text-zinc-500 w-9 shrink-0">W{wi + 1}</span><span className="text-xs text-zinc-400 flex-1">{week[0]?.slice(5)} to {week[week.length - 1]?.slice(5)}</span><span className="text-xs font-mono text-white">{perfectInWeek}/{week.filter(isActiveDay).length}</span><span className="text-xs font-mono text-zinc-400 w-10 text-right">{pct}%</span></div>)
                 }) })()}
               </div>
             </div>
@@ -1175,7 +1235,7 @@ export default function App() {
                   </div>
                   <div className="mt-auto pt-3 flex gap-1.5">
                     <button disabled={!a.unlock} onClick={() => shareToX(a)} className={`flex-1 h-10 rounded-full text-xs font-semibold border transition ${a.unlock ? 'bg-zinc-900 border-zinc-900 text-white hover:bg-zinc-800' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>X</button>
-                    <button disabled={!a.unlock} onClick={() => shareToWhatsApp(a)} className={`flex-1 h-10 rounded-full text-xs border transition ${a.unlock ? 'bg-emerald-500 border-emerald-500 text-white hover:bg-emerald-600' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>WhatsApp</button>
+                    <button disabled={!a.unlock} onClick={() => shareToWhatsApp(a)} className={`flex-1 h-10 rounded-full text-xs border transition ${a.unlock ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>WhatsApp</button>
                     <button disabled={!a.unlock} onClick={() => downloadImage(a)} className={`px-3 h-10 rounded-full text-xs border transition ${a.unlock ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}>PNG</button>
                   </div>
                 </div>
@@ -1187,7 +1247,7 @@ export default function App() {
 
       <AnimatePresence>
       {showOnboarding && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowOnboarding(false)} className="fixed inset-0 z-50 grid place-items-center p-4 sm:p-6 bg-zinc-950/80 backdrop-blur-xl" role="dialog" aria-modal="true">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={e => { overlayDown.current = e.target === e.currentTarget }} onClick={e => { if (e.target === e.currentTarget && overlayDown.current) setShowOnboarding(false) }} className="fixed inset-0 z-50 grid place-items-center p-4 sm:p-6 bg-zinc-950/80 backdrop-blur-xl" role="dialog" aria-modal="true" aria-label="Set up your arc">
           <motion.div initial={{ opacity: 0, scale: 0.97, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 8 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} onClick={e => e.stopPropagation()} className="w-full max-w-[760px] max-h-[90dvh] overflow-y-auto overscroll-contain rounded-2xl bg-zinc-900 border border-zinc-800 p-4 sm:p-6 shadow-2xl">
             <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={26} /><span className="font-semibold tracking-[0.16em] text-[13px] text-white">Set up your arc</span> <span className="text-xs font-mono text-zinc-500">Step {onboardStep}/2</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-11 h-11 shrink-0 grid place-items-center rounded-full bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition"><X size={14} /></button></div>
             {onboardStep === 1 && (
@@ -1263,7 +1323,7 @@ export default function App() {
                     </span>
                   </div>
                 </div>
-                <div className="mt-6 flex justify-end"><Button disabled={arcLength < 1} onClick={() => setOnboardStep(2)} className="h-11 px-5">Continue <ArrowRight size={14} /></Button></div>
+                <div className="mt-6 flex justify-end"><Button disabled={arcLength < 1 || tmpDays.length === 0} onClick={() => setOnboardStep(2)} className="h-11 px-5">Continue <ArrowRight size={14} /></Button></div>
               </div>
             )}
             {onboardStep === 2 && (
