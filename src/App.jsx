@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useRef, Suspense, lazy } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, Heart, X, User, Settings, Menu,
+  Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, User, Settings, Menu,
   Footprints, Moon, Salad, Egg, Droplets, Target, Ban, Wind, NotebookPen, Sun, PhoneOff, TreePine, Coins, BrushCleaning, ShowerHead, AlarmClock,
   MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock
 } from 'lucide-react'
@@ -123,7 +123,14 @@ export default function App() {
   const [tmpSelected, setTmpSelected] = useState(new Set())
   const [customName, setCustomName] = useState('')
   const [customList, setCustomList] = useState([])
+  const [showScrollTop, setShowScrollTop] = useState(false)
   const canvasRef = useRef(null)
+
+  useEffect(() => {
+    const onScroll = () => setShowScrollTop(window.scrollY > 600)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   useEffect(() => {
     const old = localStorage.getItem('wa_settings')
@@ -307,7 +314,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#09090b]">
-      <header className="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800">
+      <header className="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/80">
         <div className="max-w-[1040px] mx-auto px-5 sm:px-6 h-[60px] flex items-center justify-between gap-6">
           <button onClick={() => { setView('landing'); window.scrollTo({ top: 0, behavior: 'smooth' }) }} aria-label="WinterArc home" className="flex items-center gap-2.5 shrink-0">
             <Logo size={28} />
@@ -400,14 +407,13 @@ export default function App() {
             <Suspense fallback={null}><ThreeHero /></Suspense>
             <div className="max-w-[1040px] mx-auto px-5 sm:px-6 pt-16 sm:pt-24 pb-12">
             <motion.div variants={stagger} initial="hidden" animate="show" className="text-center">
-              <motion.h1 variants={fadeUp} className="font-[800] tracking-[-0.04em] leading-[0.88] text-[42px] sm:text-[64px] text-white">
-                Disappear for<br />
-                <span className="text-zinc-500">90 days.</span><br />
-                Come back<br />
-                <span className="text-white">unrecognizable.</span>
+              <motion.h1 variants={fadeUp} className="font-[800] tracking-[-0.04em] leading-[0.92] text-[40px] sm:text-[60px] text-white">
+                Lock in while<br />
+                they coast.
               </motion.h1>
-
-              <motion.p variants={fadeUp} className="mt-5 text-[17px] font-medium text-zinc-400">Lock in while they coast.</motion.p>
+              <motion.p variants={fadeUp} className="mt-4 text-[16px] sm:text-[18px] font-medium text-zinc-500 max-w-[520px] mx-auto">
+                Disappear for 90 days. Come back unrecognizable.
+              </motion.p>
               {todayYMD() < DEFAULT_START && (
                 <motion.div variants={fadeUp} className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-400">
                   September is prep. {daysBetween(todayYMD(), DEFAULT_START)} days to Oct 1
@@ -591,13 +597,13 @@ export default function App() {
             </div>
             <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={stagger} className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {templates.map(t => (
-                <motion.div variants={fadeUp} key={t.id} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col hover:border-zinc-700 hover:-translate-y-0.5 transition-all">
+                <motion.div variants={fadeUp} key={t.id} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col hover:border-zinc-700 transition">
                   <div className="flex items-center gap-3">
                     <span className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-300"><HabitIcon name={t.icon} size={16} /></span>
-                    <span className="font-semibold text-white">{t.name}</span>
+                    <span className="font-semibold text-sm text-white">{t.name}</span>
                   </div>
-                  <div className="mt-3 text-sm text-zinc-400 leading-relaxed">{t.desc}</div>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
+                  <div className="mt-2 text-[13px] text-zinc-500 leading-relaxed">{t.desc}</div>
+                  <div className="mt-3 flex flex-wrap gap-1.5 flex-1 content-start">
                     {t.habitIds.map(hid => {
                       const h = PRESETS.find(p => p.id === hid)
                       return <span key={hid} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700/60">{h ? <><HabitIcon name={h.icon} size={11} /> {h.name}</> : hid}</span>
@@ -607,6 +613,9 @@ export default function App() {
                 </motion.div>
               ))}
             </motion.div>
+            <div className="mt-4 text-center">
+              <button onClick={startOnboarding} className="sm:hidden inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-200 text-sm hover:bg-zinc-800 transition">Create custom <ArrowRight size={14} /></button>
+            </div>
           </section>
 
           <section id="challenges" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-16">
@@ -934,6 +943,14 @@ export default function App() {
           </motion.div>
         </motion.div>
       )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top" className="fixed bottom-6 right-6 z-40 w-10 h-10 rounded-full bg-white text-zinc-900 grid place-items-center shadow-lg hover:bg-zinc-100 transition border border-white">
+            <ArrowUp size={16} />
+          </motion.button>
+        )}
       </AnimatePresence>
 
       <footer className="max-w-[1040px] mx-auto px-5 sm:px-6 py-6 border-t border-zinc-800 mt-8">
