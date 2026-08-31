@@ -1,9 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.jsx'
-import ErrorBoundary from './ErrorBoundary.jsx'
-import { initClarity } from './clarity.js'
+import App from './App'
+import ErrorBoundary from './ErrorBoundary'
+import { initClarity } from './clarity'
 
 if ('serviceWorker' in navigator) {
   // claiming an uncontrolled page fires controllerchange on a first visit; that is not an update
@@ -37,7 +37,7 @@ if ('serviceWorker' in navigator) {
 
 initClarity()
 
-createRoot(document.getElementById('root')).render(
+createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
       <App />

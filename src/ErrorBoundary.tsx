@@ -1,12 +1,16 @@
-import { Component } from 'react'
+import { Component, type ReactNode } from 'react'
 
-const KEYS = ['wa_settings', 'wa_settings_v2', 'wa_habits', 'wa_habits_v2', 'wa_entries', 'wa_stars']
+import { STORAGE_KEYS } from '@/lib/storage'
+
 const RECOVERY_FLAG = 'wa_recovered_once'
 
-export default class ErrorBoundary extends Component {
-  state = { error: null, recovering: false }
+interface Props { children?: ReactNode }
+interface State { error: Error | null; recovering: boolean }
 
-  static getDerivedStateFromError(error) {
+export default class ErrorBoundary extends Component<Props, State> {
+  state: State = { error: null, recovering: false }
+
+  static getDerivedStateFromError(error: Error): Partial<State> {
     return { error }
   }
 
@@ -29,7 +33,7 @@ export default class ErrorBoundary extends Component {
   }
 
   clearAndReload = () => {
-    for (const k of KEYS) {
+    for (const k of STORAGE_KEYS) {
       try { localStorage.removeItem(k) } catch {}
     }
     try { sessionStorage.removeItem(RECOVERY_FLAG) } catch {}

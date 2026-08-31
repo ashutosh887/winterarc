@@ -1,6 +1,13 @@
+import type { ComponentType, ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
-export function Eyebrow({ icon: Icon, className, children }) {
+type IconComponent = ComponentType<{ size?: number; className?: string }>
+
+export function Eyebrow({ icon: Icon, className, children }: {
+  icon?: IconComponent
+  className?: string
+  children?: ReactNode
+}) {
   return (
     <div className={cn('inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500', className)}>
       {Icon ? <Icon size={12} /> : null}
@@ -9,7 +16,12 @@ export function Eyebrow({ icon: Icon, className, children }) {
   )
 }
 
-export function PageHeading({ icon, eyebrow, title, subtitle }) {
+export function PageHeading({ icon, eyebrow, title, subtitle }: {
+  icon?: IconComponent
+  eyebrow?: ReactNode
+  title?: ReactNode
+  subtitle?: ReactNode
+}) {
   return (
     <header>
       {eyebrow ? <Eyebrow icon={icon}>{eyebrow}</Eyebrow> : null}
@@ -19,7 +31,13 @@ export function PageHeading({ icon, eyebrow, title, subtitle }) {
   )
 }
 
-export function IconChip({ icon: Icon, size = 36, active = false, className, children }) {
+export function IconChip({ icon: Icon, size = 36, active = false, className, children }: {
+  icon?: IconComponent
+  size?: number
+  active?: boolean
+  className?: string
+  children?: ReactNode
+}) {
   return (
     <span
       style={{ width: size, height: size }}

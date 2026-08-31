@@ -1,8 +1,15 @@
-import { useId } from 'react'
+import { useId, type ReactNode } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export function Disclosure({ open, onToggle, title, lead, className, children }) {
+export function Disclosure({ open, onToggle, title, lead, className, children }: {
+  open: boolean
+  onToggle: () => void
+  title?: ReactNode
+  lead?: ReactNode
+  className?: string
+  children?: ReactNode
+}) {
   const panelId = useId()
   return (
     <div className={className}>

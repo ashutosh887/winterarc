@@ -1,7 +1,15 @@
+import type { ReactNode } from 'react'
 import { Check, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export function HabitTile({ icon, name, desc, selected, onToggle, onRemove }) {
+export function HabitTile({ icon, name, desc, selected, onToggle, onRemove }: {
+  icon?: ReactNode
+  name: string
+  desc?: string
+  selected?: boolean
+  onToggle?: () => void
+  onRemove?: () => void
+}) {
   return (
     <div
       className={cn(
