@@ -1,38 +1,29 @@
 # WinterArc
 
-92 days. Oct 1 to Dec 31. No restart. Local first.
+A 92-day habit tracker. Private by default.
 
-Pick 3 to 5 habits. Mark them each day. The grid keeps you honest.
+Pick a few habits. Check them daily. The grid keeps you honest. No account, no cloud. Data stays on your device and works offline.
 
-Live at https://trywinterarc.vercel.app
+Live: https://trywinterarc.vercel.app
 
-## What it does
-
-- 92-day grid. Fill any past date, missed stays red.
-- Three tiers plus templates. All free.
-- Rings for each habit, streaks, achievements.
-- Share to X, WhatsApp, or download a PNG. Export JSON or CSV. Copy a prompt for your LLM.
-- Works offline as a PWA. No login.
-
-## Stack
-
-Vite, React, Tailwind, Framer Motion. Three.js is lazy. PWA via vite-plugin-pwa.
-
-## Run it
+## Quick start
 
 ```bash
 npm install
-npm run dev
-npm run build
+npm run dev      # local
+npm run build    # production
 ```
 
-## Config
+## What's inside
 
-One file: `src/config.ts` for templates, resources, quotes.
+- 92-day grid — missed stays red, no reset
+- Templates and resources in one file: `src/config.ts`
+- Streaks, rings and achievements
+- Share to X / WhatsApp or export PNG, JSON, CSV
 
 ## Contributing
 
-See `CONTRIBUTING.md`. Short PRs win. Reach out on X [@ashutosh887_](https://x.com/ashutosh887_) for ideas.
+See `CONTRIBUTING.md`. Small PRs, conventional commits, `npm run lint` before push.
 
 ## License
 

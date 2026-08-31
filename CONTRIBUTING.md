@@ -1,11 +1,6 @@
-# Contributing to WinterArc
+# Contributing
 
-Thanks for helping. WinterArc is small on purpose. Keep it that way.
-
-## How to help
-
-- Pick an issue, or open one with a clear problem and a small fix.
-- Keep PRs tight. One idea per PR. Less is better.
+WinterArc stays small. One focused change per PR.
 
 ## Setup
 
@@ -15,26 +10,36 @@ npm run dev
 npm run build
 ```
 
-## Where things live
+## Where to edit
 
-- `src/config.ts` — templates, resources, quotes. One file, no backend.
-- `src/App.jsx` — grid, rings, tracker, landing.
-- `index.html` — titles, descriptions, JSON-LD.
-- `public/` — PWA icons, `sitemap.xml`, `robots.txt`.
+- `src/config.ts` — templates, resources, quotes
+- `src/App.jsx` — tracker, grid, landing
+- `src/components/ui/*` — shadcn components
 
-## Rules
+No new deps without discussion. Use `lucide-react` for icons, no emojis.
 
-- Use icons from `lucide-react`. No emojis.
-- Keep copy short and direct. No puff.
-- One border style: `border-zinc-800`, `rounded-2xl`. No shine.
-- Buttons: primary is white, secondary is `bg-zinc-900 border-zinc-800`. All pill, `rounded-full`.
-- No new dependencies without a good reason.
-- Run `npm run lint` and `npm run build` before you push.
+## Raising a PR
 
-## Feedback or ideas?
+1. Fork and branch: `feat/add-minimal-template` or `fix/grid-date-math`
+2. Keep it tiny. One idea.
+3. Use conventional commits: `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`
+4. Run before push:
 
-Open an issue or reach out on X: [@ashutosh887_](https://x.com/ashutosh887_). For code, send a PR against `main`.
+```bash
+npm run lint
+npm run build
+```
 
-## Commits
+5. Open the PR against `main`. Fill the template. Link the issue if there is one. Add a screenshot for UI changes.
 
-We use conventional commits. Example: `feat: add minimal template`, `fix: correct 92-day math`.
+Checks: Husky + commitlint + lint-staged run on commit. CI builds.
+
+## Style
+
+- Borders: `border-zinc-800` + `rounded-2xl`
+- Buttons: `shadcn` `Button` — `default` is white pill, `secondary` is zinc-900. Size `sm` for nav, `default` for CTAs.
+- Copy: short, direct, no hype.
+
+## Ideas or bugs?
+
+Open an issue. Or message [@ashutosh887_](https://x.com/ashutosh887_) on X.

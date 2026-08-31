@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef, lazy, Suspense } from 'react'
+import { useEffect, useMemo, useState, useRef, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, Heart, X, User, Settings, Menu,
