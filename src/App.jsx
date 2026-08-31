@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState, useRef, Suspense, lazy } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, User, Settings, Menu,
+  Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, User, Settings, Menu, LayoutGrid, Compass,
   Footprints, Moon, Salad, Egg, Droplets, Target, Ban, Wind, NotebookPen, Sun, PhoneOff, TreePine, Coins, BrushCleaning, ShowerHead, AlarmClock,
   MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock
 } from 'lucide-react'
-import { resources, templates, challenges, quotes as QUOTES_CFG } from './config'
+import { site, resources, templates, challenges, quotes as QUOTES_CFG } from './config'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -126,7 +126,24 @@ export default function App() {
   const [customName, setCustomName] = useState('')
   const [customList, setCustomList] = useState([])
   const [showScrollTop, setShowScrollTop] = useState(false)
+  const [stars, setStars] = useState(null)
   const canvasRef = useRef(null)
+
+  useEffect(() => {
+    const DAY = 86400000
+    try {
+      const cached = JSON.parse(localStorage.getItem('wa_stars') || 'null')
+      if (cached && Date.now() - cached.at < DAY) { setStars(cached.n); return }
+    } catch {}
+    fetch('https://api.github.com/repos/ashutosh887/winterarc')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (typeof d?.stargazers_count !== 'number') return
+        setStars(d.stargazers_count)
+        try { localStorage.setItem('wa_stars', JSON.stringify({ n: d.stargazers_count, at: Date.now() })) } catch {}
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const onScroll = () => setShowScrollTop(window.scrollY > 600)
@@ -331,6 +348,9 @@ export default function App() {
                 <button onClick={() => setView('dashboard')} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'dashboard' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white'}`}>Dashboard</button>
               </div>
             )}
+            <a href={site.support.github} target="_blank" rel="noreferrer" aria-label="Star WinterArc on GitHub" className="hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-zinc-800 bg-zinc-900 text-[13px] font-medium text-zinc-400 hover:text-white hover:border-zinc-700 transition">
+              <Star size={13} /> {stars === null ? 'Star' : stars}
+            </a>
             <Button onClick={startOnboarding} size="sm" className="rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold px-4 h-8 text-[13px]">
               <ArrowRight size={14} /> {hasData ? 'Edit arc' : 'Start your arc'}
             </Button>
@@ -462,7 +482,7 @@ export default function App() {
           </section>
 
           <section id="features" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-16">
-            <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Sparkles size={12} /> Features</div>
+            <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><LayoutGrid size={12} /> Features</div>
             <h2 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Stay honest.</h2>
             <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">A grid, a ring, and a share card if you want one.</p>
 
@@ -586,9 +606,9 @@ export default function App() {
 
       {view === 'resources' && (
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
-          <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Dumbbell size={12} /> Resources</div>
+          <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Compass size={12} /> Resources</div>
           <h1 className="mt-2 text-[26px] font-bold tracking-tight text-white">Resources that help</h1>
-          <p className="mt-1 text-sm text-zinc-500">Curated. No affiliates. Edit <code className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">src/config.ts</code> to add your own.</p>
+          <p className="mt-1 text-sm text-zinc-500">Everything here is usable without paying. No affiliate links.</p>
           <div className="mt-8 grid gap-6">
             {Object.entries(resources).map(([key, cat]) => (
               <div key={key} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
@@ -604,19 +624,40 @@ export default function App() {
               </div>
             ))}
           </div>
-          <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
-            <div className="flex items-center justify-between"><h3 className="font-semibold text-white flex items-center gap-2"><Star size={14} /> Daily quotes</h3><span className="text-xs font-mono text-zinc-500">Day {stats.dayNum || 1}</span></div>
-            <p className="text-sm text-zinc-300 mt-2">"{quote.q}" <span className="text-zinc-500">- {quote.a}</span></p>
-            <div className="mt-4 grid sm:grid-cols-2 gap-2">
-              {QUOTES.slice(0, 6).map((qq, i) => (
-                <div key={i} className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-                  <div className="text-[11px] font-mono text-zinc-500">Day {i + 1}</div>
-                  <div className="text-sm mt-1 text-zinc-300">"{qq.q}"</div>
-                  <div className="text-xs text-zinc-500">- {qq.a}</div>
-                </div>
-              ))}
+          <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-white flex items-center gap-2"><Star size={14} /> Quote of the day</h2>
+              <span className="text-xs font-mono text-zinc-500">{QUOTES.length} quotes</span>
             </div>
-            <div className="mt-3 text-xs font-mono text-zinc-600 text-center">92 quotes. One per day.</div>
+            <blockquote className="mt-3 text-[15px] leading-6 text-zinc-200">{quote.q}</blockquote>
+            <div className="mt-2 text-xs font-mono text-zinc-500">{quote.a}</div>
+          </div>
+        </main>
+      )}
+
+      {view === 'feedback' && (
+        <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
+          <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><NotebookPen size={12} /> Feedback</div>
+          <h1 className="mt-2 text-[26px] font-bold tracking-tight text-white">Found a bug, want a feature</h1>
+          <p className="mt-1 text-sm text-zinc-500 max-w-[560px]">There is no form here and no analytics. Everything goes through GitHub or X, so you can see what happened to your report.</p>
+          <div className="mt-8 grid sm:grid-cols-3 gap-4">
+            {[
+              { title: 'Report a bug', body: 'Open an issue with what you did and what happened.', label: 'Open an issue', href: site.support.github + '/issues/new' },
+              { title: 'Suggest a feature', body: 'Issues are fine. A pull request is better.', label: 'Read CONTRIBUTING', href: site.support.github + '/blob/main/CONTRIBUTING.md' },
+              { title: 'Just say something', body: 'Short thoughts are easier to send on X.', label: '@ashutosh887_', href: 'https://x.com/ashutosh887_' },
+            ].map(c => (
+              <div key={c.title} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col">
+                <div className="text-sm font-semibold text-white">{c.title}</div>
+                <p className="mt-1.5 text-[13px] leading-5 text-zinc-500 flex-1">{c.body}</p>
+                <a href={c.href} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1.5 self-start px-4 py-2 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-200 text-sm hover:bg-zinc-800 hover:border-zinc-700 transition">
+                  {c.label} <ExternalLink size={12} />
+                </a>
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+            <div className="text-sm font-semibold text-white">Before you file</div>
+            <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">Your data lives in this browser only. If the grid looks wrong, export JSON from the dashboard and attach it. Nothing in the export leaves your machine until you upload it yourself.</p>
           </div>
         </main>
       )}
@@ -858,9 +899,35 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <footer className="max-w-[1040px] mx-auto px-5 sm:px-6 py-6 border-t border-zinc-800 mt-8">
-        <div className="text-center text-[11px] font-mono text-zinc-500">
-          Open source WinterArc tracker — Oct 1 → Dec 31 (92 days, Jan 1 graduation). Local-first, PWA, no login.
+      <footer className="border-t border-zinc-800 mt-12">
+        <div className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-10">
+            <div className="sm:max-w-[300px]">
+              <div className="flex items-center gap-2.5">
+                <Logo size={24} />
+                <span className="font-semibold tracking-[0.16em] text-[12px] text-white">WINTERARC</span>
+              </div>
+              <p className="mt-3 text-[12px] leading-5 text-zinc-500">
+                Open source WinterArc tracker. Oct 1 to Dec 31, 92 days, Jan 1 graduation. Local-first, PWA, no login.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-x-10 gap-y-2 sm:ml-auto text-[13px]">
+              <div className="space-y-2">
+                <button onClick={() => goTo('templates')} className="block text-zinc-400 hover:text-white transition">Templates</button>
+                <button onClick={() => goTo('resources')} className="block text-zinc-400 hover:text-white transition">Resources</button>
+                <button onClick={() => goTo('feedback')} className="block text-zinc-400 hover:text-white transition">Feedback</button>
+              </div>
+              <div className="space-y-2">
+                <a href={site.support.github} target="_blank" rel="noreferrer" className="block text-zinc-400 hover:text-white transition">GitHub</a>
+                <a href={site.support.github + '/blob/main/CONTRIBUTING.md'} target="_blank" rel="noreferrer" className="block text-zinc-400 hover:text-white transition">Contribute</a>
+                <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="block text-zinc-400 hover:text-white transition">X</a>
+              </div>
+            </div>
+          </div>
+          <div className="mt-8 pt-5 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] font-mono text-zinc-500">
+            <span>&copy; {new Date().getFullYear()} {site.author.name}. MIT licensed.</span>
+            <span>Built in public. No trackers.</span>
+          </div>
         </div>
       </footer>
     </div>
