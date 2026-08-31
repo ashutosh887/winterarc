@@ -342,19 +342,19 @@ export default function App() {
   }
   function shareToX(achievement) {
     const text = achievement
-      ? `${achievement.label} - Day ${stats.dayNum}/${totalDays} • ${stats.pct}% • streak ${stats.streak}\nLock in while they coast.\n`
-      : `Day ${stats.dayNum}/${totalDays} • ${stats.perfect} perfect • ${stats.pct}% • streak ${stats.streak}\nDisappear for 90 days. Come back unrecognizable.\n`
+      ? `${achievement.label}. Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done, streak ${stats.streak}.\n${site.tagline}\n`
+      : `Day ${stats.dayNum}/${totalDays}. ${stats.perfect} perfect days, ${stats.pct}% done, streak ${stats.streak}.\n${site.hero}\n`
     const url = site.domain
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'width=600,height=400')
   }
   function shareToWhatsApp(achievement) {
     const text = achievement
-      ? `${achievement.label} unlocked! Day ${stats.dayNum}/${totalDays} • ${stats.pct}% • streak ${stats.streak} - trywinterarc.vercel.app`
-      : `Winter Arc Day ${stats.dayNum}/${totalDays}: ${stats.pct}% • streak ${stats.streak} - trywinterarc.vercel.app - Lock in while they coast.`
+      ? `${achievement.label} unlocked. Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done, streak ${stats.streak}. ${site.domain}`
+      : `WinterArc day ${stats.dayNum}/${totalDays}. ${stats.pct}% done, streak ${stats.streak}. ${site.domain}`
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
   }
   async function nativeShare(achievement) {
-    const text = achievement ? `${achievement.label}: ${achievement.desc}` : `Day ${stats.dayNum}/${totalDays} • ${stats.pct}%`
+    const text = achievement ? `${achievement.label}. ${achievement.desc}` : `Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done`
     if (navigator.share) { try { await navigator.share({ title: 'WinterArc', text, url: location.href }) } catch {} } else { shareToX(achievement) }
   }
   function goTo(next) {
