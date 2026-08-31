@@ -398,7 +398,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-zinc-950">
-      <header className="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800">
+      <header className="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="max-w-[1040px] mx-auto px-5 sm:px-6 h-14 flex items-center justify-between gap-3">
           <button onClick={() => goTo('landing')} aria-label="WinterArc home" className="flex items-center gap-2.5 shrink-0">
             <Logo size={26} />
@@ -1098,7 +1098,7 @@ export default function App() {
 
       <canvas ref={canvasRef} className="hidden" aria-hidden />
 
-      <footer className="border-t border-zinc-800 mt-12">
+      <footer className="border-t border-zinc-800 mt-12" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
           <div className="flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-10">
             <div className="sm:max-w-[300px]">

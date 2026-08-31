@@ -68,6 +68,11 @@ button, a, [role="button"], label { cursor: pointer; }
     radial-gradient(520px 180px at 82% 0%, rgba(161, 161, 170, 0.05), transparent 70%);
 }
 
+/* iOS Safari zooms the page when a focused input is under 16px */
+@media (max-width: 640px) {
+  input, select, textarea { font-size: 16px; }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -77,5 +82,8 @@ button, a, [role="button"], label { cursor: pointer; }
   }
   body {
     @apply bg-background text-foreground antialiased;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    overflow-x: hidden;
   }
 }
