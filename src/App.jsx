@@ -1747,7 +1747,7 @@ export default function App() {
                       <Label className="text-zinc-500">Which days</Label>
                       <button type="button" onClick={() => setTmpDays(ALL_WEEKDAYS)} className="text-[11px] font-mono text-zinc-500 hover:text-white transition">Every day</button>
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="grid grid-cols-7 gap-1">
                       {WEEKDAYS.map(d => {
                         const on = tmpDays.includes(d.i)
                         return (
