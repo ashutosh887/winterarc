@@ -647,13 +647,11 @@ export default function App() {
 
       {view === 'templates' && (
         <main id="main">
-          <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pt-12 pb-2">
+          <section className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
             <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><BookOpen size={12} /> Templates</div>
             <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Start from a template</h1>
-            <p className="mt-1 text-sm text-zinc-500">Pick one, then edit it in setup.</p>
-          </section>
-          <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pb-12">
-            <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={stagger} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <p className="mt-1.5 text-sm text-zinc-500">Pick one, then edit it in setup. Nothing here is locked in.</p>
+            <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={stagger} className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {templates.map(t => (
                 <motion.div variants={fadeUp} key={t.id} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col hover:border-zinc-700 transition">
                   <div className="flex items-center gap-3">
@@ -672,7 +670,6 @@ export default function App() {
               ))}
             </motion.div>
           </section>
-
         </main>
       )}
 
@@ -680,8 +677,8 @@ export default function App() {
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
           <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Compass size={12} /> Resources</div>
           <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Tools worth using</h1>
-          <p className="mt-1 text-sm text-zinc-500">Everything here is usable without paying. No affiliate links.</p>
-          <div className="mt-8 grid gap-6">
+          <p className="mt-1.5 text-sm text-zinc-500">Everything here is usable without paying. No affiliate links.</p>
+          <div className="mt-8 space-y-6">
             {Object.entries(resources).map(([key, cat]) => (
               <div key={key} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
                 <div className="text-[15px] font-semibold text-white">{cat.title}</div>
