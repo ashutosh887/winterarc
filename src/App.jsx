@@ -109,11 +109,9 @@ function ThreeHero() {
 function Logo({ size = 32 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden>
-      <circle cx="32" cy="32" r="30" fill="#18181b" stroke="#27272a" />
-      <path d="M12 44 L26 18 L32 30 L38 22 L52 44 Z" fill="none" stroke="#fafafa" strokeWidth="2.2" strokeLinejoin="round" />
-      <circle cx="32" cy="26" r="3.2" fill="#fafafa" />
-      <path d="M28 34 C28 31 30 29 32 29 C34 29 36 31 36 34 L33.5 38 L30.5 38 Z" fill="#fafafa" opacity="0.95" />
-      <path d="M26 38 Q32 42 38 38" stroke="#a1a1aa" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+      <rect width="64" height="64" rx="14" fill="#fafafa" />
+      <path d="M14 44 L24 20 L32 32 L40 20 L50 44" fill="none" stroke="#09090b" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M24 44 L32 32 L40 44" fill="none" stroke="#09090b" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" opacity="0.18" />
     </svg>
   )
 }
@@ -425,8 +423,9 @@ export default function App() {
       {view === 'landing' && (
         <main id="main">
           {/* HERO */}
-          <section className="relative max-w-[1040px] mx-auto px-5 sm:px-6 pt-14 sm:pt-20 pb-10 overflow-hidden aurora rounded-2xl border border-zinc-800 mt-4 sm:mt-6">
+          <section className="relative overflow-hidden aurora border-b border-zinc-800">
             <Suspense fallback={null}><ThreeHero /></Suspense>
+            <div className="max-w-[1040px] mx-auto px-5 sm:px-6 pt-14 sm:pt-20 pb-10">
             <motion.div variants={stagger} initial="hidden" animate="show" className="text-center">
               <motion.div variants={fadeUp} className="flex justify-center">
                 <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/70 text-[11px] font-mono tracking-widest text-zinc-400">
@@ -508,6 +507,7 @@ export default function App() {
                 </div>
               </div>
             </motion.div>
+            </div>
           </section>
 
           {/* FEATURES — left/right, no fluff */}
@@ -753,6 +753,17 @@ export default function App() {
         </main>
       )}
 
+      {view === 'tracker' && !hasData && (
+        <main className="max-w-[640px] mx-auto px-5 sm:px-6 py-16 text-center">
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-8">
+            <div className="w-10 h-10 rounded-xl bg-white text-zinc-900 grid place-items-center mx-auto"><Sparkles size={18} /></div>
+            <h2 className="mt-4 text-xl font-bold text-white">No arc yet</h2>
+            <p className="mt-2 text-sm text-zinc-500">Start your arc to see the tracker. It takes 30 seconds.</p>
+            <Button onClick={startOnboarding} className="mt-6">Start your arc</Button>
+          </div>
+        </main>
+      )}
+
       {view === 'tracker' && hasData && (
         <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-6">
           <motion.div initial="hidden" animate="show" variants={stagger} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -946,8 +957,8 @@ export default function App() {
 
       <AnimatePresence>
       {showOnboarding && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center p-4 sm:p-6 bg-zinc-950/80 backdrop-blur-xl" role="dialog" aria-modal="true">
-          <motion.div initial={{ opacity: 0, scale: 0.97, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 8 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} className="w-full max-w-[760px] max-h-[90dvh] overflow-y-auto overscroll-contain rounded-[24px] bg-zinc-900 border border-zinc-800 p-4 sm:p-6 shadow-2xl">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowOnboarding(false)} className="fixed inset-0 z-50 grid place-items-center p-4 sm:p-6 bg-zinc-950/80 backdrop-blur-xl" role="dialog" aria-modal="true">
+          <motion.div initial={{ opacity: 0, scale: 0.97, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 8 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} onClick={e => e.stopPropagation()} className="w-full max-w-[760px] max-h-[90dvh] overflow-y-auto overscroll-contain rounded-[24px] bg-zinc-900 border border-zinc-800 p-4 sm:p-6 shadow-2xl">
             <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={26} /><span className="font-semibold tracking-[0.13em] text-sm text-white">Set up your arc</span> <span className="text-xs font-mono text-zinc-500">Step {onboardStep}/3</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-8 h-8 grid place-items-center rounded-full bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition"><X size={14} /></button></div>
             {onboardStep === 1 && (
               <div className="mt-6">
