@@ -893,17 +893,17 @@ export default function App() {
       <AnimatePresence>
       {showOnboarding && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowOnboarding(false)} className="fixed inset-0 z-50 grid place-items-center p-4 sm:p-6 bg-zinc-950/80 backdrop-blur-xl" role="dialog" aria-modal="true">
-          <motion.div initial={{ opacity: 0, scale: 0.97, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 8 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} onClick={e => e.stopPropagation()} className="w-full max-w-[760px] max-h-[90dvh] overflow-y-auto overscroll-contain rounded-[24px] bg-zinc-900 border border-zinc-800 p-4 sm:p-6 shadow-2xl">
+          <motion.div initial={{ opacity: 0, scale: 0.97, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 8 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} onClick={e => e.stopPropagation()} className="w-full max-w-[760px] max-h-[90dvh] overflow-y-auto overscroll-contain rounded-3xl bg-zinc-900 border border-zinc-800 p-4 sm:p-6 shadow-2xl">
             <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Logo size={26} /><span className="font-semibold tracking-[0.13em] text-sm text-white">Set up your arc</span> <span className="text-xs font-mono text-zinc-500">Step {onboardStep}/2</span></div><button onClick={() => setShowOnboarding(false)} aria-label="Close" className="w-8 h-8 grid place-items-center rounded-full bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition"><X size={14} /></button></div>
             {onboardStep === 1 && (
               <div className="mt-6">
-                <h2 className="text-xl font-bold text-white">Set up your arc</h2>
-                <p className="text-sm text-zinc-400 mt-1">Stored locally. No account.</p>
+                <h2 className="text-xl font-bold text-white">Name and dates</h2>
+                <p className="text-sm text-zinc-400 mt-1">Saved in this browser. No account.</p>
                 <div className="mt-4 space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="arc-name" className="text-zinc-400">Your name</Label>
                     <Input id="arc-name" value={tmpName} onChange={e => setTmpName(e.target.value)} placeholder="Your name" autoFocus />
-                    <div className="text-xs text-zinc-500">Leave blank and we'll say your arc. Example: Ashutosh</div>
+                    <div className="text-xs text-zinc-500">Leave it blank and the app just says your arc. Example: Ashutosh</div>
                   </div>
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5"><Label htmlFor="arc-start" className="text-zinc-400">Start</Label><Input id="arc-start" type="date" value={tmpStart} onChange={e => setTmpStart(e.target.value)} /></div>
