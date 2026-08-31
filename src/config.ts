@@ -4,8 +4,7 @@ export const site = {
   tagline: 'Lock in while they coast.',
   hero: 'Disappear for 90 days. Come back unrecognizable.',
   author: { name: 'Ashutosh Jha', url: 'https://ashutosh887.in', github: 'https://github.com/ashutosh887/winterarc', handle: 'ashutosh887_' },
-  builtOn: 'Vercel',
-  support: { cta: 'Star on GitHub. It helps', github: 'https://github.com/ashutosh887/winterarc' },
+  support: { github: 'https://github.com/ashutosh887/winterarc' },
 }
 
 export const resources: Record<string, { title: string; items: { name: string; url: string; desc: string }[] }> = {
