@@ -701,7 +701,7 @@ export default function App() {
         </main>
       )}
 
-      {view === 'tracker' && !hasData && (
+      {(view === 'tracker' || view === 'dashboard') && !hasData && (
         <main className="max-w-[640px] mx-auto px-5 sm:px-6 py-16 text-center">
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-8">
             <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 text-white grid place-items-center mx-auto"><ArrowRight size={18} /></div>
