@@ -1,23 +1,19 @@
-## What does this PR do?
+## What
 
-<!-- one sentence -->
+<!-- One sentence on what this change does. -->
 
-## Why?
+## Why
 
-<!-- problem, not solution -->
+<!-- The problem or the reason. -->
 
-## How?
+## How
 
-<!-- key change, keep short -->
+<!-- The key change, kept short. Screenshot for UI changes. -->
 
-## Checks
+## Checklist
 
-- [ ] One focused change
-- [ ] `lucide-react` icons only, no emojis
-- [ ] `npm run lint` passes
+- [ ] `npm run lint` passes with 0 warnings
 - [ ] `npm run build` passes
-- [ ] Screenshot added (if UI)
-
-## Type
-
-feat / fix / docs / refactor / chore
+- [ ] Title uses a conventional commit prefix (`feat:`, `fix:`, `docs:`, ...)
+- [ ] No console errors or warnings in the browser
+- [ ] Checked responsive layout on mobile and desktop

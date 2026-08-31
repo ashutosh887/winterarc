@@ -1,45 +1,46 @@
 # Contributing
 
-WinterArc stays small. One focused change per PR.
+One focused change per pull request.
 
-## Setup
+## Run it
 
 ```bash
 npm install
 npm run dev
-npm run build
 ```
 
-## Where to edit
-
-- `src/config.ts` — templates, resources, quotes
-- `src/App.jsx` — tracker, grid, landing
-- `src/components/ui/*` — shadcn components
-
-No new deps without discussion. Use `lucide-react` for icons, no emojis.
-
-## Raising a PR
-
-1. Fork and branch: `feat/add-minimal-template` or `fix/grid-date-math`
-2. Keep it tiny. One idea.
-3. Use conventional commits: `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`
-4. Run before push:
+## Before you push
 
 ```bash
-npm run lint
-npm run build
+npm run lint    # oxlint, must report 0 errors and 0 warnings
+npm run build   # must pass
 ```
 
-5. Open the PR against `main`. Fill the template. Link the issue if there is one. Add a screenshot for UI changes.
+## Commits
 
-Checks: Husky + commitlint + lint-staged run on commit. CI builds.
+Conventional commits are enforced by commitlint via a husky `commit-msg` hook.
+lint-staged runs `oxlint --fix` on staged files in the `pre-commit` hook.
 
-## Style
+```
+feat: add minimal template
+fix: correct grid date offset
+docs: update contributing guide
+```
 
-- Borders: `border-zinc-800` + `rounded-2xl`
-- Buttons: `shadcn` `Button` — `default` is white pill, `secondary` is zinc-900. Size `sm` for nav, `default` for CTAs.
-- Copy: short, direct, no hype.
+Types: `feat`, `fix`, `docs`, `refactor`, `chore`, `perf`, `test`, `build`, `ci`, `style`, `revert`.
 
-## Ideas or bugs?
+## Adding content
 
-Open an issue. Or message [@ashutosh887_](https://x.com/ashutosh887_) on X.
+Templates, resources, quotes and challenges all live in `src/config.ts`.
+Add an entry there instead of editing components. Resource links must be real and reachable.
+Use `lucide-react` icon names, no emoji.
+
+## Pull requests
+
+Fill in the template: What, Why, How.
+Add a screenshot for any UI change.
+Tick the checklist: lint passes, build passes, conventional commit title, no console errors, responsive checked.
+
+## Issues
+
+Open an issue for bugs and ideas, or message [@ashutosh887_](https://x.com/ashutosh887_) on X.

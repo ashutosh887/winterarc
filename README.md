@@ -1,30 +1,34 @@
 # WinterArc
 
-A 92-day habit tracker. Private by default.
-
-Pick a few habits. Check them daily. The grid keeps you honest. No account, no cloud. Data stays on your device and works offline.
+A habit tracker for the 92 days from October 1 to December 31, with graduation on January 1.
+Everything is stored in your browser. No account, no server, works offline.
 
 Live: https://trywinterarc.vercel.app
 
-## Quick start
+## Stack
+
+React, Vite, Tailwind CSS, shadcn/ui.
+
+## Run locally
 
 ```bash
 npm install
-npm run dev      # local
-npm run build    # production
+npm run dev
+npm run build
+npm run lint
 ```
 
-## What's inside
+## Where things live
 
-- 92-day grid — missed stays red, no reset
-- Templates and resources in one file: `src/config.ts`
-- Streaks, rings and achievements
-- Share to X / WhatsApp or export PNG, JSON, CSV
+- `src/config.ts` is the source of truth for content: templates, resources, quotes, challenges.
+- `src/App.jsx` holds the views and the tracker logic.
+- `src/components/ui/` holds the shadcn components.
+- `public/` holds the icons, OG image, robots.txt and sitemap.xml.
 
 ## Contributing
 
-See `CONTRIBUTING.md`. Small PRs, conventional commits, `npm run lint` before push.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-MIT
+MIT. See [LICENSE](LICENSE).
