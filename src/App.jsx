@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState, Suspense, lazy } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Check, Flame, Trophy, ExternalLink, Sparkles, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, Settings, Menu, LayoutGrid, Compass,
+  Check, Flame, Trophy, ExternalLink, Flag, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, Settings, Menu, LayoutGrid, Compass,
   Footprints, Moon, Salad, Egg, Droplets, Target, Ban, Wind, NotebookPen, Sun, PhoneOff, TreePine, Coins, BrushCleaning, ShowerHead, AlarmClock,
   MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone, Copy, ChevronDown, Share2, MessageCircle, ImageDown, MoreHorizontal, Info
 } from 'lucide-react'
 import { site, resources, templates, challenges, quotes as QUOTES_CFG } from './config'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Eyebrow, PageHeading, IconChip } from '@/components/app/Surface'
 import { Disclosure } from '@/components/app/Disclosure'
+import { HabitTile } from '@/components/app/HabitTile'
 const ThreeHero = lazy(() => import('./ThreeHero'))
 
 const ICON_MAP = {
@@ -19,7 +19,7 @@ const ICON_MAP = {
   bookopen: BookOpen, wind: Wind, notebookpen: NotebookPen, sun: Sun, phoneoff: PhoneOff, treepine: TreePine, coins: Coins,
   brushcleaning: BrushCleaning, showerhead: ShowerHead, alarmclock: AlarmClock, flame: Flame, snowflake: Snowflake, star: Star,
   zap: Zap, shield: Shield, mountainSnow: MountainSnow, hourglass: Hourglass, gem: Gem, crown: Crown, rocket: Rocket, graduationcap: GraduationCap,
-  check: Check, trophy: Trophy, lock: Lock, sparkles: Sparkles, heart: Heart,
+  check: Check, trophy: Trophy, lock: Lock, flag: Flag, heart: Heart,
 }
 function HabitIcon({ name, size = 16, className }) {
   const C = ICON_MAP[name]
@@ -421,7 +421,7 @@ export default function App() {
   function addCustom() {
     if (!customName.trim()) return
     const id = 'custom_' + Date.now()
-    setCustomList(prev => [...prev, { id, name: customName.trim(), icon: 'sparkles', tier: 'custom', desc: 'Custom' }])
+    setCustomList(prev => [...prev, { id, name: customName.trim(), icon: 'flag', tier: 'custom', desc: '' }])
     setTmpSelected(s => new Set([...s, id])); setCustomName('')
   }
   function applyTemplate(tid) {
@@ -1745,8 +1745,43 @@ export default function App() {
                   <p className="mt-2 text-xs text-zinc-500">A template just ticks its habits below. Add or remove any of them after.</p>
                 </div>
                 <div className="mt-2 text-[11px] font-mono tracking-widest text-zinc-500">Selected {tmpSelected.size} {tmpSelected.size > 10 && '· over 10'}</div>
-                {['non-neg', 'extra', 'aesthetic'].map(tier => (<div key={tier} className="mt-5"><div className="text-[11px] font-mono tracking-widest text-zinc-500">{TIER_LABELS[tier]}</div><div className="mt-2 grid sm:grid-cols-2 gap-2">{PRESETS.filter(p => p.tier === tier).map(p => { const sel = tmpSelected.has(p.id); return (<button key={p.id} onClick={() => setTmpSelected(s => { const n = new Set(s); sel ? n.delete(p.id) : n.add(p.id); return n })} className={`text-left rounded-xl border p-3 flex gap-3 items-start transition ${sel ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}><span className={`w-8 h-8 rounded-full grid place-items-center border shrink-0 ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'bg-zinc-800 border-zinc-700 text-zinc-300'}`}><HabitIcon name={p.icon} size={14} /></span><span className="flex-1 min-w-0"><span className={`text-sm font-medium block ${sel ? 'text-zinc-900' : 'text-zinc-200'}`}>{p.name}</span><span className="text-xs text-zinc-500">{p.desc}</span></span><span className={`mt-1 w-5 h-5 rounded-full grid place-items-center border text-xs shrink-0 ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'border-zinc-700 text-transparent'}`}><Check size={12} /></span></button>) })}</div></div>))}
-                <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950 p-3"><div className="text-[11px] font-mono tracking-widest text-zinc-500">Custom habit</div><div className="mt-2 flex gap-2"><Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. No sugar, 3L water" onKeyDown={e => e.key === 'Enter' && addCustom()} className="h-11" maxLength={60} /><Button variant="secondary" className="h-11 px-5" onClick={addCustom}>Add</Button></div>{customList.length > 0 && (<div className="mt-3 flex flex-wrap gap-2">{customList.map(c => (<Badge key={c.id} variant="secondary" className="gap-1.5">{c.name} <button onClick={() => { setCustomList(prev => prev.filter(x => x.id !== c.id)); setTmpSelected(s => { const n = new Set(s); n.delete(c.id); return n }) }} className="ml-1 hover:text-destructive"><X size={12} /></button></Badge>))}</div>)}</div>
+                {['non-neg', 'extra', 'aesthetic', 'custom'].map(tier => {
+                  const items = tier === 'custom' ? customList : PRESETS.filter(p => p.tier === tier)
+                  if (tier === 'custom' && items.length === 0) return null
+                  return (
+                    <div key={tier} className="mt-5">
+                      <div className="text-[11px] font-mono tracking-widest text-zinc-500">{TIER_LABELS[tier]}</div>
+                      <div className="mt-2 grid sm:grid-cols-2 gap-2">
+                        {items.map(p => (
+                          <HabitTile
+                            key={p.id}
+                            icon={<HabitIcon name={p.icon} size={14} />}
+                            name={p.name}
+                            desc={p.desc}
+                            selected={tmpSelected.has(p.id)}
+                            onToggle={() => setTmpSelected(prev => {
+                              const next = new Set(prev)
+                              if (next.has(p.id)) next.delete(p.id); else next.add(p.id)
+                              return next
+                            })}
+                            onRemove={tier === 'custom' ? () => {
+                              setCustomList(prev => prev.filter(x => x.id !== p.id))
+                              setTmpSelected(prev => { const next = new Set(prev); next.delete(p.id); return next })
+                            } : undefined}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+                <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950 p-3">
+                  <div className="text-[11px] font-mono tracking-widest text-zinc-500">Add your own</div>
+                  <div className="mt-2 flex gap-2">
+                    <Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. Run 5km" onKeyDown={e => e.key === 'Enter' && addCustom()} className="h-11" maxLength={60} />
+                    <Button variant="secondary" className="h-11 px-5 shrink-0" onClick={addCustom}>Add</Button>
+                  </div>
+                  <p className="mt-2 text-xs text-zinc-500">It joins the Custom group above, ticked and ready.</p>
+                </div>
               </div>
             )}
             {onboardStep === 2 && (
