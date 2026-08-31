@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState, Suspense, lazy } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
 import {
-  Check, Flame, Trophy, ExternalLink, Flag, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, Menu, LayoutGrid, Compass,
+  Check, Flame, Trophy, ExternalLink, Flag, Snowflake, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, X, Menu, LayoutGrid, Compass,
   Footprints, Moon, Salad, Egg, Droplets, Target, Ban, Wind, NotebookPen, Sun, PhoneOff, TreePine, Coins, BrushCleaning, ShowerHead, AlarmClock,
-  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone, Pencil, Copy, ChevronDown, ChevronLeft, ChevronRight, Share2, MessageCircle, ImageDown, MoreHorizontal, Info
+  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Smartphone, Pencil, Copy, ChevronDown, ChevronLeft, ChevronRight, Share2, MessageCircle, ImageDown, MoreHorizontal, Info
 } from 'lucide-react'
 import { site, resources, templates, challenges, quotes as QUOTES_CFG } from './config'
 import { Button } from '@/components/ui/button'
@@ -12,14 +12,15 @@ import { Label } from '@/components/ui/label'
 import { Eyebrow, PageHeading, IconChip } from '@/components/app/Surface'
 import { Disclosure } from '@/components/app/Disclosure'
 import { HabitTile } from '@/components/app/HabitTile'
+import QuietBoundary from '@/components/app/QuietBoundary'
 const ThreeHero = lazy(() => import('./ThreeHero'))
 
 const ICON_MAP = {
   dumbbell: Dumbbell, footprints: Footprints, moon: Moon, salad: Salad, egg: Egg, droplets: Droplets, target: Target, ban: Ban,
   bookopen: BookOpen, wind: Wind, notebookpen: NotebookPen, sun: Sun, phoneoff: PhoneOff, treepine: TreePine, coins: Coins,
   brushcleaning: BrushCleaning, showerhead: ShowerHead, alarmclock: AlarmClock, flame: Flame, snowflake: Snowflake, star: Star,
-  zap: Zap, shield: Shield, mountainSnow: MountainSnow, hourglass: Hourglass, gem: Gem, crown: Crown, rocket: Rocket, graduationcap: GraduationCap,
-  check: Check, trophy: Trophy, lock: Lock, flag: Flag, heart: Heart,
+  zap: Zap, mountainSnow: MountainSnow, hourglass: Hourglass, gem: Gem, crown: Crown, rocket: Rocket, graduationcap: GraduationCap,
+  check: Check, trophy: Trophy, flag: Flag,
 }
 function HabitIcon({ name, size = 16, className }) {
   const C = ICON_MAP[name]
@@ -183,6 +184,7 @@ export default function App() {
   const [streakInfo, setStreakInfo] = useState(false)
   const [weeksOpen, setWeeksOpen] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
+  const [resetting, setResetting] = useState(false)
   const [backupBeforeReset, setBackupBeforeReset] = useState(true)
   const [promptCopied, setPromptCopied] = useState(false)
   const canvasRef = useRef(null)
@@ -333,10 +335,7 @@ export default function App() {
 
   const stats = useMemo(() => {
     let perfect = 0, totalChecked = 0, totalPossible = 0, cur = 0, best = 0, c = 0, scheduled = 0
-    const isPerfect = d => {
-      const e = entries[d] || {}
-      return effectiveHabits.length > 0 && effectiveHabits.every(h => e[h.id])
-    }
+    const isPerfect = isPerfectDay
     allDates.forEach(d => {
       const e = entries[d] || {}
       if (!isActiveDay(d)) return
@@ -365,13 +364,15 @@ export default function App() {
     const perfectPct = scheduled ? Math.round((perfect / scheduled) * 100) : 0
     const dayNum = today < start ? 0 : today > end ? totalDays : daysBetween(start, today)
     return { perfect, scheduled, totalChecked, totalPossible, pct, perfectPct, streak: cur, bestStreak: best, dayNum, remaining: Math.max(0, totalDays - dayNum) }
-  }, [allDates, entries, effectiveHabits, start, end, totalDays, isActiveDay, today])
+  }, [allDates, entries, effectiveHabits, start, end, totalDays, isActiveDay, isPerfectDay, today])
 
-  const dailyPct = useMemo(() => {
+  const dayDoneCount = useMemo(() => {
     const e = entries[selectedDate] || {}
-    const done = effectiveHabits.filter(h => e[h.id]).length
-    return effectiveHabits.length ? Math.round((done / effectiveHabits.length) * 100) : 0
+    return effectiveHabits.filter(h => e[h.id]).length
   }, [entries, selectedDate, effectiveHabits])
+  const dayComplete = effectiveHabits.length > 0 && dayDoneCount === effectiveHabits.length
+  const dailyPct = effectiveHabits.length ? Math.round((dayDoneCount / effectiveHabits.length) * 100) : 0
+  const dayPct = totalDays ? Math.round((stats.dayNum / totalDays) * 100) : 0
 
   const quote = useMemo(() => (QUOTES.length ? QUOTES[stats.dayNum % QUOTES.length] : ''), [stats.dayNum])
 
@@ -486,16 +487,43 @@ export default function App() {
       ctx.fill()
     }
 
+    // same mark as the favicon and the OG image, so the three read as one brand
+    const mark = (cx, cy, r) => {
+      const u = r / 32
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2)
+      ctx.fillStyle = '#18181b'; ctx.fill()
+      ctx.strokeStyle = '#3f3f46'; ctx.lineWidth = 2 * u; ctx.stroke()
+      const pt = (x, y) => [cx + (x - 32) * u, cy + (y - 32) * u]
+      const poly = (pts, fill) => {
+        ctx.beginPath()
+        pts.forEach(([x, y], i) => { const [a, b] = pt(x, y); i ? ctx.lineTo(a, b) : ctx.moveTo(a, b) })
+        ctx.closePath(); ctx.fillStyle = fill; ctx.fill()
+      }
+      poly([[11, 45], [26, 19], [34, 33], [39, 25], [53, 45]], '#fafafa')
+      poly([[22.2, 27.5], [29.8, 27.5], [26, 21]], '#18181b')
+    }
+    mark(PAD + 15, 62, 15)
     ctx.fillStyle = '#fafafa'; ctx.font = '700 21px ui-sans-serif,system-ui'
-    ctx.fillText('WINTERARC', PAD, 70)
-    const markWidth = ctx.measureText('WINTERARC').width
+    ctx.fillText('WINTERARC', PAD + 40, 70)
+    const markWidth = 40 + ctx.measureText('WINTERARC').width
     ctx.fillStyle = '#52525b'; ctx.font = '400 17px ui-monospace,monospace'
     ctx.fillText(site.tagline, PAD + markWidth + 18, 70)
 
     ctx.fillStyle = '#fafafa'; ctx.font = '800 58px ui-sans-serif,system-ui'
     ctx.fillText(achievement ? achievement.label : `Day ${stats.dayNum} of ${totalDays}`, PAD, 148)
     ctx.fillStyle = '#a1a1aa'; ctx.font = '400 21px ui-sans-serif,system-ui'
-    const sub = achievement ? achievement.desc : effectiveHabits.map(h => h.name).join(', ')
+    // never cut a habit name mid-word on a public image; drop to a count instead
+    const names = effectiveHabits.map(h => h.name)
+    let sub = achievement ? achievement.desc : names.join(', ')
+    if (!achievement && sub.length > 74) {
+      let kept = []
+      for (const n of names) {
+        if ([...kept, n].join(', ').length > 60) break
+        kept.push(n)
+      }
+      const rest = names.length - kept.length
+      sub = kept.length ? `${kept.join(', ')} and ${rest} more` : `${names.length} habits`
+    }
     ctx.fillText(sub.length > 74 ? `${sub.slice(0, 71)}...` : sub, PAD, 184)
 
     const cells = [
@@ -616,8 +644,8 @@ export default function App() {
     if (view !== 'tracker' || !hasData || showOnboarding || confirmReset) return
     const onKey = e => {
       if (e.metaKey || e.ctrlKey || e.altKey) return
-      const tag = document.activeElement?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      const el = document.activeElement
+      if (el?.tagName === 'INPUT' || el?.tagName === 'TEXTAREA' || el?.isContentEditable) return
       if (e.key === 'ArrowLeft') { e.preventDefault(); stepDay(-1); return }
       if (e.key === 'ArrowRight') { e.preventDefault(); stepDay(1); return }
       if (e.key === 't' || e.key === 'T') { setSelectedDate(today < end ? today : end); return }
@@ -632,18 +660,39 @@ export default function App() {
   })
 
   useEffect(() => {
-    const open = showOnboarding || confirmReset
+    const open = showOnboarding || confirmReset || shareOpen
     if (!open) return
-    const onKey = e => {
-      if (e.key !== 'Escape') return
+    const restoreTo = document.activeElement
+    const panel = () => document.querySelectorAll('[role="dialog"]')[document.querySelectorAll('[role="dialog"]').length - 1]
+    const focusables = () => Array.from(
+      panel()?.querySelectorAll('button, [href], input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])') ?? []
+    ).filter(el => !el.disabled && el.offsetParent !== null)
+    const raf = requestAnimationFrame(() => focusables()[0]?.focus())
+    const close = () => {
       if (confirmReset) setConfirmReset(false)
+      else if (shareOpen) setShareOpen(false)
       else setShowOnboarding(false)
+    }
+    const onKey = e => {
+      if (e.key === 'Escape') { close(); return }
+      if (e.key !== 'Tab') return
+      const items = focusables()
+      if (!items.length) return
+      const first = items[0], last = items[items.length - 1]
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+      else if (!panel()?.contains(document.activeElement)) { e.preventDefault(); first.focus() }
     }
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', onKey)
-    return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', onKey) }
-  }, [showOnboarding, confirmReset])
+    return () => {
+      cancelAnimationFrame(raf)
+      document.body.style.overflow = prev
+      window.removeEventListener('keydown', onKey)
+      restoreTo?.focus?.()
+    }
+  }, [showOnboarding, confirmReset, shareOpen])
 
   const dayFmt = useMemo(() => new Intl.DateTimeFormat('en', { weekday: 'long', day: 'numeric', month: 'short' }), [])
   function dayLabel(d) {
@@ -703,6 +752,7 @@ export default function App() {
   }
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="min-h-[100dvh] bg-zinc-950">
       {entriesBroken && (
         <div role="alert" className="bg-red-500/10 border-b border-red-500/20 px-5 py-2.5 text-center text-[13px] text-red-200">
@@ -711,7 +761,7 @@ export default function App() {
       )}
       <header className="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800 pt-[env(safe-area-inset-top)]">
         <div className="max-w-[1040px] mx-auto px-5 sm:px-6 h-14 flex items-center justify-between gap-3">
-          <button onClick={() => goTo('landing')} aria-label="WinterArc home" className="flex h-full items-center gap-2.5 shrink-0">
+          <button onClick={() => goTo('landing')} aria-label="WinterArc home" className="flex self-stretch items-center gap-2.5 shrink-0">
             <Logo size={26} />
             <span className="font-semibold tracking-[0.16em] text-[13px] text-white">WINTERARC</span>
           </button>
@@ -722,24 +772,24 @@ export default function App() {
                 <button
                   key={l.label}
                   onClick={l.onClick}
-                  className={`h-10 px-3 rounded-full text-[13px] font-medium transition ${l.active ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
+                  className={`h-11 px-3 rounded-full text-[13px] font-medium transition ${l.active ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}
                 >
                   {l.label}
                 </button>
               ))}
             </nav>
 
-            <a href={site.support.github} target="_blank" rel="noopener noreferrer" onPointerEnter={loadStars} onFocus={loadStars} aria-label="Star WinterArc on GitHub" className="hidden sm:inline-flex items-center gap-1.5 h-10 px-3 rounded-full border border-zinc-800 bg-zinc-900 text-[13px] font-medium text-zinc-400 hover:text-white hover:border-zinc-700 transition">
+            <a href={site.support.github} target="_blank" rel="noopener noreferrer" onPointerEnter={loadStars} onFocus={loadStars} aria-label="Star WinterArc on GitHub" className="hidden sm:inline-flex items-center gap-1.5 h-11 px-3 rounded-full border border-zinc-800 bg-zinc-900 text-[13px] font-medium text-zinc-400 hover:text-white hover:border-zinc-700 transition">
               <Star size={13} /> {stars === null ? 'Star' : stars.toLocaleString()}
             </a>
 
-            <button onClick={startOnboarding} className="inline-flex shrink-0 items-center gap-1.5 h-10 px-4 rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold text-[13px] transition whitespace-nowrap">
+            <button onClick={startOnboarding} className="inline-flex shrink-0 items-center gap-1.5 h-11 px-4 rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold text-[13px] transition whitespace-nowrap">
               <span className="sm:hidden">{hasData ? 'Edit' : 'Set up'}</span>
               <span className="hidden sm:inline">{hasData ? 'Edit arc' : 'Set up your arc'}</span>
               {hasData ? <Pencil size={14} /> : <ArrowRight size={14} />}
             </button>
 
-            <button onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" aria-expanded={mobileMenuOpen} className="lg:hidden shrink-0 w-10 h-10 grid place-items-center rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
+            <button onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" aria-expanded={mobileMenuOpen} className="lg:hidden shrink-0 w-11 h-11 grid place-items-center rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
               {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
@@ -773,7 +823,7 @@ export default function App() {
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 flex items-center gap-3">
             <span className="w-7 h-7 shrink-0 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-400"><Snowflake size={13} /></span>
             <span className="text-sm text-zinc-400 line-clamp-2 sm:truncate">{quote}</span>
-            <span className="ml-auto hidden sm:inline shrink-0 text-[11px] font-mono text-zinc-500 tabular-nums">Day {stats.dayNum} / {totalDays} · {Math.round((stats.dayNum / totalDays) * 100)}%</span>
+            <span className="ml-auto hidden sm:inline shrink-0 text-[11px] font-mono text-zinc-500 tabular-nums">Day {stats.dayNum} / {totalDays} · {dayPct}%</span>
           </motion.div>
           </div>
         </div>
@@ -791,7 +841,7 @@ export default function App() {
               <span className={`w-2 h-2 rounded-full shrink-0 ${perfect ? 'bg-white' : done > 0 ? 'bg-zinc-500' : 'bg-red-500/50'}`} />
               <span className="text-zinc-500">Yesterday</span>
               <span className={perfect ? 'text-white font-semibold' : 'text-zinc-300'}>{perfect ? 'Perfect' : `${done}/${effectiveHabits.length} done`}</span>
-              <button onClick={() => setSelectedDate(prev)} className="ml-auto text-xs px-4 h-9 inline-flex items-center rounded-full underline decoration-zinc-600 hover:text-white transition">View</button>
+              <button onClick={() => setSelectedDate(prev)} className="ml-auto text-xs px-4 h-11 inline-flex items-center rounded-full underline decoration-zinc-600 hover:text-white transition">View</button>
             </div>
           </div>
         )
@@ -800,7 +850,7 @@ export default function App() {
       {view === 'landing' && (
         <main id="main">
           <section className="relative overflow-hidden aurora">
-            {heroReady && <Suspense fallback={null}><ThreeHero /></Suspense>}
+            {heroReady && <QuietBoundary><Suspense fallback={null}><ThreeHero /></Suspense></QuietBoundary>}
             <div className="max-w-[1040px] mx-auto px-5 sm:px-6 min-h-[calc(100svh-3.5rem-env(safe-area-inset-top))] flex flex-col justify-center py-16">
             <motion.div variants={stagger} initial="hidden" animate="show" className="text-center">
               <motion.h1 variants={fadeUp} className="font-[800] tracking-[-0.045em] leading-[0.88] text-[48px] min-[380px]:text-[56px] sm:text-[88px] lg:text-[104px] text-white">
@@ -811,7 +861,7 @@ export default function App() {
                 Disappear for 90 days. Come back unrecognizable.
               </motion.p>
               <motion.p variants={fadeUp} className="mt-4 max-w-[520px] mx-auto text-[15px] leading-6 text-zinc-500">
-                Pick a few habits. Check them off daily. Nothing leaves your device.
+                Pick a few habits. Check them off daily. Your habit data never leaves your browser.
               </motion.p>
 
               <motion.div variants={fadeUp} className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -986,7 +1036,7 @@ export default function App() {
 
               <div className="mt-8 grid sm:grid-cols-3 gap-6">
                 {[
-                  { n: '01', t: 'Set it up', d: 'Your dates, your habits. Five is plenty. Past seven you are lying to yourself.' },
+                  { n: '01', t: 'Set it up', d: 'Your dates, your habits. Five is plenty. Past ten you are lying to yourself.' },
                   { n: '02', t: 'Tap what you did', d: 'Backfill any past date. Forgetting to log is not the same as missing.' },
                   { n: '03', t: 'Watch the grid fill', d: 'Red stays red, and tomorrow stays locked until it arrives.' },
                 ].map(s => (
@@ -1116,7 +1166,7 @@ export default function App() {
 
           <div className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-3">
             <button onClick={() => goTo('landing')} className="font-mono text-[13px] text-white underline decoration-zinc-700 hover:decoration-zinc-400 px-2 h-11">{site.domain.replace('https://', '')}</button>
-            <button onClick={copyLink} className="ml-auto inline-flex items-center gap-1.5 h-9 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">
+            <button onClick={copyLink} className="ml-auto inline-flex items-center gap-1.5 h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">
               {copied ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy link</>}
             </button>
           </div>
@@ -1132,7 +1182,7 @@ export default function App() {
               {
                 title: 'iPhone and iPad',
                 note: 'Safari only. Chrome and in-app browsers cannot install it.',
-                steps: ['Open the site in Safari', 'Tap the Share button in the toolbar', 'Scroll down and tap Add to Home Screen', 'Tap Add'],
+                steps: ['Open the site in Safari', 'Tap the Share button in the toolbar', 'Scroll down and tap Add to home screen', 'Tap Add'],
               },
               {
                 title: 'Android',
@@ -1210,7 +1260,7 @@ export default function App() {
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-8">
             <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 text-white grid place-items-center mx-auto"><ArrowRight size={18} /></div>
-            <h2 className="mt-4 text-[22px] font-bold tracking-tight text-white">No arc yet</h2>
+            <h1 className="mt-4 text-[22px] font-bold tracking-tight text-white">No arc yet</h1>
             <p className="mt-2 text-sm text-zinc-500">Start your arc to see the tracker. It takes 30 seconds.</p>
             <Button onClick={startOnboarding} className="mt-6 h-11 px-5">Start your arc <ArrowRight size={14} /></Button>
           </div>
@@ -1219,49 +1269,41 @@ export default function App() {
 
       {view === 'tracker' && hasData && (
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
+          <h1 className="sr-only">Tracker</h1>
           <motion.div initial="hidden" animate="show" variants={stagger} className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
             <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex items-center gap-2.5">
-              <Ring pct={Math.round((stats.dayNum / totalDays) * 100)} size={44} stroke={3}><span className="text-[11px] font-mono font-bold tabular-nums text-white">{Math.round((stats.dayNum / totalDays) * 100)}%</span></Ring>
+              <Ring pct={dayPct} size={44} stroke={3}><span className="text-[11px] font-mono font-bold tabular-nums text-white">{dayPct}%</span></Ring>
               <div className="min-w-0">
-                <div className="text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-500 truncate">Day</div>
-                <div className="text-[17px] font-bold text-white leading-tight tabular-nums">Day {stats.dayNum}</div>
-                <div className="text-[10px] font-mono text-zinc-500 truncate">{stats.remaining} left</div>
+                <div className="text-[10px] sm:text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-400 truncate">Day</div>
+                <div className="text-[17px] font-bold text-white leading-tight tabular-nums">{stats.dayNum}</div>
+                <div className="text-[10px] font-mono text-zinc-400 truncate">{stats.remaining} left</div>
               </div>
             </motion.div>
             <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex items-center gap-2.5">
-              <Ring pct={stats.perfectPct} size={44} stroke={3}><span className="text-zinc-300"><Flame size={18} /></span></Ring>
+              <Ring pct={stats.perfectPct} size={44} stroke={3}><span className="text-[11px] font-mono font-bold tabular-nums text-white">{stats.perfectPct}%</span></Ring>
               <div className="min-w-0">
-                <div className="text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-500 truncate">Perfect days</div>
+                <div className="text-[10px] sm:text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-400 truncate">Perfect days</div>
                 <div className="text-[17px] font-bold text-white leading-tight">{stats.perfect}<span className="text-xs font-mono text-zinc-500">/{stats.scheduled}</span></div>
-                <div className="text-[10px] font-mono text-zinc-500 truncate">{stats.perfectPct}% of sched</div>
+                <div className="text-[10px] font-mono text-zinc-400 truncate">of {stats.scheduled} days</div>
               </div>
             </motion.div>
             <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex items-center gap-2.5">
               <Ring pct={stats.pct} size={44} stroke={3}><span className="text-xs font-bold tabular-nums text-white">{stats.pct}%</span></Ring>
               <div className="min-w-0">
-                <div className="text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-500 truncate">Completion</div>
+                <div className="text-[10px] sm:text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-400 truncate">Completion</div>
                 <div className="text-[17px] font-bold text-white leading-tight">{stats.totalChecked}<span className="text-xs font-mono text-zinc-500">/{stats.totalPossible}</span></div>
-                <div className="text-[10px] font-mono text-zinc-500 truncate">{activeDays.length < 7 ? `${stats.scheduled} sched days` : 'checks'}</div>
+                <div className="text-[10px] font-mono text-zinc-400 truncate">checks</div>
               </div>
             </motion.div>
-            <motion.div variants={fadeUp} className={`rounded-2xl border border-zinc-800 bg-zinc-900 p-3 ${shareOpen ? 'col-span-2 lg:col-span-4' : 'col-span-2 lg:col-span-1 flex flex-col justify-center'}`}>
-              <button onClick={() => setShareOpen(v => !v)} aria-expanded={shareOpen} className="w-full flex items-center gap-2.5 text-left">
+            <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 col-span-2 lg:col-span-1 flex flex-col justify-center">
+              <button onClick={() => setShareOpen(true)} aria-haspopup="dialog" className="w-full flex items-center gap-2.5 text-left rounded-xl">
                 <IconChip icon={Share2} size={44} />
                 <span className="min-w-0">
                   <span className="block text-[11px] font-mono tracking-widest text-zinc-500">Share</span>
                   <span className="block text-[13px] font-semibold text-white">Post your grid</span>
                 </span>
-                <ChevronDown size={15} className={`ml-auto shrink-0 text-zinc-500 transition-transform ${shareOpen ? 'rotate-180' : ''}`} />
+                <ChevronRight size={15} className="ml-auto shrink-0 text-zinc-500" />
               </button>
-              {shareOpen && (
-                <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <button onClick={() => shareToX()} className="h-11 rounded-full bg-white text-zinc-900 font-semibold text-xs hover:bg-zinc-100 transition inline-flex items-center justify-center gap-1.5"><Share2 size={14} /> X</button>
-                  <button onClick={() => shareToWhatsApp()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MessageCircle size={14} /> WhatsApp</button>
-                  <button onClick={() => downloadImage()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><ImageDown size={14} /> PNG</button>
-                  <button onClick={() => nativeShare()} className="h-11 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs hover:text-white hover:border-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MoreHorizontal size={14} /> More</button>
-                  <p className="col-span-2 sm:col-span-4 text-xs text-zinc-500">X and WhatsApp take text only, so the card downloads to attach. More sends the image.</p>
-                </div>
-              )}
             </motion.div>
           </motion.div>
 
@@ -1270,7 +1312,7 @@ export default function App() {
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="text-[15px] font-semibold text-white">Daily check-in</div>
+                  <h2 className="text-[15px] font-semibold text-white">Daily check-in</h2>
                   {!arcStarted
                     ? <div className="text-[11px] font-mono text-zinc-500">Starts {start}</div>
                     : selectedIsFuture
@@ -1304,8 +1346,7 @@ export default function App() {
                   className="w-11 h-11 shrink-0 grid place-items-center rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white hover:border-zinc-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
                 ><ChevronLeft size={16} /></button>
                 <div className="flex-1 min-w-0 text-center">
-                  <div className="text-sm font-medium text-white">{dayLabel(selectedDate)}</div>
-                  <div className="text-[11px] font-mono text-zinc-500 tabular-nums">{selectedDate}</div>
+                  <div className="text-sm font-medium text-white truncate">{dayLabel(selectedDate)}</div>
                 </div>
                 <button
                   onClick={() => stepDay(1)}
@@ -1314,7 +1355,7 @@ export default function App() {
                   className="w-11 h-11 shrink-0 grid place-items-center rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white hover:border-zinc-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
                 ><ChevronRight size={16} /></button>
               </div>
-              <input type="date" value={selectedDate} min={start} max={today < end ? today : end} disabled={!arcStarted} onChange={e => { const v = e.target.value; if (!v) return; const cap = today < end ? today : end; setSelectedDate(v < start ? start : v > cap ? cap : v) }} className="mt-2 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 min-h-11 text-base sm:text-sm text-zinc-400" />
+              <input type="date" aria-label="Day to check in" value={selectedDate} min={start} max={today < end ? today : end} disabled={!arcStarted} onChange={e => { const v = e.target.value; if (!v) return; const cap = today < end ? today : end; setSelectedDate(v < start ? start : v > cap ? cap : v) }} className="mt-2 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 min-h-11 text-base sm:text-sm text-zinc-400 disabled:opacity-40 disabled:cursor-not-allowed" />
               <div className={`mt-4 space-y-2 ${arcStarted ? '' : 'hidden'}`}>
                 {effectiveHabits.map((h, hi) => {
                   const done = !!(entries[selectedDate] || {})[h.id]
@@ -1343,7 +1384,7 @@ export default function App() {
                 )}
               </div>
               {undo && undo.date === selectedDate && (
-                <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 flex items-center gap-2">
+                <div role="status" aria-live="polite" className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 flex items-center gap-2">
                   <span className="text-xs text-zinc-400">Day cleared.</span>
                   <button
                     onClick={() => { setEntries(prev => ({ ...prev, [undo.date]: { ...undo.entry } })); setUndo(null) }}
@@ -1351,8 +1392,12 @@ export default function App() {
                   >Undo</button>
                 </div>
               )}
-              <div className={`mt-3 flex items-center justify-between text-xs font-mono ${arcStarted ? '' : 'hidden'}`}><span className="text-zinc-400">{effectiveHabits.filter(h => (entries[selectedDate] || {})[h.id]).length}/{effectiveHabits.length} done</span>{effectiveHabits.length > 0 && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) && <span className="text-white inline-flex items-center gap-1"><Check size={12} /> Perfect day</span>}</div>
-              <div className={`mt-3 flex gap-2 ${arcStarted ? '' : 'hidden'}`}>
+              <div className={`mt-3 text-xs font-mono ${arcStarted ? '' : 'hidden'}`}>
+                {dayComplete
+                  ? <span className="text-white inline-flex items-center gap-1"><Check size={12} /> Perfect day</span>
+                  : <span className="text-zinc-400">{dayDoneCount} of {effectiveHabits.length} done</span>}
+              </div>
+              <div className={`mt-3 grid grid-cols-2 gap-2 ${arcStarted ? '' : 'hidden'}`}>
                 <button
                   disabled={selectedIsFuture || effectiveHabits.length === 0}
                   onClick={() => {
@@ -1366,11 +1411,10 @@ export default function App() {
                       return { ...prev, [selectedDate]: kept }
                     })
                   }}
-                  className="flex-1 h-11 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium border border-zinc-700 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-zinc-800"
-                >{effectiveHabits.length > 0 && effectiveHabits.every(h => (entries[selectedDate] || {})[h.id]) ? 'Clear day' : 'Mark all done'}</button>
-                <button disabled={selectedDate === (today < end ? today : end)} onClick={() => setSelectedDate(today < end ? today : end)} className="px-5 h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition disabled:opacity-40 disabled:cursor-not-allowed">Today</button>
-  
-            </div>
+                  className={`h-11 rounded-full text-sm font-semibold border transition disabled:opacity-40 disabled:cursor-not-allowed ${dayComplete ? 'bg-zinc-950 border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700' : 'bg-white border-white text-zinc-900 hover:bg-zinc-100'}`}
+                >{dayComplete ? 'Uncheck all' : 'Mark all done'}</button>
+                <button disabled={selectedDate === (today < end ? today : end)} onClick={() => setSelectedDate(today < end ? today : end)} className="h-11 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm hover:text-white hover:border-zinc-700 transition disabled:opacity-40 disabled:cursor-not-allowed">Go to today</button>
+              </div>
             </div>
               <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
               <div className="flex items-center gap-2">
@@ -1408,7 +1452,7 @@ export default function App() {
               </div>
               <div className="mt-2 text-[10px] font-mono text-zinc-500">last 7 days</div>
               {streakInfo && (
-                <p className="mt-3 pt-3 border-t border-zinc-800 text-[13px] leading-6 text-zinc-500">
+                <p className="mt-3 rounded-xl bg-zinc-950 p-3 text-[13px] leading-6 text-zinc-400">
                   A day counts when every habit is checked. Rest days are skipped, so they never break it. One partial scheduled day ends it. Backfilling repairs it, because the streak reads the grid.
                 </p>
               )}
@@ -1418,10 +1462,10 @@ export default function App() {
 
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-2.5 sm:p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="text-[15px] font-semibold text-white">Your grid</div>
+                <h2 className="text-[15px] font-semibold text-white">Your grid</h2>
                 <button
                   onClick={() => setOpenMonths(openMonths.length === months.length ? [focusMonth] : months.map(m => m.key))}
-                  className="h-9 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 text-xs hover:text-white hover:border-zinc-700 transition"
+                  className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 text-xs hover:text-white hover:border-zinc-700 transition"
                 >
                   {openMonths.length === months.length ? 'Collapse' : `Show all ${totalDays} days`}
                 </button>
@@ -1477,10 +1521,10 @@ export default function App() {
                                 disabled={isFuture}
                                 aria-label={isFuture ? `${d}, not yet` : rest ? `${d}, rest day` : `${d}, ${done} of ${effectiveHabits.length} done`}
                                 title={isFuture ? `${d} - not yet` : rest ? `${d} - rest day` : `${d} - ${done}/${effectiveHabits.length}`}
-                                className={`relative aspect-square rounded-md border flex flex-col items-center justify-center transition ${isFuture ? 'cursor-not-allowed opacity-45' : 'active:scale-95 hover:scale-[1.04]'} ${bg} ${isSelected ? 'ring-2 ring-inset ring-white' : ''}`}
+                                className={`relative min-h-11 sm:min-h-0 sm:aspect-square rounded-md border flex flex-col items-center justify-center transition ${isFuture ? 'cursor-not-allowed opacity-60' : 'active:scale-95 hover:scale-[1.04]'} ${bg} ${isSelected ? 'ring-2 ring-inset ring-white' : ''}`}
                               >
-                                <span className={`text-[11px] font-mono tabular-nums ${rest ? 'text-zinc-700' : perfect ? 'text-zinc-900' : done > 0 ? 'text-zinc-900' : isFuture ? 'text-zinc-600' : 'text-red-300'}`}>{d.slice(8, 10)}</span>
-                                <span className={`hidden sm:block text-[9px] font-mono ${rest || perfect ? 'text-zinc-700' : 'text-zinc-500'}`}>{rest ? 'rest' : isFuture ? '' : `${done}/${effectiveHabits.length}`}</span>
+                                <span className={`text-[11px] font-mono tabular-nums ${rest ? 'text-zinc-500' : perfect ? 'text-zinc-900' : done > 0 ? 'text-zinc-900' : isFuture ? 'text-zinc-400' : 'text-red-300'}`}>{d.slice(8, 10)}</span>
+                                <span className={`hidden sm:block text-[9px] font-mono ${perfect ? 'text-zinc-700' : rest ? 'text-zinc-500' : 'text-zinc-400'}`}>{rest ? 'rest' : isFuture ? '' : `${done}/${effectiveHabits.length}`}</span>
                                 {isToday && <span className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full border border-zinc-900" />}
                               </button>
                             )
@@ -1492,7 +1536,7 @@ export default function App() {
                 })}
               </div>
               <div className="mt-6">
-                <div className="text-[11px] font-mono tracking-widest text-zinc-500">Habit rings</div>
+                <h2 className="text-[11px] font-mono tracking-widest text-zinc-500">Habit rings</h2>
                 <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                   {effectiveHabits.map(h => {
                     const hits = allDates.filter(d => (entries[d] || {})[h.id]).length
@@ -1516,9 +1560,9 @@ export default function App() {
             <Disclosure open={promptOpen} onToggle={() => setPromptOpen(v => !v)} title="Export and LLM prompt">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <button onClick={copyPrompt} className="px-4 h-9 rounded-full bg-white text-zinc-900 text-xs font-semibold hover:bg-zinc-100 transition">{promptCopied ? 'Copied' : 'Copy prompt'}</button>
-                  <button onClick={exportJSON} className="px-4 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">JSON</button>
-                  <button onClick={exportCSV} className="px-4 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">CSV</button>
+                  <button onClick={copyPrompt} className="px-4 h-11 rounded-full bg-white text-zinc-900 text-xs font-semibold hover:bg-zinc-100 transition">{promptCopied ? 'Copied' : 'Copy prompt'}</button>
+                  <button onClick={exportJSON} className="px-4 h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">JSON</button>
+                  <button onClick={exportCSV} className="px-4 h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">CSV</button>
                 </div>
                 <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 overflow-auto max-h-56"><pre className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-words font-mono">{llmPrompt}</pre></div>
                 <div className="mt-2 text-xs text-zinc-500">Paste it with your JSON export. Nothing sends itself.</div>
@@ -1541,6 +1585,35 @@ export default function App() {
       )}
 
       <AnimatePresence>
+        {shareOpen && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onMouseDown={e => { overlayDown.current = e.target === e.currentTarget }}
+            onClick={e => { if (e.target === e.currentTarget && overlayDown.current) setShareOpen(false) }}
+            className="fixed inset-0 z-50 grid place-items-center p-4 bg-zinc-950/80 backdrop-blur-xl"
+            role="dialog" aria-modal="true" aria-label="Share your grid"
+          >
+            <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} onClick={e => e.stopPropagation()} className="w-full max-w-[440px] rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h2 className="text-[22px] font-bold tracking-tight text-white">Post your grid</h2>
+                  <p className="mt-1 text-sm text-zinc-400">Day {stats.dayNum} of {totalDays}, {stats.pct}% done, streak {stats.streak}.</p>
+                </div>
+                <button onClick={() => setShareOpen(false)} aria-label="Close" className="w-11 h-11 -mt-2 -mr-2 shrink-0 grid place-items-center rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition"><X size={18} /></button>
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                <button onClick={() => shareToX()} className="h-11 rounded-full bg-white text-zinc-900 font-semibold text-sm hover:bg-zinc-100 transition inline-flex items-center justify-center gap-1.5"><Share2 size={15} /> X</button>
+                <button onClick={() => shareToWhatsApp()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MessageCircle size={15} /> WhatsApp</button>
+                <button onClick={() => downloadImage()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><ImageDown size={15} /> PNG</button>
+                <button onClick={() => nativeShare()} className="h-11 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm hover:text-white hover:border-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MoreHorizontal size={15} /> More</button>
+              </div>
+              <p className="mt-4 text-[13px] leading-6 text-zinc-400">X and WhatsApp take text only, so the card downloads for you to attach. More sends the image itself.</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {confirmReset && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -1556,11 +1629,11 @@ export default function App() {
               </p>
               <label className="mt-4 flex items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 cursor-pointer">
                 <input type="checkbox" checked={backupBeforeReset} onChange={e => setBackupBeforeReset(e.target.checked)} className="mt-0.5 accent-white w-4 h-4" />
-                <span className="text-[13px] leading-5 text-zinc-300">Download a JSON backup first<span className="block text-zinc-500">Saves the file, then clears.</span></span>
+                <span className="text-[13px] leading-5 text-zinc-300">Export a JSON copy first<span className="block text-zinc-500">Saves the file, then clears. There is no import yet, so it will not load back in.</span></span>
               </label>
               <div className="mt-5 grid grid-cols-2 gap-2">
                 <button onClick={() => setConfirmReset(false)} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-sm hover:text-white hover:border-zinc-700 transition">Keep my arc</button>
-                <button onClick={resetAll} className="h-11 px-4 rounded-full bg-red-500/15 border border-red-500/25 text-red-200 text-sm font-semibold hover:bg-red-500/25 transition">Reset everything</button>
+                <button disabled={resetting} onClick={() => { setResetting(true); resetAll() }} className="h-11 px-4 rounded-full bg-red-500/15 border border-red-500/25 text-red-200 text-sm font-semibold hover:bg-red-500/25 transition disabled:opacity-50 disabled:cursor-not-allowed">{resetting ? 'Resetting' : 'Reset everything'}</button>
               </div>
             </motion.div>
           </motion.div>
@@ -1580,7 +1653,7 @@ export default function App() {
             <button onClick={() => goTo('tracker')} className="h-11 px-5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-sm hover:text-white hover:border-zinc-700 transition">Open tracker</button>
           </div>
 
-          <div className="mt-6 grid lg:grid-cols-3 gap-4">
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4 [&>*]:min-w-0">
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col items-center">
               <div className="text-[11px] font-mono tracking-widest text-zinc-500">Overall</div>
               <div className="mt-4">
@@ -1608,7 +1681,7 @@ export default function App() {
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col">
               <div className="flex items-center justify-between">
                 <div className="text-[11px] font-mono tracking-widest text-zinc-500">Weekly</div>
-                <button onClick={() => setWeeksOpen(v => !v)} aria-expanded={weeksOpen} className="text-[11px] font-mono text-zinc-500 hover:text-white transition">
+                <button onClick={() => setWeeksOpen(v => !v)} aria-expanded={weeksOpen} className="inline-flex items-center min-h-11 px-3 -mr-3 text-[11px] font-mono text-zinc-400 hover:text-white transition">
                   {weeksOpen ? 'Chart' : 'List'}
                 </button>
               </div>
@@ -1652,7 +1725,7 @@ export default function App() {
               <div className="text-[11px] font-mono tracking-widest text-zinc-500">Today</div>
               <blockquote className="mt-3 text-[15px] leading-6 text-zinc-200">{quote}</blockquote>
 
-              <div className="mt-5 pt-4 border-t border-zinc-800 space-y-1">
+              <div className="mt-5 space-y-1">
                 <label htmlFor="dash-name" className="text-[11px] font-mono tracking-widest text-zinc-500">Name on your share card</label>
                 <div className="flex gap-2">
                   <input
@@ -1700,7 +1773,7 @@ export default function App() {
                   {a.unlock && (
                     <button
                       onClick={() => nativeShare(a)}
-                      className={`mt-auto pt-3 self-start inline-flex items-center gap-1.5 text-xs font-medium ${a.unlock ? 'text-zinc-700 hover:text-zinc-900' : 'text-zinc-600'}`}
+                      className="mt-auto pt-3 self-start inline-flex items-center min-h-11 gap-1.5 text-xs font-medium text-zinc-700 hover:text-zinc-900"
                     >
                       <Share2 size={12} /> Share
                     </button>
@@ -1877,7 +1950,7 @@ export default function App() {
                 <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950 p-3">
                   <div className="text-[11px] font-mono tracking-widest text-zinc-500">Add your own</div>
                   <div className="mt-2 flex gap-2">
-                    <Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. Run 5km" onKeyDown={e => e.key === 'Enter' && addCustom()} className="h-11" maxLength={60} />
+                    <Input aria-label="Custom habit name" value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. Run 5km" onKeyDown={e => e.key === 'Enter' && addCustom()} className="h-11" maxLength={60} />
                     <Button variant="secondary" className="h-11 px-5 shrink-0" onClick={addCustom}>Add</Button>
                   </div>
                   <p className="mt-2 text-xs text-zinc-500">Joins the Custom group above, ticked.</p>
@@ -1885,9 +1958,9 @@ export default function App() {
               </div>
             )}
             {onboardStep === 2 && (
-              <div className="shrink-0 border-t border-zinc-800 px-4 sm:px-6 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex items-center gap-2">
-                <Button variant="outline" className="h-11 px-5" onClick={() => setOnboardStep(1)}>Back</Button>
-                <Button className="h-11 px-5 flex-1 sm:flex-none sm:ml-auto" onClick={completeOnboarding}>Save arc · {tmpSelected.size} <ArrowRight size={14} /></Button>
+              <div className="shrink-0 border-t border-zinc-800 px-4 sm:px-6 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] grid grid-cols-2 gap-2">
+                <Button variant="outline" className="h-11" onClick={() => setOnboardStep(1)}>Back</Button>
+                <Button className="h-11" onClick={completeOnboarding}>Save arc · {tmpSelected.size} <ArrowRight size={14} /></Button>
               </div>
             )}
           </motion.div>
@@ -1922,7 +1995,7 @@ export default function App() {
                   <button onClick={dismissInstallHint} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 text-[13px] hover:text-white hover:border-zinc-700 transition">Not now</button>
                 </div>
               </div>
-              <button onClick={dismissInstallHint} aria-label="Dismiss" className="w-10 h-10 shrink-0 grid place-items-center rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition"><X size={14} /></button>
+              <button onClick={dismissInstallHint} aria-label="Dismiss" className="w-11 h-11 shrink-0 grid place-items-center rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition"><X size={14} /></button>
             </div>
           </motion.div>
         )}
@@ -1934,32 +2007,32 @@ export default function App() {
         <div className="max-w-[1040px] mx-auto px-5 sm:px-6 py-10">
           <div className="grid gap-8 sm:grid-cols-[1.4fr_1fr_1fr]">
             <div>
-              <button onClick={() => goTo('landing')} className="flex items-center gap-2.5">
+              <button onClick={() => goTo('landing')} className="flex items-center min-h-11 gap-2.5">
                 <Logo size={22} />
                 <span className="font-semibold tracking-[0.16em] text-[12px] text-white">WINTERARC</span>
               </button>
               <p className="mt-3 text-[13px] leading-6 text-zinc-500 max-w-[280px]">
-                Set your dates, pick your habits, keep the grid honest.
+                Set your dates and keep the grid honest.
               </p>
             </div>
 
             <div>
               <div className="text-[11px] font-mono tracking-widest text-zinc-500">Product</div>
               <div className="mt-3 flex flex-col items-start gap-1">
-                <button onClick={() => goTo('about')} className="py-1 text-[13px] text-zinc-400 hover:text-white transition">What is a winter arc</button>
-                <button onClick={() => goTo('templates')} className="py-1 text-[13px] text-zinc-400 hover:text-white transition">Templates</button>
-                <button onClick={() => goTo('resources')} className="py-1 text-[13px] text-zinc-400 hover:text-white transition">Resources</button>
-                <button onClick={() => goTo('install')} className="py-1 text-[13px] text-zinc-400 hover:text-white transition">Install as app</button>
+                <button onClick={() => goTo('about')} className="inline-flex items-center min-h-11 text-[13px] text-zinc-400 hover:text-white transition">What is a winter arc</button>
+                <button onClick={() => goTo('templates')} className="inline-flex items-center min-h-11 text-[13px] text-zinc-400 hover:text-white transition">Templates</button>
+                <button onClick={() => goTo('resources')} className="inline-flex items-center min-h-11 text-[13px] text-zinc-400 hover:text-white transition">Resources</button>
+                <button onClick={() => goTo('install')} className="inline-flex items-center min-h-11 text-[13px] text-zinc-400 hover:text-white transition">Install as app</button>
               </div>
             </div>
 
             <div>
               <div className="text-[11px] font-mono tracking-widest text-zinc-500">Project</div>
               <div className="mt-3 flex flex-col items-start gap-1">
-                <a href={site.support.github} target="_blank" rel="noreferrer" className="py-1 text-[13px] text-zinc-400 hover:text-white transition">GitHub</a>
-                <a href={site.support.github + '/blob/main/CONTRIBUTING.md'} target="_blank" rel="noreferrer" className="py-1 text-[13px] text-zinc-400 hover:text-white transition">Contribute</a>
-                <button onClick={() => goTo('feedback')} className="py-1 text-[13px] text-zinc-400 hover:text-white transition">Feedback</button>
-                <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="py-1 text-[13px] text-zinc-400 hover:text-white transition">X</a>
+                <a href={site.support.github} target="_blank" rel="noreferrer" className="inline-flex items-center min-h-11 text-[13px] text-zinc-400 hover:text-white transition">GitHub</a>
+                <a href={site.support.github + '/blob/main/CONTRIBUTING.md'} target="_blank" rel="noreferrer" className="inline-flex items-center min-h-11 text-[13px] text-zinc-400 hover:text-white transition">Contribute</a>
+                <button onClick={() => goTo('feedback')} className="inline-flex items-center min-h-11 text-[13px] text-zinc-400 hover:text-white transition">Feedback</button>
+                <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="inline-flex items-center min-h-11 text-[13px] text-zinc-400 hover:text-white transition">X</a>
               </div>
             </div>
           </div>
@@ -1971,5 +2044,6 @@ export default function App() {
         </div>
       </footer>
     </div>
+    </MotionConfig>
   )
 }
