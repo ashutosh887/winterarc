@@ -29,10 +29,10 @@ function HabitIcon({ name, size = 16, className }) {
 
 const ARC_PRESETS = [
   { label: 'Winter arc', range: () => getDefaultArc() },
-  { label: '30 days', range: () => ({ start: todayYMD(), end: addDays(todayYMD(), 29) }) },
-  { label: '60 days', range: () => ({ start: todayYMD(), end: addDays(todayYMD(), 59) }) },
-  { label: '90 days', range: () => ({ start: todayYMD(), end: addDays(todayYMD(), 89) }) },
-  { label: 'This month', range: () => { const d = new Date(); const y = d.getFullYear(), m = d.getMonth(); const p = x => String(x).padStart(2, '0'); return { start: `${y}-${p(m + 1)}-01`, end: `${y}-${p(m + 1)}-${p(new Date(y, m + 1, 0).getDate())}` } } },
+  { label: 'Start today', range: () => ({ start: todayYMD(), end: addDays(todayYMD(), 89) }) },
+  { label: 'Start tomorrow', range: () => ({ start: addDays(todayYMD(), 1), end: addDays(todayYMD(), 90) }) },
+  { label: '30 days', range: () => ({ start: addDays(todayYMD(), 1), end: addDays(todayYMD(), 30) }) },
+  { label: '60 days', range: () => ({ start: addDays(todayYMD(), 1), end: addDays(todayYMD(), 60) }) },
 ]
 
 const WEEKDAYS = [
@@ -56,7 +56,8 @@ const PATHS = Object.fromEntries(Object.entries(ROUTES).map(([path, view]) => [v
 const viewForPath = path => ROUTES[path.replace(/\/+$/, '') || '/'] ?? null
 
 const getDefaultArc = () => {
-  const y = new Date().getFullYear()
+  const now = new Date()
+  const y = now.getMonth() === 11 && now.getDate() === 31 ? now.getFullYear() + 1 : now.getFullYear()
   return { start: `${y}-10-01`, end: `${y}-12-31` }
 }
 const DEFAULT_START = getDefaultArc().start
@@ -96,7 +97,7 @@ function readStore(key, fallback) {
   } catch { return fallback }
 }
 function writeStore(key, val) {
-  try { localStorage.setItem(key, JSON.stringify(val)); return true } catch { storageBroken = true; return false }
+  try { localStorage.setItem(key, JSON.stringify(val)); return true } catch { return false }
 }
 
 function useLocalStorage(key, initial, validate) {
@@ -206,19 +207,24 @@ export default function App() {
 
   useEffect(() => {
     const DAY = 86400000
-    try {
-      const cached = JSON.parse(localStorage.getItem('wa_stars') || 'null')
-      if (cached && typeof cached.n === 'number' && Date.now() - cached.at < DAY) { setStars(cached.n); return }
-    } catch {}
-    fetch('https://api.github.com/repos/ashutosh887/winterarc')
-      .then(r => r.ok ? r.json() : null)
+    const cached = readStore('wa_stars', null)
+    if (cached && typeof cached.n === 'number' && Date.now() - cached.at < DAY) setStars(cached.n)
+  }, [])
+
+  // fetched on intent, not on load, so a visit never contacts a third party by itself
+  const starsAsked = useRef(false)
+  function loadStars() {
+    if (starsAsked.current || stars !== null) return
+    starsAsked.current = true
+    fetch('https://api.github.com/repos/ashutosh887/winterarc', { signal: AbortSignal.timeout(5000) })
+      .then(r => (r.ok ? r.json() : null))
       .then(d => {
         if (typeof d?.stargazers_count !== 'number') return
         setStars(d.stargazers_count)
-        try { localStorage.setItem('wa_stars', JSON.stringify({ n: d.stargazers_count, at: Date.now() })) } catch {}
+        writeStore('wa_stars', { n: d.stargazers_count, at: Date.now() })
       })
       .catch(() => {})
-  }, [])
+  }
 
   useEffect(() => {
     const onScroll = () => setShowScrollTop(window.scrollY > 600)
@@ -439,13 +445,18 @@ export default function App() {
     const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `winter-arc-${start}_${end}.csv`; a.click(); URL.revokeObjectURL(url)
   }
   function resetAll() {
-    if (backupBeforeReset) exportJSON()
-    for (const k of ['wa_settings', 'wa_settings_v2', 'wa_habits', 'wa_habits_v2', 'wa_entries', 'wa_stars']) {
-      try { localStorage.removeItem(k) } catch {}
+    const clear = () => {
+      for (const k of ['wa_settings', 'wa_settings_v2', 'wa_habits', 'wa_habits_v2', 'wa_entries', 'wa_stars']) {
+        try { localStorage.removeItem(k) } catch {}
+      }
+      window.location.replace('/')
     }
-    window.location.replace('/')
+    if (!backupBeforeReset) return clear()
+    exportJSON()
+    // give the download a moment to start before the page navigates away
+    setTimeout(clear, 1200)
   }
-  const llmPrompt = `Here is my habit data from ${start} to ${end}. Habits: ${effectiveHabits.map(h => h.name).join(', ')}. Days elapsed: ${stats.dayNum} of ${totalDays}. Perfect days: ${stats.perfect} (${stats.perfectPct}%). Checks completed: ${stats.pct}%. Current streak: ${stats.streak}, best ${stats.bestStreak}.\nRaw entries: ${JSON.stringify(entries).slice(0, 4000)}\n\nTell me which habit I miss most and on which weekdays. Then give me one change to make this week. Keep it under 150 words and skip the pep talk.`
+  const llmPrompt = useMemo(() => `Here is my habit data from ${start} to ${end}. Habits: ${effectiveHabits.map(h => h.name).join(', ')}. Days elapsed: ${stats.dayNum} of ${totalDays}. Perfect days: ${stats.perfect} (${stats.perfectPct}%). Checks completed: ${stats.pct}%. Current streak: ${stats.streak}, best ${stats.bestStreak}.\nRaw entries: ${JSON.stringify(entries).slice(0, 4000)}\n\nTell me which habit I miss most and on which weekdays. Then give me one change to make this week. Keep it under 150 words and skip the pep talk.`, [start, end, effectiveHabits, stats, totalDays, entries])
 
   function drawShareCard({ achievement } = {}) {
     const canvas = canvasRef.current; if (!canvas) return
@@ -607,7 +618,7 @@ export default function App() {
               ))}
             </nav>
 
-            <a href={site.support.github} target="_blank" rel="noreferrer" aria-label="Star WinterArc on GitHub" className="hidden sm:inline-flex items-center gap-1.5 h-10 px-3 rounded-full border border-zinc-800 bg-zinc-900 text-[13px] font-medium text-zinc-400 hover:text-white hover:border-zinc-700 transition">
+            <a href={site.support.github} target="_blank" rel="noopener noreferrer" onPointerEnter={loadStars} onFocus={loadStars} aria-label="Star WinterArc on GitHub" className="hidden sm:inline-flex items-center gap-1.5 h-10 px-3 rounded-full border border-zinc-800 bg-zinc-900 text-[13px] font-medium text-zinc-400 hover:text-white hover:border-zinc-700 transition">
               <Star size={13} /> {stars === null ? 'Star' : stars.toLocaleString()}
             </a>
 
@@ -1462,7 +1473,7 @@ export default function App() {
                 <div className="mt-5 space-y-5">
                   <div className="space-y-2">
                     <Label htmlFor="arc-name" className="text-zinc-500">Your name</Label>
-                    <Input id="arc-name" value={tmpName} onChange={e => setTmpName(e.target.value)} placeholder="Your name" className="h-11" autoComplete="off" />
+                    <Input id="arc-name" value={tmpName} onChange={e => setTmpName(e.target.value)} placeholder="Your name" className="h-11" autoComplete="off" maxLength={40} />
                     <div className="text-xs text-zinc-500">Optional. Example: Ashutosh</div>
                   </div>
 
@@ -1523,11 +1534,22 @@ export default function App() {
                     <div className="space-y-1.5"><Label htmlFor="arc-end" className="text-zinc-500">End</Label><Input id="arc-end" type="date" value={tmpEnd} onChange={e => setTmpEnd(e.target.value)} className="h-11 appearance-none" /></div>
                   </div>
 
-                  <div className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 flex items-center justify-between">
-                    <span className="text-sm text-zinc-300">Duration</span>
-                    <span className={`text-sm font-mono ${arcLength > 0 ? 'text-white' : 'text-red-300'}`}>
-                      {arcLength > 0 ? `${arcLength} days` : 'End date is before the start'}
-                    </span>
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-zinc-300">Duration</span>
+                      <span className={`text-sm font-mono ${arcLength > 0 ? 'text-white' : 'text-red-300'}`}>
+                        {arcLength > 0 ? `${arcLength} days` : 'End date is before the start'}
+                      </span>
+                    </div>
+                    {arcLength > 0 && (
+                      <div className="mt-1.5 text-xs text-zinc-500">
+                        {tmpStart > today
+                          ? `Starts in ${daysBetween(today, tmpStart) - 1} ${daysBetween(today, tmpStart) - 1 === 1 ? 'day' : 'days'}.`
+                          : tmpStart === today ? 'Starts today.' : `Already running, day ${daysBetween(tmpStart, today)}.`}
+                        {' '}
+                        {tmpDays.length < 7 ? `${Math.round(arcLength * tmpDays.length / 7)} of those are scheduled days.` : 'Every day is scheduled.'}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1541,9 +1563,40 @@ export default function App() {
               <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 sm:px-6 py-5">
                 <h2 className="text-[22px] font-bold tracking-tight text-white">Pick your habits</h2>
                 <p className="mt-1 text-sm text-zinc-500">Three to five is enough. Ten is the cap.</p>
+
+                <div className="mt-4">
+                  <div className="text-[11px] font-mono tracking-widest text-zinc-500">Start from a template</div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {templates.map(t => {
+                      const ids = t.habitIds
+                      const on = ids.length === tmpSelected.size && ids.every(id => tmpSelected.has(id))
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          aria-pressed={on}
+                          onClick={() => setTmpSelected(new Set(ids))}
+                          title={t.desc}
+                          className={`h-11 px-4 rounded-full text-[13px] font-medium border transition inline-flex items-center gap-1.5 ${on ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-950 text-zinc-300 border-zinc-800 hover:border-zinc-700 hover:text-white'}`}
+                        >
+                          {on ? <Check size={12} /> : <HabitIcon name={t.icon} size={13} />}
+                          {t.name}
+                        </button>
+                      )
+                    })}
+                    <button
+                      type="button"
+                      onClick={() => { setTmpSelected(new Set()); setCustomList([]) }}
+                      className="h-11 px-4 rounded-full text-[13px] font-medium border border-zinc-800 bg-zinc-950 text-zinc-500 hover:text-white hover:border-zinc-700 transition"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <p className="mt-2 text-xs text-zinc-500">A template just ticks its habits below. Add or remove any of them after.</p>
+                </div>
                 <div className="mt-2 text-[11px] font-mono tracking-widest text-zinc-500">Selected {tmpSelected.size} {tmpSelected.size > 10 && '· over 10'}</div>
                 {['non-neg', 'extra', 'aesthetic'].map(tier => (<div key={tier} className="mt-5"><div className="text-[11px] font-mono tracking-widest text-zinc-500">{TIER_LABELS[tier]}</div><div className="mt-2 grid sm:grid-cols-2 gap-2">{PRESETS.filter(p => p.tier === tier).map(p => { const sel = tmpSelected.has(p.id); return (<button key={p.id} onClick={() => setTmpSelected(s => { const n = new Set(s); sel ? n.delete(p.id) : n.add(p.id); return n })} className={`text-left rounded-xl border p-3 flex gap-3 items-start transition ${sel ? 'bg-white border-white' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}><span className={`w-8 h-8 rounded-full grid place-items-center border shrink-0 ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'bg-zinc-800 border-zinc-700 text-zinc-300'}`}><HabitIcon name={p.icon} size={14} /></span><span className="flex-1 min-w-0"><span className={`text-sm font-medium block ${sel ? 'text-zinc-900' : 'text-zinc-200'}`}>{p.name}</span><span className="text-xs text-zinc-500">{p.desc}</span></span><span className={`mt-1 w-5 h-5 rounded-full grid place-items-center border text-xs shrink-0 ${sel ? 'bg-zinc-900 border-zinc-900 text-white' : 'border-zinc-700 text-transparent'}`}><Check size={12} /></span></button>) })}</div></div>))}
-                <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950 p-3"><div className="text-[11px] font-mono tracking-widest text-zinc-500">Custom habit</div><div className="mt-2 flex gap-2"><Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. No sugar, 3L water" onKeyDown={e => e.key === 'Enter' && addCustom()} className="h-11" /><Button variant="secondary" className="h-11 px-5" onClick={addCustom}>Add</Button></div>{customList.length > 0 && (<div className="mt-3 flex flex-wrap gap-2">{customList.map(c => (<Badge key={c.id} variant="secondary" className="gap-1.5">{c.name} <button onClick={() => { setCustomList(prev => prev.filter(x => x.id !== c.id)); setTmpSelected(s => { const n = new Set(s); n.delete(c.id); return n }) }} className="ml-1 hover:text-destructive"><X size={12} /></button></Badge>))}</div>)}</div>
+                <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950 p-3"><div className="text-[11px] font-mono tracking-widest text-zinc-500">Custom habit</div><div className="mt-2 flex gap-2"><Input value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. No sugar, 3L water" onKeyDown={e => e.key === 'Enter' && addCustom()} className="h-11" maxLength={60} /><Button variant="secondary" className="h-11 px-5" onClick={addCustom}>Add</Button></div>{customList.length > 0 && (<div className="mt-3 flex flex-wrap gap-2">{customList.map(c => (<Badge key={c.id} variant="secondary" className="gap-1.5">{c.name} <button onClick={() => { setCustomList(prev => prev.filter(x => x.id !== c.id)); setTmpSelected(s => { const n = new Set(s); n.delete(c.id); return n }) }} className="ml-1 hover:text-destructive"><X size={12} /></button></Badge>))}</div>)}</div>
               </div>
             )}
             {onboardStep === 2 && (
