@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import ErrorBoundary from './ErrorBoundary.jsx'
+import { initClarity } from './clarity.js'
 
 if ('serviceWorker' in navigator) {
   // claiming an uncontrolled page fires controllerchange on a first visit; that is not an update
@@ -33,6 +34,8 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistration().then(reg => reg && reg.update()).catch(() => {})
   })
 }
+
+initClarity()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

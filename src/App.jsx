@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState, Suspense, lazy } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Check, Flame, Trophy, ExternalLink, Flag, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, Settings, Menu, LayoutGrid, Compass,
+  Check, Flame, Trophy, ExternalLink, Flag, Snowflake, Shield, Zap, BookOpen, Dumbbell, Star, ArrowRight, ArrowUp, Heart, X, Menu, LayoutGrid, Compass,
   Footprints, Moon, Salad, Egg, Droplets, Target, Ban, Wind, NotebookPen, Sun, PhoneOff, TreePine, Coins, BrushCleaning, ShowerHead, AlarmClock,
-  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone, Copy, ChevronDown, ChevronLeft, ChevronRight, Share2, MessageCircle, ImageDown, MoreHorizontal, Info
+  MountainSnow, Hourglass, Gem, Crown, Rocket, GraduationCap, Lock, Smartphone, Pencil, Copy, ChevronDown, ChevronLeft, ChevronRight, Share2, MessageCircle, ImageDown, MoreHorizontal, Info
 } from 'lucide-react'
 import { site, resources, templates, challenges, quotes as QUOTES_CFG } from './config'
 import { Button } from '@/components/ui/button'
@@ -736,7 +736,7 @@ export default function App() {
             <button onClick={startOnboarding} className="inline-flex shrink-0 items-center gap-1.5 h-10 px-4 rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold text-[13px] transition whitespace-nowrap">
               <span className="sm:hidden">{hasData ? 'Edit' : 'Set up'}</span>
               <span className="hidden sm:inline">{hasData ? 'Edit arc' : 'Set up your arc'}</span>
-              <ArrowRight size={14} />
+              {hasData ? <Pencil size={14} /> : <ArrowRight size={14} />}
             </button>
 
             <button onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" aria-expanded={mobileMenuOpen} className="lg:hidden shrink-0 w-10 h-10 grid place-items-center rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
@@ -1176,7 +1176,7 @@ export default function App() {
         <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
           <Eyebrow icon={NotebookPen}>Feedback</Eyebrow>
           <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Found a bug, want a feature</h1>
-          <p className="mt-1 text-sm text-zinc-500 max-w-[560px]">No form, no analytics. Everything goes through GitHub or X, so you can watch what happens to your report.</p>
+          <p className="mt-1 text-sm text-zinc-500 max-w-[560px]">No form here. Everything goes through GitHub or X, so you can watch what happens to your report.</p>
           <div className="mt-8 grid sm:grid-cols-3 gap-4">
             {[
               { title: 'Report a bug', body: 'Open an issue with what you did and what happened.', label: 'Open an issue', href: site.support.github + '/issues/new' },
@@ -1192,6 +1192,13 @@ export default function App() {
               </div>
             ))}
           </div>
+          <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+            <div className="text-sm font-semibold text-white">What is measured</div>
+            <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">
+              The hosted site runs Microsoft Clarity so I can see which screens break. It records pages, clicks and scrolling, with text masked. It cannot read your habits, dates or name, because those live in browser storage it never touches. Run your own copy without <code className="px-1 rounded bg-zinc-950 border border-zinc-800 text-zinc-400">VITE_CLARITY_ID</code> and nothing is measured at all.
+            </p>
+          </div>
+
           <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
             <div className="text-sm font-semibold text-white">Before you file</div>
             <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">Your data lives in this browser only. If the grid looks wrong, export JSON from the dashboard and attach it. Nothing in the export leaves your machine until you upload it yourself.</p>
@@ -1656,7 +1663,7 @@ export default function App() {
                     maxLength={40}
                     className="flex-1 min-w-0 h-11 rounded-full bg-zinc-950 border border-zinc-800 px-4 text-base sm:text-sm text-white placeholder:text-zinc-500"
                   />
-                  <button onClick={startOnboarding} aria-label="Edit habits and dates" title="Edit habits and dates" className="w-11 h-11 shrink-0 grid place-items-center rounded-full bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition"><Settings size={15} className="text-zinc-300" /></button>
+                  <button onClick={startOnboarding} aria-label="Edit habits and dates" title="Edit habits and dates" className="w-11 h-11 shrink-0 grid place-items-center rounded-full bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition"><Pencil size={15} className="text-zinc-300" /></button>
                 </div>
               </div>
 
@@ -1959,7 +1966,7 @@ export default function App() {
 
           <div className="mt-10 pt-5 border-t border-zinc-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-[11px] font-mono text-zinc-500">
             <span>&copy; {new Date().getFullYear()} {site.author.name}. MIT licensed.</span>
-            <span>Local-first. No account, no trackers.</span>
+            <span>Local-first. No account. Your habits never leave the device.</span>
           </div>
         </div>
       </footer>

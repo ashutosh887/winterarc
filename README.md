@@ -19,6 +19,10 @@ npm run build
 npm run lint
 ```
 
+## Environment
+
+Copy `.env.example` to `.env.local`. It runs fine empty. `VITE_CLARITY_ID` enables Microsoft Clarity on the hosted site only.
+
 ## Where things live
 
 - `src/config.ts` is the source of truth for content: templates, resources, quotes, challenges.

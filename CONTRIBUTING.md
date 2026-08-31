@@ -16,6 +16,12 @@ npm run lint    # oxlint, must report 0 errors and 0 warnings
 npm run build   # must pass
 ```
 
+## Environment
+
+Copy `.env.example` to `.env.local`. Everything works with it empty.
+
+`VITE_CLARITY_ID` turns on Microsoft Clarity on the hosted site so I can see which screens break. Leave it blank and the app makes no analytics calls at all. It never reads habit data, which lives in browser storage Clarity cannot touch.
+
 ## Commits
 
 Conventional commits are enforced by commitlint via a husky `commit-msg` hook.
