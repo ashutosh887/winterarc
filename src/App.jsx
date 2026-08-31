@@ -315,37 +315,35 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#09090b]">
       <header className="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/80">
-        <div className="max-w-[1040px] mx-auto px-5 sm:px-6 h-[60px] flex items-center justify-between gap-6">
+        <div className="max-w-[1040px] mx-auto px-5 sm:px-6 h-[56px] flex items-center gap-6">
           <button onClick={() => { setView('landing'); window.scrollTo({ top: 0, behavior: 'smooth' }) }} aria-label="WinterArc home" className="flex items-center gap-2.5 shrink-0">
             <Logo size={28} />
-            <span className="font-semibold tracking-[0.14em] text-[13px] text-white">WINTERARC</span>
+            <span className="font-semibold tracking-[0.16em] text-[13px] text-white">WINTERARC</span>
           </button>
-
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-1 ml-6">
             {view === 'landing' ? (
               <>
-                <button onClick={() => scrollToId('features')} className="px-3.5 py-2 rounded-full text-[13px] font-medium text-zinc-400 hover:text-white hover:bg-zinc-900 transition">Features</button>
-                <button onClick={() => scrollToId('how')} className="px-3.5 py-2 rounded-full text-[13px] font-medium text-zinc-400 hover:text-white hover:bg-zinc-900 transition">How it works</button>
-                <button onClick={() => scrollToId('templates')} className="px-3.5 py-2 rounded-full text-[13px] font-medium text-zinc-400 hover:text-white hover:bg-zinc-900 transition">Templates</button>
-                <button onClick={() => scrollToId('resources')} className="px-3.5 py-2 rounded-full text-[13px] font-medium text-zinc-400 hover:text-white hover:bg-zinc-900 transition">Resources</button>
+                <button onClick={() => scrollToId('how')} className="px-3.5 py-1.5 rounded-full text-[13px] font-medium text-zinc-500 hover:text-white transition">How it works</button>
+                <button onClick={() => scrollToId('templates')} className="px-3.5 py-1.5 rounded-full text-[13px] font-medium text-zinc-500 hover:text-white transition">Templates</button>
+                <button onClick={() => setView('resources')} className="px-3.5 py-1.5 rounded-full text-[13px] font-medium text-zinc-500 hover:text-white transition">Resources</button>
               </>
+            ) : view === 'resources' ? (
+              <button onClick={() => setView('landing')} className="px-3.5 py-1.5 rounded-full text-[13px] text-zinc-400 hover:text-white transition inline-flex items-center gap-1.5"><ArrowRight size={14} className="rotate-180" /> Back</button>
             ) : (
-              <button onClick={() => setView('landing')} className="px-3.5 py-2 rounded-full text-[13px] text-zinc-400 hover:text-white hover:bg-zinc-900 transition inline-flex items-center gap-1.5"><ArrowRight size={14} className="rotate-180" /> Back to site</button>
-            )}
-            {hasData && (
-              <>
-                <span className="w-px h-5 bg-zinc-800 mx-2" />
-                <button onClick={() => setView('tracker')} className={`px-4 py-2 rounded-full text-[13px] font-medium transition ${view === 'tracker' ? 'bg-white text-zinc-900' : 'text-zinc-300 hover:text-white hover:bg-zinc-900'}`}>Tracker</button>
-                <button onClick={() => setView('dashboard')} className={`px-4 py-2 rounded-full text-[13px] font-medium transition ${view === 'dashboard' ? 'bg-white text-zinc-900' : 'text-zinc-300 hover:text-white hover:bg-zinc-900'}`}>Dashboard</button>
-              </>
+              <button onClick={() => setView('landing')} className="px-3.5 py-1.5 rounded-full text-[13px] text-zinc-400 hover:text-white transition inline-flex items-center gap-1.5"><ArrowRight size={14} className="rotate-180" /> Back</button>
             )}
           </nav>
-
-          <div className="flex items-center gap-2">
-            <Button onClick={startOnboarding} size="sm" className="rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold px-5 h-9">
-              <Sparkles size={14} /> {hasData ? 'Edit arc' : 'Start your arc'}
+          <div className="flex items-center gap-2 ml-auto">
+            {hasData && (
+              <div className="hidden lg:flex items-center gap-1 mr-1">
+                <button onClick={() => setView('tracker')} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'tracker' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white'}`}>Tracker</button>
+                <button onClick={() => setView('dashboard')} className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition ${view === 'dashboard' ? 'bg-white text-zinc-900' : 'text-zinc-400 hover:text-white'}`}>Dashboard</button>
+              </div>
+            )}
+            <Button onClick={startOnboarding} size="sm" className="rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold px-4 h-8 text-[13px]">
+              {hasData ? 'Edit arc' : 'Start your arc'}
             </Button>
-            <Button variant="ghost" size="icon-sm" onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" className="lg:hidden rounded-full text-zinc-400 hover:text-white hover:bg-zinc-900">
+            <Button variant="ghost" size="icon-sm" onClick={() => setMobileMenuOpen(v => !v)} aria-label="Menu" className="lg:hidden rounded-full text-zinc-500 hover:text-white">
               <Menu size={18} />
             </Button>
           </div>
@@ -356,10 +354,9 @@ export default function App() {
         {mobileMenuOpen && (
           <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="lg:hidden sticky top-[56px] z-20 bg-zinc-950 border-b border-zinc-800">
             <div className="max-w-[1040px] mx-auto px-5 py-3 grid grid-cols-2 gap-2">
-              <button onClick={() => scrollToId('features')} className="px-3 py-2.5 rounded-xl text-sm font-medium text-left border bg-zinc-900 text-zinc-200 border-zinc-800">Features</button>
               <button onClick={() => scrollToId('how')} className="px-3 py-2.5 rounded-xl text-sm font-medium text-left border bg-zinc-900 text-zinc-200 border-zinc-800">How it works</button>
               <button onClick={() => scrollToId('templates')} className="px-3 py-2.5 rounded-xl text-sm font-medium text-left border bg-zinc-900 text-zinc-200 border-zinc-800">Templates</button>
-              <button onClick={() => scrollToId('resources')} className="px-3 py-2.5 rounded-xl text-sm font-medium text-left border bg-zinc-900 text-zinc-200 border-zinc-800">Resources</button>
+              <button onClick={() => { setView('resources'); setMobileMenuOpen(false) }} className={`px-3 py-2.5 rounded-xl text-sm font-medium text-left border ${view === 'resources' ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-200 border-zinc-800'}`}>Resources</button>
               {hasData ? (
                 <>
                   <button onClick={() => { setView('tracker'); setMobileMenuOpen(false) }} className={`px-3 py-2.5 rounded-xl text-sm font-medium text-left border ${view === 'tracker' ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-300 border-zinc-800'}`}>Tracker</button>
@@ -647,42 +644,6 @@ export default function App() {
             </motion.div>
           </section>
 
-          <section id="resources" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-16">
-            <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Dumbbell size={12} /> Resources</div>
-            <h2 className="mt-2 text-[22px] font-bold tracking-tight text-white">Resources that help</h2>
-            <p className="mt-1 text-sm text-zinc-500">Curated. No affiliates. Edit <code className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">src/config.ts</code> to add your own.</p>
-            <div className="mt-6 grid gap-6">
-              {Object.entries(resources).map(([key, cat]) => (
-                <div key={key} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
-                  <div className="text-sm font-semibold text-white">{cat.title}</div>
-                  <div className="mt-3 grid sm:grid-cols-2 gap-3">
-                    {cat.items.map(it => (
-                      <a key={it.name} href={it.url} target="_blank" rel="noreferrer" className="rounded-xl border border-zinc-800 bg-zinc-950 p-3 hover:border-zinc-700 transition block group">
-                        <div className="flex items-center gap-2"><span className="text-sm font-medium text-white group-hover:text-zinc-200 transition">{it.name}</span><ExternalLink size={12} className="text-zinc-600 group-hover:text-zinc-400" /></div>
-                        <div className="text-xs text-zinc-500 mt-1">{it.desc}</div>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
-              <div className="flex items-center justify-between"><h3 className="font-semibold text-white flex items-center gap-2"><Star size={14} /> Daily quotes</h3><span className="text-xs font-mono text-zinc-500">Day {stats.dayNum || 1}</span></div>
-              <p className="text-sm text-zinc-300 mt-2">"{quote.q}" <span className="text-zinc-500">- {quote.a}</span></p>
-              <div className="mt-4 grid sm:grid-cols-2 gap-2">
-                {QUOTES.slice(0, 6).map((qq, i) => (
-                  <div key={i} className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-                    <div className="text-[11px] font-mono text-zinc-500">Day {i + 1}</div>
-                    <div className="text-sm mt-1 text-zinc-300">"{qq.q}"</div>
-                    <div className="text-xs text-zinc-500">- {qq.a}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-3 text-xs font-mono text-zinc-600 text-center">92 quotes. One per day.</div>
-            </div>
-          </section>
-
           <section className="max-w-[1040px] mx-auto px-5 sm:px-6 pb-8">
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
@@ -696,6 +657,43 @@ export default function App() {
             </div>
             <div className="mt-3 text-center text-xs font-mono text-zinc-600">Feedback or feature idea? Open a PR via <a href="https://github.com/ashutosh887/winterarc/blob/main/CONTRIBUTING.md" className="underline decoration-zinc-700 hover:text-zinc-400">CONTRIBUTING.md</a> or DM <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="underline decoration-zinc-700 hover:text-zinc-400">@ashutosh887_</a> on X.</div>
           </section>
+        </main>
+      )}
+
+      {view === 'resources' && (
+        <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
+          <div className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-zinc-500"><Dumbbell size={12} /> Resources</div>
+          <h1 className="mt-2 text-[26px] font-bold tracking-tight text-white">Resources that help</h1>
+          <p className="mt-1 text-sm text-zinc-500">Curated. No affiliates. Edit <code className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">src/config.ts</code> to add your own.</p>
+          <div className="mt-8 grid gap-6">
+            {Object.entries(resources).map(([key, cat]) => (
+              <div key={key} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+                <div className="text-sm font-semibold text-white">{cat.title}</div>
+                <div className="mt-3 grid sm:grid-cols-2 gap-3">
+                  {cat.items.map(it => (
+                    <a key={it.name} href={it.url} target="_blank" rel="noreferrer" className="rounded-xl border border-zinc-800 bg-zinc-950 p-3 hover:border-zinc-700 transition block group">
+                      <div className="flex items-center gap-2"><span className="text-sm font-medium text-white group-hover:text-zinc-200 transition">{it.name}</span><ExternalLink size={12} className="text-zinc-600 group-hover:text-zinc-400" /></div>
+                      <div className="text-xs text-zinc-500 mt-1">{it.desc}</div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+            <div className="flex items-center justify-between"><h3 className="font-semibold text-white flex items-center gap-2"><Star size={14} /> Daily quotes</h3><span className="text-xs font-mono text-zinc-500">Day {stats.dayNum || 1}</span></div>
+            <p className="text-sm text-zinc-300 mt-2">"{quote.q}" <span className="text-zinc-500">- {quote.a}</span></p>
+            <div className="mt-4 grid sm:grid-cols-2 gap-2">
+              {QUOTES.slice(0, 6).map((qq, i) => (
+                <div key={i} className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
+                  <div className="text-[11px] font-mono text-zinc-500">Day {i + 1}</div>
+                  <div className="text-sm mt-1 text-zinc-300">"{qq.q}"</div>
+                  <div className="text-xs text-zinc-500">- {qq.a}</div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 text-xs font-mono text-zinc-600 text-center">92 quotes. One per day.</div>
+          </div>
         </main>
       )}
 
