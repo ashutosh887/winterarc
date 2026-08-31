@@ -16,16 +16,23 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'og-image.png', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
-        name: 'WinterArc - 92-Day Winter Arc Tracker',
+        id: '/',
+        name: 'WinterArc habit tracker',
         short_name: 'WinterArc',
-        description: 'Free, open-source tracker for the 92-day Winter Arc (Oct 1 - Dec 31). Pick 3-5 habits, keep the grid honest.',
+        description: 'Track a few daily habits for the 92 days from October 1 to December 31. Everything stays in your browser.',
+        lang: 'en',
+        dir: 'ltr',
         theme_color: '#09090b',
         background_color: '#09090b',
         display: 'standalone',
+        orientation: 'portrait',
+        scope: '/',
         start_url: '/',
+        categories: ['productivity', 'health', 'lifestyle'],
         icons: [
-          { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+          { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
       workbox: { globPatterns: ['**/*.{js,css,html,svg,png}'] }
