@@ -4,7 +4,6 @@ import {
 } from 'lucide-react'
 import { site } from '@/config'
 import { addDays } from '@/lib/date'
-import { Button } from '@/components/ui/button'
 import { useArc } from '@/hooks/useArc'
 import { Logo } from '@/components/app/Ring'
 import { OnboardingDialog } from '@/components/app/OnboardingDialog'
@@ -198,7 +197,7 @@ export default function App() {
                 ? `Setup starts you today and runs a warm-up to ${longDate(setupWarmUp.end)}, then offers you the winter arc.`
                 : `Setup starts you on ${longDate(recommended.start)}. Any other dates work too.`}
             </p>
-            <Button onClick={startOnboarding} className="mt-6 h-11 px-5">Start your arc <ArrowRight size={14} /></Button>
+            <button onClick={startOnboarding} className={buttonClass('primary', 'lg', 'mt-6')}>Start your arc <ArrowRight size={14} /></button>
           </div>
         </main>
       )}

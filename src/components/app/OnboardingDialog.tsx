@@ -3,7 +3,6 @@ import { motion } from 'framer-motion'
 import type { Arc } from '@/hooks/useArc'
 import type { Tier } from '@/lib/types'
 import { ALL_WEEKDAYS, WEEKDAYS, daysBetween } from '@/lib/date'
-import { Button } from '@/components/ui/button'
 import { HabitIcon } from '@/components/app/HabitIcon'
 import { HabitTile } from '@/components/app/HabitTile'
 import { Input } from '@/components/ui/input'
@@ -153,7 +152,7 @@ export function OnboardingDialog({ arc }: { arc: Arc }) {
               )}
               {onboardStep === 1 && (
                 <div className="shrink-0 border-t border-zinc-800 px-4 sm:px-6 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex justify-end">
-                  <Button disabled={arcLength < 1 || tmpDays.length === 0} onClick={() => setOnboardStep(2)} className="h-11 px-5 w-full sm:w-auto">Continue <ArrowRight size={14} /></Button>
+                  <button disabled={arcLength < 1 || tmpDays.length === 0} onClick={() => setOnboardStep(2)} className={buttonClass('primary', 'md', 'w-full sm:w-auto')}>Continue <ArrowRight size={14} /></button>
                 </div>
               )}
               {onboardStep === 2 && (
@@ -225,7 +224,7 @@ export function OnboardingDialog({ arc }: { arc: Arc }) {
                     <div className="text-[11px] font-mono tracking-widest text-zinc-500">Add your own</div>
                     <div className="mt-2 flex gap-2">
                       <Input aria-label="Custom habit name" value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. Run 5km" onKeyDown={e => e.key === 'Enter' && addCustom()} className="h-11" maxLength={60} />
-                      <Button variant="secondary" className="h-11 px-5 shrink-0" onClick={addCustom}>Add</Button>
+                      <button className={buttonClass('secondary', 'md')} onClick={addCustom}>Add</button>
                     </div>
                     <p className="mt-2 text-xs text-zinc-500">Joins the Custom group above, ticked.</p>
                   </div>
@@ -233,8 +232,8 @@ export function OnboardingDialog({ arc }: { arc: Arc }) {
               )}
               {onboardStep === 2 && (
                 <div className="shrink-0 border-t border-zinc-800 px-4 sm:px-6 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] grid grid-cols-2 gap-2">
-                  <Button variant="outline" className="h-11" onClick={() => setOnboardStep(1)}>Back</Button>
-                  <Button className="h-11" onClick={completeOnboarding}>Save arc · {tmpSelected.size} <ArrowRight size={14} /></Button>
+                  <button className={buttonClass('ghost', 'md')} onClick={() => setOnboardStep(1)}>Back</button>
+                  <button className={buttonClass('primary', 'md')} onClick={completeOnboarding}>Save arc · {tmpSelected.size} <ArrowRight size={14} /></button>
                 </div>
               )}
             </motion.div>
