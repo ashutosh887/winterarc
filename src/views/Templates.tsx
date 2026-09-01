@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import type { Arc } from '@/hooks/useArc'
 import { HabitIcon } from '@/components/app/HabitIcon'
 import { PRESETS } from '@/lib/presets'
-import { CARD, IconChip, Page, PageHeading, Section } from '@/components/app/Surface'
+import { CARD, IconChip, Page, PageHeading, Section, buttonClass } from '@/components/app/Surface'
 import { fadeUp, stagger } from '@/lib/motion'
 import { templates } from '@/config'
 
@@ -33,7 +33,7 @@ export function Templates({ arc }: { arc: Arc }) {
                   )
                 })}
               </div>
-              <button onClick={() => applyTemplate(t.id)} className="mt-5 inline-flex items-center justify-center gap-1.5 px-5 h-12 shrink-0 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition">
+              <button onClick={() => applyTemplate(t.id)} className={buttonClass('primary', 'lg', 'mt-5')}>
                 Use template <ArrowRight size={14} />
               </button>
             </motion.div>

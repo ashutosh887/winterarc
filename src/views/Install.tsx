@@ -1,6 +1,6 @@
 import { ArrowRight, Check, Copy, RotateCw, Smartphone } from 'lucide-react'
 import type { Arc } from '@/hooks/useArc'
-import { Card, CardText, CardTitle, Page, PageHeading, PROSE, Section } from '@/components/app/Surface'
+import { Card, CardText, CardTitle, PROSE, Page, PageHeading, Section, buttonClass } from '@/components/app/Surface'
 import { site } from '@/config'
 
 type Platform = 'ios' | 'android' | 'desktop'
@@ -62,7 +62,7 @@ export function Install({ arc }: { arc: Arc }) {
 
             <Section className="flex flex-wrap items-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-900 p-3">
               <button onClick={() => goTo('landing')} className="font-mono text-[13px] text-white underline decoration-zinc-700 hover:decoration-zinc-400 px-2 h-11">{site.domain.replace('https://', '')}</button>
-              <button onClick={copyLink} className="ml-auto inline-flex items-center gap-1.5 h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">
+              <button onClick={copyLink} className={buttonClass('ghost', 'sm', 'ml-auto')}>
                 {copied ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy link</>}
               </button>
             </Section>
@@ -80,16 +80,16 @@ export function Install({ arc }: { arc: Arc }) {
                   <CardText className={PROSE}>{status}</CardText>
                   <div className="mt-5 flex flex-wrap gap-2">
                     {installEvent ? (
-                      <button onClick={runInstall} className="inline-flex items-center gap-2 h-12 px-5 rounded-full bg-white text-zinc-900 font-semibold text-sm hover:bg-zinc-100 transition">
+                      <button onClick={runInstall} className={buttonClass('primary', 'lg')}>
                         Install now <ArrowRight size={14} />
                       </button>
                     ) : (
-                      <button onClick={showSteps} className="inline-flex items-center gap-2 h-12 px-5 rounded-full bg-white text-zinc-900 font-semibold text-sm hover:bg-zinc-100 transition">
+                      <button onClick={showSteps} className={buttonClass('primary', 'lg')}>
                         Show me the steps <ArrowRight size={14} />
                       </button>
                     )}
                     {declined && (
-                      <button onClick={() => window.location.reload()} className="inline-flex items-center gap-1.5 h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">
+                      <button onClick={() => window.location.reload()} className={buttonClass('ghost', 'sm')}>
                         <RotateCw size={13} /> Reload and try again
                       </button>
                     )}

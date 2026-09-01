@@ -1,6 +1,6 @@
 import { ArrowRight, Snowflake } from 'lucide-react'
 import type { Arc } from '@/hooks/useArc'
-import { Card, CardText, CardTitle, Page, PageHeading, Section } from '@/components/app/Surface'
+import { Card, CardText, CardTitle, Page, PageHeading, Section, buttonClass } from '@/components/app/Surface'
 import { site } from '@/config'
 
 export function About({ arc }: { arc: Arc }) {
@@ -104,10 +104,10 @@ export function About({ arc }: { arc: Arc }) {
       </Section>
 
       <Section className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:max-w-[420px]">
-        <button onClick={startOnboarding} className="inline-flex items-center justify-center gap-2 h-12 px-5 rounded-full bg-white text-zinc-900 font-semibold text-sm hover:bg-zinc-100 transition">
+        <button onClick={startOnboarding} className={buttonClass('primary', 'lg')}>
           Start your arc <ArrowRight size={14} />
         </button>
-        <button onClick={() => goTo('templates')} className="inline-flex items-center justify-center h-12 px-5 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-200 text-sm hover:bg-zinc-800 hover:border-zinc-700 transition">
+        <button onClick={() => goTo('templates')} className={buttonClass('ghost', 'lg')}>
           See templates
         </button>
       </Section>

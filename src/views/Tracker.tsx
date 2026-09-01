@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import type { Arc } from '@/hooks/useArc'
 import { Disclosure } from '@/components/app/Disclosure'
 import { HabitIcon } from '@/components/app/HabitIcon'
-import { IconChip } from '@/components/app/Surface'
+import { IconChip, buttonClass } from '@/components/app/Surface'
 import { Ring } from '@/components/app/Ring'
 import { DEFAULT_REMINDERS, REMINDER_SLOTS, SLOT_LABELS, clockLabel } from '@/lib/reminders'
 import { addDays } from '@/lib/date'
@@ -29,11 +29,11 @@ export function Tracker({ arc }: { arc: Arc }) {
                 <div className={`mt-4 gap-2 ${canRollOver ? 'grid grid-cols-2 sm:max-w-[420px]' : 'flex'}`}>
                   {canRollOver ? (
                     <>
-                      <button onClick={startWinterArc} className="h-11 px-4 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">{nextArcCta}</button>
-                      <button onClick={startOnboarding} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">Edit dates</button>
+                      <button onClick={startWinterArc} className={buttonClass('primary', 'sm')}>{nextArcCta}</button>
+                      <button onClick={startOnboarding} className={buttonClass('ghost', 'sm')}>Edit dates</button>
                     </>
                   ) : (
-                    <button onClick={startOnboarding} className="h-11 px-5 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Set up your next arc</button>
+                    <button onClick={startOnboarding} className={buttonClass('primary', 'sm')}>Set up your next arc</button>
                   )}
                 </div>
               </div>
@@ -99,9 +99,9 @@ export function Tracker({ arc }: { arc: Arc }) {
                     </p>
                     <div className="mt-4 grid grid-cols-2 gap-2">
                       {warmUp
-                        ? <button onClick={startWarmUp} className="h-11 px-4 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Start a warm-up</button>
-                        : <button onClick={startToday} className="h-11 px-4 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Start today</button>}
-                      <button onClick={startOnboarding} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">Edit dates</button>
+                        ? <button onClick={startWarmUp} className={buttonClass('primary', 'sm')}>Start a warm-up</button>
+                        : <button onClick={startToday} className={buttonClass('primary', 'sm')}>Start today</button>}
+                      <button onClick={startOnboarding} className={buttonClass('ghost', 'sm')}>Edit dates</button>
                     </div>
                     {warmUp && (
                       <p className="mt-3 text-[11px] font-mono text-zinc-500 tabular-nums">
@@ -115,7 +115,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                     onClick={() => stepDay(-1)}
                     disabled={selectedDate <= start}
                     aria-label="Previous day"
-                    className="w-11 h-11 shrink-0 grid place-items-center rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white hover:border-zinc-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    className={buttonClass('ghost', 'icon')}
                   ><ChevronLeft size={16} /></button>
                   <div className="flex-1 min-w-0 text-center">
                     <div className="text-sm font-medium text-white truncate">{dayLabel(selectedDate)}</div>
@@ -124,7 +124,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                     onClick={() => stepDay(1)}
                     disabled={selectedDate >= (today < end ? today : end)}
                     aria-label="Next day"
-                    className="w-11 h-11 shrink-0 grid place-items-center rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white hover:border-zinc-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    className={buttonClass('ghost', 'icon')}
                   ><ChevronRight size={16} /></button>
                 </div>
                 <input type="date" aria-label="Day to check in" value={selectedDate} min={start} max={today < end ? today : end} disabled={!arcStarted} onChange={e => { const v = e.target.value; if (!v) return; const cap = today < end ? today : end; setSelectedDate(v < start ? start : v > cap ? cap : v) }} className="mt-2 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 min-h-11 text-base sm:text-sm text-zinc-400 disabled:opacity-40 disabled:cursor-not-allowed" />
@@ -170,7 +170,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                     <span className="text-xs text-zinc-400">Day cleared.</span>
                     <button
                       onClick={() => { setEntries(prev => ({ ...prev, [undo.date]: { ...undo.entry } })); setUndo(null) }}
-                      className="ml-auto min-h-11 px-4 rounded-full border border-zinc-700 bg-zinc-800 text-xs text-white hover:bg-zinc-700 transition"
+                      className={buttonClass('secondary', 'sm', 'ml-auto')}
                     >Undo</button>
                   </div>
                 )}
@@ -195,7 +195,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                     }}
                     className={`h-11 rounded-full text-sm font-semibold border transition disabled:opacity-40 disabled:cursor-not-allowed ${dayComplete ? 'bg-zinc-950 border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700' : 'bg-white border-white text-zinc-900 hover:bg-zinc-100'}`}
                   >{dayComplete ? 'Uncheck all' : 'Mark all done'}</button>
-                  <button disabled={selectedDate === (today < end ? today : end)} onClick={() => setSelectedDate(today < end ? today : end)} className="h-11 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm hover:text-white hover:border-zinc-700 transition disabled:opacity-40 disabled:cursor-not-allowed">Go to today</button>
+                  <button disabled={selectedDate === (today < end ? today : end)} onClick={() => setSelectedDate(today < end ? today : end)} className={buttonClass('ghost', 'md')}>Go to today</button>
                 </div>
               </div>
                 <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
@@ -247,7 +247,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                   <h2 className="text-[15px] font-semibold text-white">Your grid</h2>
                   <button
                     onClick={() => setOpenMonths(openMonths.length === months.length ? [focusMonth] : months.map(m => m.key))}
-                    className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 text-xs hover:text-white hover:border-zinc-700 transition"
+                    className={buttonClass('ghost', 'sm')}
                   >
                     {openMonths.length === months.length ? 'Collapse' : `Show all ${totalDays} days`}
                   </button>
@@ -357,8 +357,8 @@ export function Tracker({ arc }: { arc: Arc }) {
                   </p>
                   {remindersSupported && (
                     remindersSet
-                      ? <button onClick={turnOffReminders} className="h-11 px-4 shrink-0 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">Delete both</button>
-                      : <button onClick={askForReminders} className="h-11 px-4 shrink-0 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Turn on reminders</button>
+                      ? <button onClick={turnOffReminders} className={buttonClass('ghost', 'sm')}>Delete both</button>
+                      : <button onClick={askForReminders} className={buttonClass('primary', 'sm')}>Turn on reminders</button>
                   )}
                 </div>
 
@@ -401,7 +401,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                         : 'These times are saved. Your browser has not been asked for permission yet.'}
                     </span>
                     {notifPermission !== 'denied' && (
-                      <button onClick={askForReminders} className="h-11 px-4 shrink-0 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Allow notifications</button>
+                      <button onClick={askForReminders} className={buttonClass('primary', 'sm')}>Allow notifications</button>
                     )}
                   </div>
                 )}
@@ -416,7 +416,7 @@ export function Tracker({ arc }: { arc: Arc }) {
 
                 {remindersOn && (
                   <div className="mt-3 flex flex-wrap items-center gap-3">
-                    <button onClick={testReminder} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">Send a test</button>
+                    <button onClick={testReminder} className={buttonClass('ghost', 'sm')}>Send a test</button>
                     <span role="status" aria-live="polite" className="text-xs font-mono text-zinc-500">
                       {reminderTest === 'sent' ? 'Sent. Check your notifications.' : reminderTest === 'failed' ? 'The browser refused it.' : ''}
                     </span>
@@ -429,9 +429,9 @@ export function Tracker({ arc }: { arc: Arc }) {
               <Disclosure open={promptOpen} onToggle={() => setPromptOpen(v => !v)} title="Export and LLM prompt">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <button onClick={copyPrompt} className="px-4 h-11 rounded-full bg-white text-zinc-900 text-xs font-semibold hover:bg-zinc-100 transition">{promptCopied ? 'Copied' : 'Copy prompt'}</button>
-                    <button onClick={exportJSON} className="px-4 h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">JSON</button>
-                    <button onClick={exportCSV} className="px-4 h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-xs hover:bg-zinc-700 transition">CSV</button>
+                    <button onClick={copyPrompt} className={buttonClass('primary', 'sm')}>{promptCopied ? 'Copied' : 'Copy prompt'}</button>
+                    <button onClick={exportJSON} className={buttonClass('secondary', 'sm')}>JSON</button>
+                    <button onClick={exportCSV} className={buttonClass('secondary', 'sm')}>CSV</button>
                   </div>
                   <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 overflow-auto max-h-56"><pre className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap break-words font-mono">{llmPrompt}</pre></div>
                   <div className="mt-2 text-xs text-zinc-500">Paste it with your JSON export. Nothing sends itself.</div>
@@ -446,7 +446,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                 <div className="text-[15px] font-semibold text-white">Start over</div>
                 <p className="mt-1 text-[13px] leading-5 text-zinc-500">Deletes every day you have logged, warm-up included. No undo.</p>
               </div>
-              <button onClick={() => setConfirmReset(true)} className="ml-auto shrink-0 h-11 px-5 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-sm font-semibold hover:bg-red-500/15 transition">Reset arc</button>
+              <button onClick={() => setConfirmReset(true)} className={buttonClass('danger', 'md', 'ml-auto')}>Reset arc</button>
             </div>
           </div>
     </>

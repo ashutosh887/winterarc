@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from 'react'
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ComponentType, ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 type IconComponent = ComponentType<{ size?: number; className?: string }>
@@ -7,6 +7,46 @@ export const SHELL = 'max-w-[1040px] mx-auto px-5 sm:px-6'
 export const PROSE = 'max-w-[620px]'
 export const CARD = 'rounded-2xl border border-zinc-800 bg-zinc-900'
 export const INSET = 'rounded-xl border border-zinc-800 bg-zinc-950'
+
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
+export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon'
+
+/**
+ * Every variant at a given size shares the height, padding, radius, type size and
+ * weight, and every variant carries a border. Only colour changes between them.
+ * Before this, a white button was `font-semibold` with no border next to a
+ * `font-medium` outline button, so the primary always read a size larger.
+ */
+const BUTTON_BASE = 'inline-flex items-center justify-center shrink-0 rounded-full border font-semibold whitespace-nowrap transition disabled:opacity-40 disabled:cursor-not-allowed'
+
+const BUTTON_SIZE: Record<ButtonSize, string> = {
+  sm: 'h-11 px-4 text-[13px] gap-1.5',
+  md: 'h-11 px-5 text-sm gap-2',
+  lg: 'h-12 px-6 text-[15px] gap-2',
+  icon: 'w-11 h-11 text-[13px]',
+}
+
+const BUTTON_VARIANT: Record<ButtonVariant, string> = {
+  primary: 'bg-white border-white text-zinc-900 hover:bg-zinc-100 hover:border-zinc-100',
+  secondary: 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700',
+  ghost: 'bg-zinc-950 border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700',
+  danger: 'bg-red-500/10 border-red-500/20 text-red-300 hover:bg-red-500/15',
+}
+
+export function buttonClass(variant: ButtonVariant = 'ghost', size: ButtonSize = 'sm', className?: string) {
+  return cn(BUTTON_BASE, BUTTON_SIZE[size], BUTTON_VARIANT[variant], className)
+}
+
+type ButtonOwn = { variant?: ButtonVariant; size?: ButtonSize; full?: boolean }
+
+export function Button({ variant, size, full, className, ...rest }: ButtonOwn & ButtonHTMLAttributes<HTMLButtonElement>) {
+  return <button type="button" className={buttonClass(variant, size, cn(full && 'w-full', className))} {...rest} />
+}
+
+/** Same box as Button, for the places that have to be a real link. */
+export function ButtonLink({ variant, size, full, className, ...rest }: ButtonOwn & AnchorHTMLAttributes<HTMLAnchorElement>) {
+  return <a className={buttonClass(variant, size, cn(full && 'w-full', className))} {...rest} />
+}
 
 export function Eyebrow({ icon: Icon, className, children }: {
   icon?: IconComponent

@@ -1,6 +1,6 @@
 import { ImageDown, Pencil, Share2, Trophy } from 'lucide-react'
 import type { Arc } from '@/hooks/useArc'
-import { Page, PageHeading } from '@/components/app/Surface'
+import { Page, PageHeading, buttonClass } from '@/components/app/Surface'
 import { HabitIcon } from '@/components/app/HabitIcon'
 import { Ring } from '@/components/app/Ring'
 
@@ -13,7 +13,7 @@ export function Dashboard({ arc }: { arc: Arc }) {
               eyebrow="Dashboard"
               title={settings?.name ? `${settings.name}'s ${isWarmUp ? 'warm-up' : 'arc'}` : isWarmUp ? 'Your warm-up' : 'Your arc'}
               subtitle={`${longDate(start)} to ${longDate(end)} · ${effectiveHabits.length} ${effectiveHabits.length === 1 ? 'habit' : 'habits'} · ${activeDays.length === 7 ? 'every day' : `${activeDays.length} days a week`}`}
-              actions={<button onClick={() => goTo('tracker')} className="h-12 px-5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-sm hover:text-white hover:border-zinc-700 transition">Open tracker</button>}
+              actions={<button onClick={() => goTo('tracker')} className={buttonClass('ghost', 'lg')}>Open tracker</button>}
             />
 
             <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4 [&>*]:min-w-0">
@@ -37,8 +37,8 @@ export function Dashboard({ arc }: { arc: Arc }) {
                   ))}
                 </div>
                 <div className="mt-auto pt-4 w-full grid grid-cols-2 gap-2">
-                  <button onClick={() => nativeShare()} className="h-11 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-100 transition inline-flex items-center justify-center gap-1.5"><Share2 size={14} /> Share</button>
-                  <button onClick={() => downloadImage()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><ImageDown size={14} /> PNG</button>
+                  <button onClick={() => nativeShare()} className={buttonClass('primary', 'md')}><Share2 size={14} /> Share</button>
+                  <button onClick={() => downloadImage()} className={buttonClass('secondary', 'md')}><ImageDown size={14} /> PNG</button>
                 </div>
               </div>
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 sm:p-6 flex flex-col">
@@ -109,8 +109,8 @@ export function Dashboard({ arc }: { arc: Arc }) {
                 <div className="mt-auto pt-5">
                   <div className="text-[11px] font-mono tracking-widest text-zinc-500">Take your data</div>
                   <div className="mt-2 grid grid-cols-2 gap-2">
-                    <button onClick={exportJSON} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">JSON</button>
-                    <button onClick={exportCSV} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition">CSV</button>
+                    <button onClick={exportJSON} className={buttonClass('secondary', 'md')}>JSON</button>
+                    <button onClick={exportCSV} className={buttonClass('secondary', 'md')}>CSV</button>
                   </div>
                 </div>
               </div>

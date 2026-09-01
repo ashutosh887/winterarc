@@ -1,5 +1,5 @@
 import { ExternalLink, NotebookPen } from 'lucide-react'
-import { Card, CardText, CardTitle, Page, PageHeading, Section } from '@/components/app/Surface'
+import { Card, CardText, CardTitle, Page, PageHeading, Section, buttonClass } from '@/components/app/Surface'
 import { site } from '@/config'
 
 const CHANNELS = [
@@ -27,7 +27,7 @@ export function Feedback() {
               href={c.href}
               target="_blank"
               rel="noreferrer"
-              className="mt-5 inline-flex items-center justify-center gap-1.5 px-5 h-12 shrink-0 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-200 text-sm hover:bg-zinc-800 hover:border-zinc-700 transition"
+              className={buttonClass('ghost', 'lg', 'mt-5')}
             >
               {c.label} <ExternalLink size={12} />
             </a>

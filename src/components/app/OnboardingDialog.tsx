@@ -12,6 +12,7 @@ import { Logo } from '@/components/app/Ring'
 import { DEFAULT_REMINDERS, REMINDER_SLOTS, SLOT_LABELS } from '@/lib/reminders'
 import { PRESETS, TIER_LABELS } from '@/lib/presets'
 import { templates } from '@/config'
+import { buttonClass } from '@/components/app/Surface'
 
 export function OnboardingDialog({ arc }: { arc: Arc }) {
   const { addCustom, arcLength, completeOnboarding, customList, customName, longDate, onboardStep, overlayProps, presets, setCustomList, setCustomName, setOnboardStep, setShowOnboarding, setTmpDays, setTmpEnd, setTmpName, setTmpSelected, setTmpStart, setTmpReminders, setupWarmUp, tmpDays, tmpEnd, tmpName, tmpReminders, tmpSelected, tmpStart, today, winterArc } = arc
@@ -183,7 +184,7 @@ export function OnboardingDialog({ arc }: { arc: Arc }) {
                       <button
                         type="button"
                         onClick={() => { setTmpSelected(new Set()); setCustomList([]) }}
-                        className="h-11 px-4 rounded-full text-[13px] font-medium border border-zinc-800 bg-zinc-950 text-zinc-500 hover:text-white hover:border-zinc-700 transition"
+                        className={buttonClass('ghost', 'sm')}
                       >
                         Clear
                       </button>
