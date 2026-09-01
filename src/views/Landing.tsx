@@ -46,8 +46,7 @@ export function Landing({ arc }: { arc: Arc }) {
                 </motion.div>
 
                 <motion.div variants={fadeUp} className="mt-6 flex justify-center">
-                  <span className="inline-flex items-center gap-2.5 rounded-full border border-zinc-800 bg-zinc-900/80 backdrop-blur px-4 py-2 text-[12px] leading-5 text-zinc-400 text-left">
-                    <span className="w-1.5 h-1.5 shrink-0 rounded-full bg-white" />
+                  <span className="inline-flex items-center rounded-full border border-zinc-800 bg-zinc-900/80 backdrop-blur px-4 py-2 text-[12px] leading-5 text-zinc-400 text-left">
                     {seasonNote}
                   </span>
                 </motion.div>
