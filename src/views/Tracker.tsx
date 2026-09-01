@@ -10,7 +10,7 @@ import { addDays } from '@/lib/date'
 import { fadeUp, stagger } from '@/lib/motion'
 
 export function Tracker({ arc }: { arc: Arc }) {
-  const { activeDays, allDates, arcEnded, arcStarted, canRollOver, copyPrompt, dailyPct, dayComplete, dayDoneCount, dayLabel, dayPct, daysToStart, effectiveHabits, end, entries, exportCSV, exportJSON, focusMonth, habitStreak, isActiveDay, isPerfectDay, isWarmUp, llmPrompt, longDate, months, nextArcCta, nextArcLabel, openMonths, promptCopied, promptOpen, selectedDate, selectedIsFuture, setConfirmReset, setEntries, setOpenMonths, setPromptOpen, setSelectedDate, setShareOpen, setReminderTime, setStreakInfo, setUndo, askForReminders, notifPermission, reminderTest, reminders, remindersOn, remindersSupported, runLabel, start, startOnboarding, startToday, startWarmUp, startWinterArc, stats, stepDay, streakInfo, today, toggleHabit, totalDays, testReminder, turnOffReminders, undo, warmUp } = arc
+  const { activeDays, allDates, arcEnded, arcStarted, canRollOver, copyPrompt, dailyPct, dayComplete, dayDoneCount, dayLabel, dayPct, daysToStart, effectiveHabits, end, entries, exportCSV, exportJSON, focusMonth, habitStreak, isActiveDay, isPerfectDay, isWarmUp, llmPrompt, longDate, months, nextArcCta, nextArcLabel, openMonths, promptCopied, promptOpen, selectedDate, selectedIsFuture, setConfirmReset, setEntries, setOpenMonths, setPromptOpen, setSelectedDate, setShareOpen, setReminderTime, setStreakInfo, setUndo, askForReminders, notifPermission, reminderTest, reminders, remindersOn, remindersSet, remindersSupported, runLabel, start, startOnboarding, startToday, startWarmUp, startWinterArc, stats, stepDay, streakInfo, today, toggleHabit, totalDays, testReminder, turnOffReminders, undo, warmUp } = arc
   return (
     <>
           <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
@@ -24,7 +24,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                 <p className="mt-1.5 text-[13px] leading-6 text-zinc-500 max-w-[560px]">
                   {canRollOver
                     ? `${nextArcLabel} Same habits, empty grid. What you logged stays in this browser and in both exports. It just stops counting toward the new run.`
-                    : 'That window is closed and there is nothing left to check in it. Set the next one whenever you are ready.'}
+                    : 'That window is closed. Set the next one whenever you are ready.'}
                 </p>
                 <div className={`mt-4 gap-2 ${canRollOver ? 'grid grid-cols-2 sm:max-w-[420px]' : 'flex'}`}>
                   {canRollOver ? (
@@ -95,7 +95,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                     <div className="mt-1 text-[13px] text-zinc-400">{daysToStart === 1 ? 'day until you start' : 'days until you start'}</div>
                     <p className="mt-3 text-xs leading-5 text-zinc-500">
                       {warmUp
-                        ? 'Nothing to check yet. Run a warm-up until then, so checking in is already a habit on day one.'
+                        ? 'Nothing to check yet. Warm up until it starts, so checking in is already a habit on day one.'
                         : 'Nothing to check yet. Start today and keep the same length, or edit the dates.'}
                     </p>
                     <div className="mt-4 grid grid-cols-2 gap-2">
@@ -342,20 +342,20 @@ export function Tracker({ arc }: { arc: Arc }) {
                         ? 'Not available in this browser'
                         : notifPermission === 'denied'
                           ? 'Blocked for this site'
-                          : remindersOn
+                          : remindersSet
                             ? REMINDER_SLOTS.filter(sl => reminders[sl]).map(sl => `${SLOT_LABELS[sl]} ${clockLabel(reminders[sl])}`).join(' · ')
                             : 'Off'}
                     </p>
                   </div>
                 </div>
-                {remindersSupported && notifPermission !== 'denied' && (
-                  remindersOn
-                    ? <button onClick={turnOffReminders} className="h-11 px-4 shrink-0 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">Turn off</button>
+                {remindersSupported && (
+                  remindersSet
+                    ? <button onClick={turnOffReminders} className="h-11 px-4 shrink-0 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">Delete both</button>
                     : <button onClick={askForReminders} className="h-11 px-4 shrink-0 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Turn on reminders</button>
                 )}
               </div>
 
-              {remindersOn && (
+              {remindersSupported && (
                 <div className="mt-4 grid sm:grid-cols-2 gap-2">
                   {REMINDER_SLOTS.map(slot => {
                     const on = reminders[slot] !== null
@@ -365,10 +365,11 @@ export function Tracker({ arc }: { arc: Arc }) {
                           <span className="text-[13px] text-zinc-300">{SLOT_LABELS[slot]}</span>
                           <button
                             aria-pressed={on}
+                            aria-label={on ? `Delete the ${SLOT_LABELS[slot].toLowerCase()} reminder` : `Add a ${SLOT_LABELS[slot].toLowerCase()} reminder`}
                             onClick={() => setReminderTime(slot, on ? null : DEFAULT_REMINDERS[slot])}
                             className={`h-8 px-3 rounded-full text-[11px] font-mono border transition ${on ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'}`}
                           >
-                            {on ? 'On' : 'Off'}
+                            {on ? 'Delete' : 'Add'}
                           </button>
                         </div>
                         <input
@@ -385,12 +386,25 @@ export function Tracker({ arc }: { arc: Arc }) {
                 </div>
               )}
 
+              {remindersSupported && remindersSet && notifPermission !== 'granted' && (
+                <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 flex flex-wrap items-center gap-3">
+                  <span className="text-[13px] text-zinc-300 min-w-0 flex-1">
+                    {notifPermission === 'denied'
+                      ? 'These times are saved, but notifications are blocked for this site.'
+                      : 'These times are saved. Your browser has not been asked for permission yet.'}
+                  </span>
+                  {notifPermission !== 'denied' && (
+                    <button onClick={askForReminders} className="h-11 px-4 shrink-0 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Allow notifications</button>
+                  )}
+                </div>
+              )}
+
               <p className="mt-3 text-[13px] leading-6 text-zinc-500">
                 {notifPermission === 'denied'
                   ? 'You blocked notifications for this site. Allow them again in your browser settings, then reload.'
                   : !remindersSupported
                     ? 'This browser has no web notifications. On an iPhone they work once WinterArc is on your home screen.'
-                    : 'They fire only while WinterArc is open in a tab or installed as an app. No server here, so nothing can wake a closed browser. Rest days and finished days stay quiet. The sound is whatever your system already uses.'}
+                    : 'They fire only while WinterArc is open in a tab or installed as an app. No server here, so nothing can wake a closed browser. Rest days and finished days stay quiet, and the sound is your own.'}
               </p>
 
               {remindersOn && (

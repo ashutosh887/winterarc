@@ -55,8 +55,8 @@ export function About({ arc }: { arc: Arc }) {
                 Deciding to start is the easy part. It wears off. Setup never hands you a date you have to sit and wait for. {setupWarmUp
                   ? `The arc is close, so setup offers a run from today to ${longDate(setupWarmUp.end)}, the day before it begins.`
                   : midArc
-                    ? 'The arc is already running, so setup starts you today. Opening on weeks of red days you never had a chance to log helps nobody.'
-                    : `The arc is too far off to warm up to, so setup starts you today for 90 days. The winter arc is still one tap away as a preset.`} You use that run to find out which habits you actually hold and which ones you picked because they sounded good.
+                    ? 'The arc is already running, so setup starts you today rather than on weeks of red days you never had a chance to log.'
+                    : `The arc is too far off for a warm-up to bridge, so setup starts you today for 90 days. The winter arc is one tap away as a preset.`} You use that run to find out which habits you actually hold and which ones you picked because they sounded good.
               </p>
               <p className="mt-2 text-[13px] leading-6 text-zinc-500 max-w-[720px]">
                 When a warm-up ends, the tracker offers to roll you into the arc with the same habits and an empty grid. Set your own dates before warming up and those are the dates it hands back. Warm-up days are not deleted and not merged in. They stay in this browser and in both exports. They just stop counting toward the arc, so a rough first week of learning the tool does not sit in your record as a failed arc.

@@ -27,9 +27,8 @@ export function useLocalStorage<T>(
   useEffect(() => { initialRef.current = initial })
   const [broken, setBroken] = useState(false)
   // What this tab last wrote or accepted, so a write and its own echo never fight.
-  // Seeded from the raw string rather than null, because otherwise the first effect
-  // writes the default straight over a value that failed validation, and with no
-  // import path that destroys the only copy of it.
+  // Seeded from the raw string rather than null. Otherwise the first effect writes
+  // the default over a value that failed validation, and there is no import path.
   const lastRaw = useRef<string | null>((() => {
     try { return localStorage.getItem(key) } catch { return null }
   })())
@@ -44,8 +43,8 @@ export function useLocalStorage<T>(
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key !== key || e.storageArea !== localStorage) return
-      // A removal is a reset in another tab. Ignoring it left this tab holding the
-      // whole arc, and its next write put the data the user just deleted back.
+      // A removal is a reset in another tab. Ignoring it let this tab write the
+      // deleted data back.
       if (e.newValue === null) { lastRaw.current = null; setVal(initialRef.current); return }
       if (e.newValue === lastRaw.current) return
       let next: T

@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Dumbbell, ExternalLink, LayoutGrid, Moon, Target, Trophy, Zap } from 'lucide-react'
+import { ArrowRight, Bell, CalendarClock, Check, Dumbbell, ExternalLink, LayoutGrid, Moon, Target, Trophy, Zap } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Suspense, lazy } from 'react'
 import type { Arc } from '@/hooks/useArc'
@@ -147,7 +147,7 @@ export function Landing({ arc }: { arc: Arc }) {
             <section id="features" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12 scroll-mt-[calc(3.5rem+env(safe-area-inset-top))]">
               <Eyebrow icon={LayoutGrid}>Features</Eyebrow>
               <h2 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">Stay honest.</h2>
-              <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">Three things, and none of them nag you.</p>
+              <p className="mt-1.5 text-sm text-zinc-500 max-w-[560px]">The grid is the point. Everything else is optional.</p>
 
               <div className="mt-8 space-y-6">
                 <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2 md:min-h-[280px]">
@@ -204,6 +204,27 @@ export function Landing({ arc }: { arc: Arc }) {
                     </div>
                   </div>
                 </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 sm:p-7">
+                    <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-200 grid place-items-center"><CalendarClock size={16} /></div>
+                    <h3 className="mt-3 text-[15px] font-semibold text-white">Start before the season</h3>
+                    <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">
+                      {setupWarmUp
+                        ? `The arc starts ${longDate(winterArc.start)}. Rather than hand you a countdown, setup runs a warm-up from today to ${longDate(setupWarmUp.end)}, then rolls you into the arc with the same habits.`
+                        : 'When the arc is still weeks away, setup runs a warm-up from today up to the day before it starts, then rolls you into the arc with the same habits.'}
+                    </p>
+                    <div className="mt-4 text-xs font-mono text-zinc-600">Warm-up days are kept, not counted</div>
+                  </div>
+                  <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 sm:p-7">
+                    <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-200 grid place-items-center"><Bell size={16} /></div>
+                    <h3 className="mt-3 text-[15px] font-semibold text-white">One morning, one evening</h3>
+                    <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">
+                      Optional reminders at times you set, using your own system sound. There is no push server, so they fire while WinterArc is open or installed. Rest days and finished days stay quiet.
+                    </p>
+                    <div className="mt-4 text-xs font-mono text-zinc-600">Off until you turn them on</div>
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -215,7 +236,7 @@ export function Landing({ arc }: { arc: Arc }) {
 
                 <div className="mt-8 grid sm:grid-cols-3 gap-6">
                   {[
-                    { n: '01', t: 'Set it up', d: 'Your dates, your habits. Five is plenty. Past ten you are lying to yourself. If the arc is still weeks away, setup offers a warm-up so you begin today.' },
+                    { n: '01', t: 'Set it up', d: 'Your dates, your habits. Five is plenty. Past ten you are lying to yourself. If the arc is weeks away, setup offers a warm-up so you start today.' },
                     { n: '02', t: 'Tap what you did', d: 'Backfill any past date. Forgetting to log is not the same as missing.' },
                     { n: '03', t: 'Watch the grid fill', d: 'Red stays red, and tomorrow stays locked until it arrives.' },
                   ].map(s => (

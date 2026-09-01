@@ -211,13 +211,11 @@ export function useArc() {
   const warmUp = useMemo(() => (arcStarted ? null : warmUpBefore(start, today)), [arcStarted, start, today])
   /**
     * What a finished run rolls into. An arc already under way is trimmed to start
-    * today, because handing somebody a grid that opens on five weeks of red days
-    * they were never able to log is a lie about what happened.
+    * today, so the new grid does not open on weeks of red days nobody could log.
     */
   /**
    * The arc a warm-up interrupted, if it is still worth resuming. Without this the
-   * roll-over would hand back the winter arc and quietly lose the dates somebody
-   * picked for themselves before they chose to warm up first.
+   * roll-over hands back the winter arc and loses the dates the user chose.
    */
   const savedNext = settings?.next
   const resumeArc = useMemo(() => {
@@ -361,12 +359,13 @@ export function useArc() {
 
   const storedReminders = settings?.reminders
   const reminders = useMemo(() => normalizeReminders(storedReminders), [storedReminders])
-  const remindersOn = remindersSupported && notifPermission === 'granted' && anyReminderOn(reminders)
+  /** At least one slot has a time. Separate from whether the browser will show it. */
+  const remindersSet = anyReminderOn(reminders)
+  const remindersOn = remindersSupported && notifPermission === 'granted' && remindersSet
 
   /**
    * The whole scheduler. No push server, so it only fires while a page or the
-   * installed app is running. The UI says so, because a reminder you count on
-   * and never get is worse than none.
+   * installed app is running. The UI says so.
    */
   useEffect(() => {
     if (!remindersOn || !hasData) return
@@ -434,7 +433,7 @@ export function useArc() {
     if (p === 'granted' && !anyReminderOn(reminders)) writeReminders(DEFAULT_REMINDERS)
   }
   function turnOffReminders() { writeReminders({ morning: null, evening: null }) }
-  /** Proves the permission, the sound and the wording in one tap, with no waiting. */
+  /** Checks permission and sound without waiting for a scheduled time. */
   async function testReminder() {
     const { title, body } = reminderText(runHeadline, effectiveHabits, entries[today] || {})
     const ok = await raiseNotification(title, body, `wa-test-${Date.now()}`)
@@ -443,8 +442,7 @@ export function useArc() {
   }
 
   // A corrupt stored date makes dayNum NaN, and QUOTES[NaN] is undefined. Reading
-  // .source off that used to throw, which put the crash screen and its offer to
-  // delete the arc in front of somebody whose only problem was one bad field.
+  // .source off that threw, which raised the crash screen and its delete offer.
   const quote = useMemo(() => QUOTES[Number.isFinite(stats.dayNum) ? stats.dayNum % QUOTES.length : 0], [stats.dayNum])
   // Attribution travels with the quote everywhere it goes: the header, the image
   // and the shared text. A quote leaving the app without its author is the bug.
@@ -477,9 +475,8 @@ export function useArc() {
     })
   }
   /**
-   * Same habits, same rest days, a new window. Entries are keyed by date and are
-   * never touched here, so a day logged during a warm-up is still in the browser
-   * and still in the JSON export. It just stops counting toward the new arc.
+   * Same habits, new window. Entries are keyed by date and are never touched here,
+   * so warm-up days stay in the browser and in both exports. They stop counting.
    */
   function switchArc(range: ArcRange, mode: ArcMode, next?: ArcRange) {
     // rebuilt from scratch, so leaving `next` off is what clears a resumed arc
@@ -544,8 +541,7 @@ export function useArc() {
     setOnboardStep(2); setShowOnboarding(true)
   }
   function exportJSON() {
-    // spread first so mode, reminders and anything added later ride along; a backup
-    // that quietly omits fields is a worse backup than none
+    // spread first so mode, reminders and anything added later ride along
     const data = { settings: { ...settings, start, end, name: settings?.name ?? null, activeDays }, habits: effectiveHabits, entries, exportedAt: new Date().toISOString() }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `winter-arc-${start}_${end}.json`; a.click(); URL.revokeObjectURL(url)
@@ -557,8 +553,7 @@ export function useArc() {
   }
   function exportCSV() {
     const header = ['date', ...effectiveHabits.map(h => csvEscape(h.name)), 'perfect']
-    // days logged before a roll-over sit outside the window but are still the
-    // user's record, so the CSV carries them rather than pretending they never happened
+    // days logged before a roll-over sit outside the window, so union them in
     const dates = [...new Set([...allDates, ...Object.keys(entries)])].sort()
     const rows = dates.map(d => {
       const e = entries[d] || {}
@@ -1020,6 +1015,7 @@ export function useArc() {
     remindersSupported,
     notifPermission,
     reminders,
+    remindersSet,
     remindersOn,
     reminderTest,
     tmpReminders,

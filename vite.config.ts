@@ -27,7 +27,8 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
-        start_url: '/',
+        // the installed app opens on the tracker; the nav still reaches every page
+        start_url: '/tracker',
         categories: ['productivity', 'health', 'lifestyle'],
         icons: [
           { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
