@@ -119,14 +119,14 @@ export function Install({ arc }: { arc: Arc }) {
               ))}
             </Section>
 
-            <Section className={PROSE}>
+            <Section>
               <Card>
               <CardTitle>What you should know on iOS</CardTitle>
-              <ul className="mt-3 space-y-3 text-[14px] leading-6 text-zinc-400 list-disc pl-5 marker:text-zinc-600">
+              <ul className="mt-3 grid lg:grid-cols-2 gap-x-8 gap-y-3 text-[14px] leading-6 text-zinc-400 list-disc pl-5 marker:text-zinc-600">
                 <li>Apple only lets Safari add a web app to the home screen, so that step cannot be skipped.</li>
                 <li>The installed copy keeps its own storage. If you set up your arc in Safari first, it carries over. If you set it up somewhere else, it does not.</li>
                 <li>Storage is capped lower than a native app. A whole arc is a few kilobytes, so you will not hit it.</li>
-                <li>Notifications need iOS 16.4 or later and only work after you add it to the home screen. WinterArc does not send any yet.</li>
+                <li>Reminders need iOS 16.4 or later, and on an iPhone they only work once WinterArc is on your home screen. Set them on the tracker.</li>
               </ul>
               </Card>
             </Section>

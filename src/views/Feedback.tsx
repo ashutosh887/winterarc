@@ -1,5 +1,5 @@
 import { ExternalLink, NotebookPen } from 'lucide-react'
-import { Card, CardText, CardTitle, Page, PageHeading, PROSE, Section } from '@/components/app/Surface'
+import { Card, CardText, CardTitle, Page, PageHeading, Section } from '@/components/app/Surface'
 import { site } from '@/config'
 
 const CHANNELS = [
@@ -35,7 +35,7 @@ export function Feedback() {
         ))}
       </Section>
 
-      <Section className={`${PROSE} space-y-4`}>
+      <Section className="grid lg:grid-cols-2 gap-4 items-start max-lg:max-w-[620px]">
         <Card>
           <CardTitle>What is measured</CardTitle>
           <CardText>
