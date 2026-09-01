@@ -1,14 +1,11 @@
-import { useState } from 'react'
 import { ArrowRight, Snowflake } from 'lucide-react'
 import type { Arc } from '@/hooks/useArc'
-import { Disclosure } from '@/components/app/Disclosure'
 import { Card, CardText, CardTitle, Page, PageHeading, Section } from '@/components/app/Surface'
 import { site } from '@/config'
 
 export function About({ arc }: { arc: Arc }) {
   const { goTo, longDate, setupWarmUp, startOnboarding, today, winterArc } = arc
   const midArc = today > winterArc.start && today <= winterArc.end
-  const [open, setOpen] = useState<string | null>(null)
 
   const warmUpLine = setupWarmUp
     ? `The arc is close, so setup offers a run from today to ${longDate(setupWarmUp.end)}, the day before it begins.`
@@ -61,59 +58,59 @@ export function About({ arc }: { arc: Arc }) {
         subtitle="The stretch of the year most people write off. School is grinding, work is grinding, the weather is bad, and the plan quietly becomes January. The idea is to use that window instead of waiting it out."
       />
 
-      <Section className="grid lg:grid-cols-2 gap-4 items-start max-lg:max-w-[620px]">
-        <div className="space-y-4">
-          <Card>
-            <CardTitle className="text-[11px] font-mono tracking-widest text-zinc-500 font-normal">The tagline</CardTitle>
-            <p className="mt-2 text-[17px] font-semibold text-white">"{site.tagline}"</p>
-            <CardText>
-              Work at your hardest and stay focused during the stretch when the people around you have eased off. To lock in is to commit completely and shut out distractions. To coast is to keep moving on leftover momentum. The end of the year is when most people coast, and that is what makes it the cheapest time to get ahead.
-            </CardText>
-          </Card>
-
-          <Card>
-            <CardTitle>How to not waste it</CardTitle>
-            <ul className="mt-3 space-y-3">
-              {rules.map((r, i) => (
-                <li key={r} className="flex gap-3 text-[14px] leading-6 text-zinc-400">
-                  <span className="mt-0.5 shrink-0 w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-[11px] font-mono text-zinc-400 tabular-nums">{i + 1}</span>
-                  <span>{r}</span>
-                </li>
-              ))}
-            </ul>
-          </Card>
-        </div>
-
-        <div className="space-y-4">
+      <Section>
+        <Card className="grid sm:grid-cols-2 gap-x-8 gap-y-3 items-start">
           <div>
-            <h2 className="text-[11px] font-mono tracking-widest text-zinc-500">The reasoning</h2>
-            <div className="mt-3 rounded-2xl border border-zinc-800 bg-zinc-900 divide-y divide-zinc-800">
-              {sections.map(s => (
-                <Disclosure
-                  key={s.id}
-                  className="px-5 py-4"
-                  open={open === s.id}
-                  onToggle={() => setOpen(v => (v === s.id ? null : s.id))}
-                  title={s.title}
-                >
-                  <p className="text-[14px] leading-6 text-zinc-400">{s.body}</p>
-                  {s.extra ? <p className="mt-3 text-[14px] leading-6 text-zinc-400">{s.extra}</p> : null}
-                </Disclosure>
-              ))}
-            </div>
+            <CardTitle className="text-[11px] font-mono tracking-widest text-zinc-500 font-normal">The tagline</CardTitle>
+            <p className="mt-2 text-[20px] sm:text-[24px] leading-tight font-semibold text-white">"{site.tagline}"</p>
           </div>
+          <p className="text-[14px] leading-6 text-zinc-400">
+            Work at your hardest and stay focused during the stretch when the people around you have eased off. To lock in is to commit completely and shut out distractions. To coast is to keep moving on leftover momentum. The end of the year is when most people coast, and that is what makes it the cheapest time to get ahead.
+          </p>
+        </Card>
+      </Section>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:max-w-[420px]">
-            <button onClick={startOnboarding} className="inline-flex items-center justify-center gap-2 h-12 px-5 rounded-full bg-white text-zinc-900 font-semibold text-sm hover:bg-zinc-100 transition">
-              Start your arc <ArrowRight size={14} />
-            </button>
-            <button onClick={() => goTo('templates')} className="inline-flex items-center justify-center h-12 px-5 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-200 text-sm hover:bg-zinc-800 hover:border-zinc-700 transition">
-              See templates
-            </button>
-          </div>
+      <Section>
+        <h2 className="text-[11px] font-mono tracking-widest text-zinc-500">The reasoning</h2>
+        <div className="mt-3 grid sm:grid-cols-2 gap-3">
+          {sections.map(s => (
+            <Card key={s.id} className={s.extra ? 'sm:col-span-2' : undefined}>
+              <CardTitle>{s.title}</CardTitle>
+              {s.extra
+                ? (
+                  <div className="mt-2 grid sm:grid-cols-2 gap-x-8 gap-y-3">
+                    <p className="text-[14px] leading-6 text-zinc-400">{s.body}</p>
+                    <p className="text-[14px] leading-6 text-zinc-400">{s.extra}</p>
+                  </div>
+                )
+                : <CardText>{s.body}</CardText>}
+            </Card>
+          ))}
         </div>
       </Section>
 
+      <Section>
+        <Card>
+          <CardTitle>How to not waste it</CardTitle>
+          <ul className="mt-3 grid sm:grid-cols-2 gap-x-8 gap-y-3">
+            {rules.map((r, i) => (
+              <li key={r} className="flex gap-3 text-[14px] leading-6 text-zinc-400">
+                <span className="mt-0.5 shrink-0 w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-[11px] font-mono text-zinc-400 tabular-nums">{i + 1}</span>
+                <span>{r}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      </Section>
+
+      <Section className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:max-w-[420px]">
+        <button onClick={startOnboarding} className="inline-flex items-center justify-center gap-2 h-12 px-5 rounded-full bg-white text-zinc-900 font-semibold text-sm hover:bg-zinc-100 transition">
+          Start your arc <ArrowRight size={14} />
+        </button>
+        <button onClick={() => goTo('templates')} className="inline-flex items-center justify-center h-12 px-5 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-200 text-sm hover:bg-zinc-800 hover:border-zinc-700 transition">
+          See templates
+        </button>
+      </Section>
     </Page>
   )
 }
