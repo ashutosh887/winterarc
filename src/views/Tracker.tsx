@@ -42,25 +42,25 @@ export function Tracker({ arc }: { arc: Arc }) {
               <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex items-center gap-2.5">
                 <Ring pct={dayPct} size={44} stroke={3}><span className="text-[11px] font-mono font-bold tabular-nums text-white">{dayPct}%</span></Ring>
                 <div className="min-w-0">
-                  <div className="text-[10px] sm:text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-400 truncate">{runLabel}</div>
+                  <div className="text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-400 truncate">{runLabel}</div>
                   <div className="text-[17px] font-bold text-white leading-tight tabular-nums">{stats.dayNum}</div>
-                  <div className="text-[10px] font-mono text-zinc-400 truncate">{stats.remaining} left</div>
+                  <div className="text-[11px] font-mono text-zinc-400 truncate">{stats.remaining} left</div>
                 </div>
               </motion.div>
               <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex items-center gap-2.5">
                 <Ring pct={stats.perfectPct} size={44} stroke={3}><span className="text-[11px] font-mono font-bold tabular-nums text-white">{stats.perfectPct}%</span></Ring>
                 <div className="min-w-0">
-                  <div className="text-[10px] sm:text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-400 truncate">Perfect days</div>
+                  <div className="text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-400 truncate">Perfect days</div>
                   <div className="text-[17px] font-bold text-white leading-tight">{stats.perfect}<span className="text-xs font-mono text-zinc-500">/{stats.scheduled}</span></div>
-                  <div className="text-[10px] font-mono text-zinc-400 truncate">of {stats.scheduled} days</div>
+                  <div className="text-[11px] font-mono text-zinc-400 truncate">of {stats.scheduled} days</div>
                 </div>
               </motion.div>
               <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex items-center gap-2.5">
                 <Ring pct={stats.pct} size={44} stroke={3}><span className="text-xs font-bold tabular-nums text-white">{stats.pct}%</span></Ring>
                 <div className="min-w-0">
-                  <div className="text-[10px] sm:text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-400 truncate">Completion</div>
+                  <div className="text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-400 truncate">Completion</div>
                   <div className="text-[17px] font-bold text-white leading-tight">{stats.totalChecked}<span className="text-xs font-mono text-zinc-500">/{stats.totalPossible}</span></div>
-                  <div className="text-[10px] font-mono text-zinc-400 truncate">checks</div>
+                  <div className="text-[11px] font-mono text-zinc-400 truncate">checks</div>
                 </div>
               </motion.div>
               <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 col-span-2 lg:col-span-1 flex flex-col justify-center">
@@ -223,7 +223,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                     )
                   })}
                 </div>
-                <div className="mt-2 text-[10px] font-mono text-zinc-500">last 7 days</div>
+                <div className="mt-2 text-[11px] font-mono text-zinc-500">last 7 days</div>
                 {streakInfo && (
                   <p className="mt-3 rounded-xl bg-zinc-950 p-3 text-[13px] leading-6 text-zinc-400">
                     A day counts when every habit is checked. Rest days are skipped, so they never break it. One partial scheduled day ends it. Backfilling repairs it, because the streak reads the grid.
@@ -244,7 +244,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                   </button>
                 </div>
 
-                <div className="mt-3 sm:hidden flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-mono text-zinc-500">
+                <div className="mt-3 sm:hidden flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-mono text-zinc-500">
                   <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-white" /> all</span>
                   <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-zinc-300" /> some</span>
                   <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-red-500/15 border border-red-500/20" /> missed</span>
@@ -319,7 +319,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                         <div key={h.id} className="rounded-xl border border-zinc-800 bg-zinc-950 p-2.5 flex flex-col items-center gap-1.5">
                           <Ring pct={pct} size={56} stroke={4}><span className="text-zinc-200"><HabitIcon name={h.icon} size={16} /></span></Ring>
                           <div className="text-[11px] text-center leading-tight text-zinc-200 line-clamp-2 min-h-[26px] flex items-center" title={h.name}>{h.name}</div>
-                          <div className="text-[10px] font-mono text-zinc-300 tabular-nums">{streak}d streak</div>
+                          <div className="text-[11px] font-mono text-zinc-300 tabular-nums">{streak}d streak</div>
                           <div className="text-[11px] font-mono text-zinc-400">{pct}% · {hits}/{totalDays}</div>
                         </div>
                       )
@@ -367,7 +367,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                             aria-pressed={on}
                             aria-label={on ? `Delete the ${SLOT_LABELS[slot].toLowerCase()} reminder` : `Add a ${SLOT_LABELS[slot].toLowerCase()} reminder`}
                             onClick={() => setReminderTime(slot, on ? null : DEFAULT_REMINDERS[slot])}
-                            className={`h-8 px-3 rounded-full text-[11px] font-mono border transition ${on ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'}`}
+                            className={`h-11 px-4 shrink-0 rounded-full text-[12px] font-mono border transition ${on ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'}`}
                           >
                             {on ? 'Delete' : 'Add'}
                           </button>

@@ -315,21 +315,21 @@ export default function App() {
 
             <div>
               <div className="text-[11px] font-mono tracking-widest text-zinc-500">Product</div>
-              <div className="mt-3 flex flex-col items-start gap-1">
-                <button onClick={() => goTo('about')} className="inline-flex items-center min-h-11 text-[13px] text-zinc-400 hover:text-white transition">What is a winter arc</button>
-                <button onClick={() => goTo('templates')} className="inline-flex items-center min-h-11 text-[13px] text-zinc-400 hover:text-white transition">Templates</button>
-                <button onClick={() => goTo('resources')} className="inline-flex items-center min-h-11 text-[13px] text-zinc-400 hover:text-white transition">Resources</button>
-                <button onClick={() => goTo('install')} className="inline-flex items-center min-h-11 text-[13px] text-zinc-400 hover:text-white transition">Install as app</button>
+              <div className="mt-2 flex flex-col items-stretch">
+                <button onClick={() => goTo('about')} className="inline-flex items-center justify-start w-full min-h-11 px-3 -mx-3 rounded-lg text-[13px] text-zinc-400 hover:text-white hover:bg-zinc-900 transition">What is a winter arc</button>
+                <button onClick={() => goTo('templates')} className="inline-flex items-center justify-start w-full min-h-11 px-3 -mx-3 rounded-lg text-[13px] text-zinc-400 hover:text-white hover:bg-zinc-900 transition">Templates</button>
+                <button onClick={() => goTo('resources')} className="inline-flex items-center justify-start w-full min-h-11 px-3 -mx-3 rounded-lg text-[13px] text-zinc-400 hover:text-white hover:bg-zinc-900 transition">Resources</button>
+                <button onClick={() => goTo('install')} className="inline-flex items-center justify-start w-full min-h-11 px-3 -mx-3 rounded-lg text-[13px] text-zinc-400 hover:text-white hover:bg-zinc-900 transition">Install as app</button>
               </div>
             </div>
 
             <div>
               <div className="text-[11px] font-mono tracking-widest text-zinc-500">Project</div>
-              <div className="mt-3 flex flex-col items-start gap-1">
-                <a href={site.support.github} target="_blank" rel="noreferrer" className="inline-flex items-center min-h-11 text-[13px] text-zinc-400 hover:text-white transition">GitHub</a>
-                <a href={site.support.github + '/blob/main/CONTRIBUTING.md'} target="_blank" rel="noreferrer" className="inline-flex items-center min-h-11 text-[13px] text-zinc-400 hover:text-white transition">Contribute</a>
-                <button onClick={() => goTo('feedback')} className="inline-flex items-center min-h-11 text-[13px] text-zinc-400 hover:text-white transition">Feedback</button>
-                <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="inline-flex items-center min-h-11 text-[13px] text-zinc-400 hover:text-white transition">X</a>
+              <div className="mt-2 flex flex-col items-stretch">
+                <a href={site.support.github} target="_blank" rel="noreferrer" className="inline-flex items-center justify-start w-full min-h-11 px-3 -mx-3 rounded-lg text-[13px] text-zinc-400 hover:text-white hover:bg-zinc-900 transition">GitHub</a>
+                <a href={site.support.github + '/blob/main/CONTRIBUTING.md'} target="_blank" rel="noreferrer" className="inline-flex items-center justify-start w-full min-h-11 px-3 -mx-3 rounded-lg text-[13px] text-zinc-400 hover:text-white hover:bg-zinc-900 transition">Contribute</a>
+                <button onClick={() => goTo('feedback')} className="inline-flex items-center justify-start w-full min-h-11 px-3 -mx-3 rounded-lg text-[13px] text-zinc-400 hover:text-white hover:bg-zinc-900 transition">Feedback</button>
+                <a href="https://x.com/ashutosh887_" target="_blank" rel="noreferrer" className="inline-flex items-center justify-start w-full min-h-11 px-3 -mx-3 rounded-lg text-[13px] text-zinc-400 hover:text-white hover:bg-zinc-900 transition">X</a>
               </div>
             </div>
           </div>
