@@ -105,7 +105,7 @@ export function OnboardingDialog({ arc }: { arc: Arc }) {
                       )}
                       {pickedWarmUp && (
                         <div className="mt-2.5 rounded-lg bg-zinc-900 px-3 py-2 text-xs leading-5 text-zinc-400">
-                          A warm-up, so you are not waiting around to begin. The winter arc starts {longDate(winterArc.start)}, and when this run ends the tracker offers to roll you into it with the same habits.
+                          A warm-up, so you are not sitting around waiting. The winter arc starts {longDate(winterArc.start)}. When this run ends the tracker offers to roll you into it with the same habits.
                         </div>
                       )}
                     </div>
@@ -144,7 +144,7 @@ export function OnboardingDialog({ arc }: { arc: Arc }) {
                         })}
                       </div>
                       <p className="text-xs leading-5 text-zinc-500">
-                        Your browser asks permission when you save. Reminders fire only while WinterArc is open in a tab or running as the installed app. There is no server here, so nothing can wake a closed browser. You can change or silence them any time on the tracker.
+                        Your browser asks permission when you save. They fire only while the app is open, because there is no server to wake a closed browser. Change or silence them any time on the tracker.
                       </p>
                     </div>
                   </div>

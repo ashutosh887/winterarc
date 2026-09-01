@@ -59,9 +59,8 @@ export function getDefaultArc(today: ISODate = todayYMD()): ArcRange {
 export const MAX_WARMUP_DAYS = 45
 
 /**
- * Past this, waiting for the season is not a plan, it is a way of never
- * starting. Setup recommends a run from today instead and leaves the winter arc
- * one tap away as a preset.
+ * Past this, waiting for the season is a way of never starting. Setup recommends
+ * a run from today and leaves the winter arc one tap away as a preset.
  */
 export const MAX_WAIT_DAYS = 120
 
@@ -84,9 +83,9 @@ export function isMidArc(today: ISODate = todayYMD()): boolean {
 }
 
 /**
- * What setup offers before anyone touches a date field. Nobody should be handed
- * a start date they have to wait for, and nobody joining late should be handed a
- * month of red days they never had the chance to log.
+ * What setup offers before anyone touches a date field. Nobody should be handed a
+ * start date they have to wait for, or a month of red days they never had a
+ * chance to log.
  */
 export function getRecommendedArc(today: ISODate = todayYMD()): ArcRange {
   const winter = getDefaultArc(today)

@@ -23,7 +23,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                 </div>
                 <p className="mt-1.5 text-[13px] leading-6 text-zinc-500 max-w-[560px]">
                   {canRollOver
-                    ? `${nextArcLabel} Same habits, same rest days, an empty grid. Everything you logged stays in this browser and in both exports, it just stops counting toward the new run.`
+                    ? `${nextArcLabel} Same habits, empty grid. What you logged stays in this browser and in both exports. It just stops counting toward the new run.`
                     : 'That window is closed and there is nothing left to check in it. Set the next one whenever you are ready.'}
                 </p>
                 <div className={`mt-4 gap-2 ${canRollOver ? 'grid grid-cols-2 sm:max-w-[420px]' : 'flex'}`}>
@@ -387,10 +387,10 @@ export function Tracker({ arc }: { arc: Arc }) {
 
               <p className="mt-3 text-[13px] leading-6 text-zinc-500">
                 {notifPermission === 'denied'
-                  ? 'You blocked notifications for this site, so nothing can be sent. Allow them again in your browser settings, then reload this page.'
+                  ? 'You blocked notifications for this site. Allow them again in your browser settings, then reload.'
                   : !remindersSupported
-                    ? 'This browser does not offer web notifications. On an iPhone they work only once WinterArc is installed to the home screen.'
-                    : 'These fire only while WinterArc is open in a tab or running as the installed app. There is no server here, so nothing can wake a closed browser. They use your system notification sound, and they stay quiet on rest days and once the day is already complete.'}
+                    ? 'This browser has no web notifications. On an iPhone they work once WinterArc is on your home screen.'
+                    : 'They fire only while WinterArc is open in a tab or installed as an app. No server here, so nothing can wake a closed browser. Rest days and finished days stay quiet. The sound is whatever your system already uses.'}
               </p>
 
               {remindersOn && (

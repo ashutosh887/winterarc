@@ -91,7 +91,7 @@ export function Dashboard({ arc }: { arc: Arc }) {
                 <div className="text-[11px] font-mono tracking-widest text-zinc-500">Today</div>
                 <blockquote className="mt-3 text-[15px] leading-6 text-zinc-200">
                   {quote.text}
-                  <cite className="mt-2 block not-italic text-[13px] text-zinc-500">&mdash; {quoteCredit}</cite>
+                  <cite className="mt-2 block not-italic text-[13px] text-zinc-500">{quoteCredit}</cite>
                 </blockquote>
 
                 <div className="mt-5 space-y-1">

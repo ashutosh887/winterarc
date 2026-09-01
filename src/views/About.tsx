@@ -16,7 +16,7 @@ export function About({ arc }: { arc: Arc }) {
 
             <div className="mt-6 max-w-[620px] rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
               <div className="text-[11px] font-mono tracking-widest text-zinc-500">The tagline</div>
-              <p className="mt-2 text-[15px] font-semibold text-white">&ldquo;{site.tagline}&rdquo;</p>
+              <p className="mt-2 text-[15px] font-semibold text-white">"{site.tagline}"</p>
               <p className="mt-2 text-[13px] leading-6 text-zinc-500">
                 In plain English: work at your hardest and stay focused during the stretch when the people around you have eased off. To lock in is to commit completely and shut out distractions. To coast is to keep moving on leftover momentum without putting in effort. The end of the year is when most people coast, and that is exactly what makes it the cheapest time to get ahead.
               </p>
@@ -52,14 +52,14 @@ export function About({ arc }: { arc: Arc }) {
             <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
               <div className="text-[15px] font-semibold text-white">You do not have to wait for the season</div>
               <p className="mt-2 text-[13px] leading-6 text-zinc-500 max-w-[720px]">
-                Deciding to start is the easy part and it wears off. Setup never hands you a date you have to sit and wait for. {setupWarmUp
-                  ? `The arc is close enough to warm up to, so setup offers a run from today to ${longDate(setupWarmUp.end)}, the day before it begins.`
+                Deciding to start is the easy part. It wears off. Setup never hands you a date you have to sit and wait for. {setupWarmUp
+                  ? `The arc is close, so setup offers a run from today to ${longDate(setupWarmUp.end)}, the day before it begins.`
                   : midArc
-                    ? 'The arc is already running, so setup starts you today and tracks what is left of it rather than opening on weeks of red days you never had the chance to log.'
-                    : `The arc is further out than a warm-up can bridge, so setup starts you today for 90 days and leaves the winter arc one tap away as a preset.`} You use that run to find out which habits you actually hold and which ones you picked because they sounded good.
+                    ? 'The arc is already running, so setup starts you today. Opening on weeks of red days you never had a chance to log helps nobody.'
+                    : `The arc is too far off to warm up to, so setup starts you today for 90 days. The winter arc is still one tap away as a preset.`} You use that run to find out which habits you actually hold and which ones you picked because they sounded good.
               </p>
               <p className="mt-2 text-[13px] leading-6 text-zinc-500 max-w-[720px]">
-                When a warm-up ends, the tracker offers to roll you into the arc with the same habits and an empty grid. If you had already set your own dates before warming up, those are the dates it hands back. The warm-up days are not deleted and not merged in. They stay in this browser and in both exports, they just stop counting toward the arc, so a rough first week of learning the tool never sits in the record as a failed arc.
+                When a warm-up ends, the tracker offers to roll you into the arc with the same habits and an empty grid. Set your own dates before warming up and those are the dates it hands back. Warm-up days are not deleted and not merged in. They stay in this browser and in both exports. They just stop counting toward the arc, so a rough first week of learning the tool does not sit in your record as a failed arc.
               </p>
             </div>
 

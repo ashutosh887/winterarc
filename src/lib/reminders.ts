@@ -57,10 +57,7 @@ export function clockLabel(hhmm: string | null): string {
 
 export interface ReminderText { title: string; body: string }
 
-/**
- * The notification says what is left, not that you should feel bad. A reminder
- * that reads like a scolding gets permission revoked within a week.
- */
+/** Says what is left, not that you should feel bad. Scolding gets permission revoked. */
 export function reminderText(headline: string, habits: Habit[], entry: Record<string, boolean>): ReminderText {
   const undone = habits.filter(h => !entry[h.id]).map(h => h.name)
   const done = habits.length - undone.length

@@ -148,7 +148,7 @@ export default function App() {
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 flex items-center gap-3">
             <span className="w-7 h-7 shrink-0 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-400"><Snowflake size={13} /></span>
             <span className="min-w-0 text-sm text-zinc-400 line-clamp-2 sm:truncate">
-              {quote.text} <span className="text-zinc-500">&mdash; {quote.author}</span>
+              {quote.text} <span className="text-zinc-500">· {quote.author}</span>
             </span>
             <span className="ml-auto hidden sm:inline shrink-0 text-[11px] font-mono text-zinc-500 tabular-nums">{runLabel} {stats.dayNum} / {totalDays} · {dayPct}%</span>
           </motion.div>
@@ -244,7 +244,7 @@ export default function App() {
             <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} onClick={e => e.stopPropagation()} className="w-full max-w-[440px] rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
               <h2 className="text-[22px] font-bold tracking-tight text-white">Reset your arc</h2>
               <p className="mt-2 text-sm leading-6 text-zinc-500">
-                This removes every check in this browser, including any earlier run such as a warm-up, not only the {stats.totalChecked} inside these dates. It lives only here, so once it is gone there is nothing to restore it from.
+                This removes every check in this browser, not only the {stats.totalChecked} inside these dates. Any earlier run, a warm-up included, goes with it. Nothing else holds a copy.
               </p>
               <label className="mt-4 flex items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 cursor-pointer">
                 <input type="checkbox" checked={backupBeforeReset} onChange={e => setBackupBeforeReset(e.target.checked)} className="mt-0.5 accent-white w-4 h-4" />

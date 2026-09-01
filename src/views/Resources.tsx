@@ -30,7 +30,7 @@ export function Resources({ arc }: { arc: Arc }) {
               </div>
               <blockquote className="mt-3 text-[15px] leading-6 text-zinc-200">
                 {quote.text}
-                <cite className="mt-2 block not-italic text-[13px] text-zinc-500">&mdash; {quoteCredit}</cite>
+                <cite className="mt-2 block not-italic text-[13px] text-zinc-500">{quoteCredit}</cite>
               </blockquote>
             </div>
           </main>

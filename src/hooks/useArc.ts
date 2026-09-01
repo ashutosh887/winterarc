@@ -27,9 +27,9 @@ function notificationsSupported(): boolean {
 }
 
 /**
- * Android Chrome refuses `new Notification` outright and only shows one raised by
- * the service worker, so the worker is tried first and the constructor is the
- * fallback for desktop browsers that have no worker registered yet.
+ * Android Chrome refuses `new Notification` and only shows one raised by the
+ * service worker. So try the worker first. The constructor is the fallback for
+ * desktop browsers with no worker registered yet.
  */
 async function raiseNotification(title: string, body: string, tag: string): Promise<boolean> {
   const opts: NotificationOptions = { body, tag, icon: '/pwa-192x192.png', badge: '/pwa-192x192.png' }
@@ -364,10 +364,9 @@ export function useArc() {
   const remindersOn = remindersSupported && notifPermission === 'granted' && anyReminderOn(reminders)
 
   /**
-   * The whole scheduler. There is no push server, so this can only fire while a
-   * page or the installed app is running. That limit is stated in the UI rather
-   * than papered over, because a reminder somebody counts on and never receives
-   * is worse than no reminder at all.
+   * The whole scheduler. No push server, so it only fires while a page or the
+   * installed app is running. The UI says so, because a reminder you count on
+   * and never get is worse than none.
    */
   useEffect(() => {
     if (!remindersOn || !hasData) return
@@ -450,7 +449,7 @@ export function useArc() {
   // Attribution travels with the quote everywhere it goes: the header, the image
   // and the shared text. A quote leaving the app without its author is the bug.
   const quoteCredit = quote.source ? `${quote.author}, ${quote.source}` : quote.author
-  const quoteShareText = `"${quote.text}"\n\u2014 ${quote.author}`
+  const quoteShareText = `"${quote.text}"\n${quote.author}`
 
   const achievements = useMemo(() => challenges.map(c => {
     const value = c.metric === 'checks' ? stats.totalChecked
@@ -692,7 +691,7 @@ export function useArc() {
     ctx.fillStyle = '#d4d4d8'; ctx.font = '400 20px ui-sans-serif,system-ui'
     ctx.fillText(fit(`"${quote.text}"`, textW), PAD, 544)
     ctx.fillStyle = '#71717a'; ctx.font = '400 15px ui-sans-serif,system-ui'
-    ctx.fillText(fit(`\u2014 ${quoteCredit}`, textW), PAD, 570)
+    ctx.fillText(fit(quoteCredit, textW), PAD, 570)
 
     ctx.fillStyle = '#52525b'; ctx.font = '500 14px ui-monospace,monospace'
     ctx.fillText(site.domain.replace('https://', ''), PAD, 600)
