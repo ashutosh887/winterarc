@@ -6,7 +6,7 @@ import QuietBoundary from '@/components/app/QuietBoundary'
 
 const ThreeHero = lazy(() => import('@/ThreeHero'))
 
-import { Eyebrow, IconChip } from '@/components/app/Surface'
+import { Eyebrow, IconChip, buttonClass } from '@/components/app/Surface'
 import { HabitIcon } from '@/components/app/HabitIcon'
 import { Ring } from '@/components/app/Ring'
 import { fadeUp, stagger } from '@/lib/motion'
@@ -37,12 +37,21 @@ export function Landing({ arc }: { arc: Arc }) {
                 </motion.p>
 
                 <motion.div variants={fadeUp} className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-                  <button onClick={startOnboarding} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 h-12 rounded-full bg-white text-zinc-900 font-semibold text-[15px] hover:bg-zinc-100 transition">
-                    Start your arc <ArrowRight size={16} />
-                  </button>
-                  <button onClick={() => { hasData ? goTo('tracker') : goTo('templates') }} className="w-full sm:w-auto inline-flex items-center justify-center px-7 h-12 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-200 font-medium text-[15px] hover:bg-zinc-800 hover:border-zinc-700 transition">
-                    {hasData ? 'Open tracker' : 'Browse templates'}
-                  </button>
+                  {hasData ? (
+                    // An arc already exists, so setup is not the ask. Editing it lives on the navbar.
+                    <button onClick={() => goTo('tracker')} className={buttonClass('primary', 'lg', 'w-full sm:w-auto')}>
+                      Open tracker <ArrowRight size={16} />
+                    </button>
+                  ) : (
+                    <>
+                      <button onClick={startOnboarding} className={buttonClass('primary', 'lg', 'w-full sm:w-auto')}>
+                        Start your arc <ArrowRight size={16} />
+                      </button>
+                      <button onClick={() => goTo('templates')} className={buttonClass('ghost', 'lg', 'w-full sm:w-auto')}>
+                        Browse templates
+                      </button>
+                    </>
+                  )}
                 </motion.div>
 
                 <motion.div variants={fadeUp} className="mt-6 flex justify-center">

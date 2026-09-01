@@ -16,6 +16,7 @@ import { Landing } from '@/views/Landing'
 import { Resources } from '@/views/Resources'
 import { Templates } from '@/views/Templates'
 import { Tracker } from '@/views/Tracker'
+import { buttonClass } from '@/components/app/Surface'
 
 
 export default function App() {
@@ -104,11 +105,11 @@ export default function App() {
               ))}
             </nav>
 
-            <a href={site.support.github} target="_blank" rel="noopener noreferrer" onPointerEnter={loadStars} onFocus={loadStars} aria-label="Star WinterArc on GitHub" className="hidden sm:inline-flex items-center gap-1.5 h-11 px-3 rounded-full border border-zinc-800 bg-zinc-900 text-[13px] font-medium text-zinc-400 hover:text-white hover:border-zinc-700 transition">
+            <a href={site.support.github} target="_blank" rel="noopener noreferrer" onPointerEnter={loadStars} onFocus={loadStars} aria-label="Star WinterArc on GitHub" className={buttonClass('ghost', 'sm', 'hidden sm:inline-flex')}>
               <Star size={13} /> {stars === null ? 'Star' : stars.toLocaleString()}
             </a>
 
-            <button onClick={startOnboarding} className="inline-flex shrink-0 items-center gap-1.5 h-11 px-4 rounded-full bg-white text-zinc-900 hover:bg-zinc-100 font-semibold text-[13px] transition whitespace-nowrap">
+            <button onClick={startOnboarding} className={buttonClass('primary', 'sm')}>
               <span className="sm:hidden">{hasData ? 'Edit' : 'Set up'}</span>
               <span className="hidden sm:inline">{hasData ? 'Edit arc' : 'Set up your arc'}</span>
               {hasData ? <Pencil size={14} /> : <ArrowRight size={14} />}
@@ -134,7 +135,7 @@ export default function App() {
                   {l.label}
                 </button>
               ))}
-              <a href={site.support.github} target="_blank" rel="noreferrer" className="col-span-2 h-11 px-4 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-200 text-sm font-medium inline-flex items-center justify-center gap-1.5">
+              <a href={site.support.github} target="_blank" rel="noreferrer" className={buttonClass('ghost', 'md', 'col-span-2')}>
                 <Star size={14} /> Star on GitHub {stars !== null && `(${stars})`}
               </a>
             </div>
@@ -222,10 +223,10 @@ export default function App() {
                 <button onClick={() => setShareOpen(false)} aria-label="Close" className="w-11 h-11 -mt-2 -mr-2 shrink-0 grid place-items-center rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition"><X size={18} /></button>
               </div>
               <div className="mt-5 grid grid-cols-2 gap-2">
-                <button onClick={() => shareToX()} className="h-11 rounded-full bg-white text-zinc-900 font-semibold text-sm hover:bg-zinc-100 transition inline-flex items-center justify-center gap-1.5"><Share2 size={15} /> X</button>
-                <button onClick={() => shareToWhatsApp()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MessageCircle size={15} /> WhatsApp</button>
-                <button onClick={() => downloadImage()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><ImageDown size={15} /> PNG</button>
-                <button onClick={() => nativeShare()} className="h-11 rounded-full bg-zinc-950 border border-zinc-800 text-zinc-300 text-sm hover:text-white hover:border-zinc-700 transition inline-flex items-center justify-center gap-1.5"><MoreHorizontal size={15} /> More</button>
+                <button onClick={() => shareToX()} className={buttonClass('primary', 'md')}><Share2 size={15} /> X</button>
+                <button onClick={() => shareToWhatsApp()} className={buttonClass('secondary', 'md')}><MessageCircle size={15} /> WhatsApp</button>
+                <button onClick={() => downloadImage()} className={buttonClass('secondary', 'md')}><ImageDown size={15} /> PNG</button>
+                <button onClick={() => nativeShare()} className={buttonClass('ghost', 'md')}><MoreHorizontal size={15} /> More</button>
               </div>
               <p className="mt-4 text-[13px] leading-6 text-zinc-400">X and WhatsApp take text only, so the card downloads for you to attach. More sends the image itself.</p>
             </motion.div>
@@ -251,8 +252,8 @@ export default function App() {
                 <span className="text-[13px] leading-5 text-zinc-300">Export a JSON copy first<span className="block text-zinc-500">Saves the file, then clears. There is no import yet, so it will not load back in.</span></span>
               </label>
               <div className="mt-5 grid grid-cols-2 gap-2">
-                <button onClick={() => setConfirmReset(false)} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-sm hover:text-white hover:border-zinc-700 transition">Keep my arc</button>
-                <button disabled={resetting} onClick={() => { setResetting(true); resetAll() }} className="h-11 px-4 rounded-full bg-red-500/15 border border-red-500/25 text-red-200 text-sm font-semibold hover:bg-red-500/25 transition disabled:opacity-50 disabled:cursor-not-allowed">{resetting ? 'Resetting' : 'Reset everything'}</button>
+                <button onClick={() => setConfirmReset(false)} className={buttonClass('ghost', 'md')}>Keep my arc</button>
+                <button disabled={resetting} onClick={() => { setResetting(true); resetAll() }} className={buttonClass('danger', 'md')}>{resetting ? 'Resetting' : 'Reset everything'}</button>
               </div>
             </motion.div>
           </motion.div>
@@ -286,10 +287,10 @@ export default function App() {
                 <div className="text-[13px] font-semibold text-white">Keep it on your home screen</div>
                 <div className="mt-0.5 text-[12px] leading-5 text-zinc-500">Works offline, still no account.</div>
                 <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button onClick={runInstall} className="h-11 px-4 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">
+                  <button onClick={runInstall} className={buttonClass('primary', 'sm')}>
                     {installEvent ? 'Install' : 'Show me how'}
                   </button>
-                  <button onClick={dismissInstallHint} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-400 text-[13px] hover:text-white hover:border-zinc-700 transition">Not now</button>
+                  <button onClick={dismissInstallHint} className={buttonClass('ghost', 'sm')}>Not now</button>
                 </div>
               </div>
               <button onClick={dismissInstallHint} aria-label="Dismiss" className="w-11 h-11 shrink-0 grid place-items-center rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition"><X size={14} /></button>
@@ -336,6 +337,7 @@ export default function App() {
 
           <div className="mt-10 pt-5 border-t border-zinc-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-[11px] font-mono text-zinc-500">
             <span>&copy; {new Date().getFullYear()} {site.author.name}. MIT licensed.</span>
+            <span>v{import.meta.env.VITE_APP_VERSION} · updates install themselves</span>
             <span>Local-first. No account. Your habits never leave the device.</span>
           </div>
         </div>
