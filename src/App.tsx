@@ -210,7 +210,7 @@ export default function App() {
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             {...overlayProps(() => setShareOpen(false))}
-            className="fixed inset-0 z-50 grid place-items-center p-4 bg-zinc-950/80 backdrop-blur-xl"
+            className="fixed inset-0 z-50 grid place-items-center px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] bg-zinc-950/80 backdrop-blur-xl"
             role="dialog" aria-modal="true" aria-label="Share your grid"
           >
             <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} onClick={e => e.stopPropagation()} className="w-full max-w-[440px] rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
@@ -238,7 +238,7 @@ export default function App() {
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             {...overlayProps(() => setConfirmReset(false))}
-            className="fixed inset-0 z-50 grid place-items-center p-4 bg-zinc-950/80 backdrop-blur-xl"
+            className="fixed inset-0 z-50 grid place-items-center px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] bg-zinc-950/80 backdrop-blur-xl"
             role="dialog" aria-modal="true" aria-label="Reset your arc"
           >
             <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} onClick={e => e.stopPropagation()} className="w-full max-w-[440px] rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
