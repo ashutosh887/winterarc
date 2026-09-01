@@ -1,15 +1,16 @@
-import { Check, ChevronDown, ChevronLeft, ChevronRight, Info, Share2 } from 'lucide-react'
+import { Bell, BellOff, Check, ChevronDown, ChevronLeft, ChevronRight, Info, Share2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import type { Arc } from '@/hooks/useArc'
 import { Disclosure } from '@/components/app/Disclosure'
 import { HabitIcon } from '@/components/app/HabitIcon'
 import { IconChip } from '@/components/app/Surface'
 import { Ring } from '@/components/app/Ring'
+import { DEFAULT_REMINDERS, REMINDER_SLOTS, SLOT_LABELS, clockLabel } from '@/lib/reminders'
 import { addDays } from '@/lib/date'
 import { fadeUp, stagger } from '@/lib/motion'
 
 export function Tracker({ arc }: { arc: Arc }) {
-  const { activeDays, allDates, arcEnded, arcStarted, canRollOver, copyPrompt, dailyPct, dayComplete, dayDoneCount, dayLabel, dayPct, daysToStart, effectiveHabits, end, entries, exportCSV, exportJSON, focusMonth, habitStreak, isActiveDay, isPerfectDay, isWarmUp, llmPrompt, longDate, months, nextArc, nextArcTrimmed, openMonths, promptCopied, promptOpen, selectedDate, selectedIsFuture, setConfirmReset, setEntries, setOpenMonths, setPromptOpen, setSelectedDate, setShareOpen, setStreakInfo, setUndo, runLabel, start, startOnboarding, startToday, startWarmUp, startWinterArc, stats, stepDay, streakInfo, today, toggleHabit, totalDays, undo, warmUp } = arc
+  const { activeDays, allDates, arcEnded, arcStarted, canRollOver, copyPrompt, dailyPct, dayComplete, dayDoneCount, dayLabel, dayPct, daysToStart, effectiveHabits, end, entries, exportCSV, exportJSON, focusMonth, habitStreak, isActiveDay, isPerfectDay, isWarmUp, llmPrompt, longDate, months, nextArcCta, nextArcLabel, openMonths, promptCopied, promptOpen, selectedDate, selectedIsFuture, setConfirmReset, setEntries, setOpenMonths, setPromptOpen, setSelectedDate, setShareOpen, setReminderTime, setStreakInfo, setUndo, askForReminders, notifPermission, reminderTest, reminders, remindersOn, remindersSupported, runLabel, start, startOnboarding, startToday, startWarmUp, startWinterArc, stats, stepDay, streakInfo, today, toggleHabit, totalDays, testReminder, turnOffReminders, undo, warmUp } = arc
   return (
     <>
           <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
@@ -21,16 +22,14 @@ export function Tracker({ arc }: { arc: Arc }) {
                   <span className="text-[13px] text-zinc-400 tabular-nums">{stats.perfect} of {stats.scheduled} days perfect, {stats.pct}% of checks.</span>
                 </div>
                 <p className="mt-1.5 text-[13px] leading-6 text-zinc-500 max-w-[560px]">
-                  {!canRollOver
-                    ? 'That window is closed and there is nothing left to check in it. Set the next one whenever you are ready.'
-                    : nextArcTrimmed
-                      ? `The winter arc is already running and ends ${longDate(nextArc.end)}. Pick it up from today with the same habits and rest days. Everything you logged stays in this browser and in the JSON export, it just stops counting toward the new run.`
-                      : `The winter arc runs ${longDate(nextArc.start)} to ${longDate(nextArc.end)}. Same habits, same rest days, an empty grid. Everything you logged stays in this browser and in the JSON export, it just stops counting toward the new run.`}
+                  {canRollOver
+                    ? `${nextArcLabel} Same habits, same rest days, an empty grid. Everything you logged stays in this browser and in both exports, it just stops counting toward the new run.`
+                    : 'That window is closed and there is nothing left to check in it. Set the next one whenever you are ready.'}
                 </p>
                 <div className={`mt-4 gap-2 ${canRollOver ? 'grid grid-cols-2 sm:max-w-[420px]' : 'flex'}`}>
                   {canRollOver ? (
                     <>
-                      <button onClick={startWinterArc} className="h-11 px-4 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Start the winter arc</button>
+                      <button onClick={startWinterArc} className="h-11 px-4 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">{nextArcCta}</button>
                       <button onClick={startOnboarding} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">Edit dates</button>
                     </>
                   ) : (
@@ -83,7 +82,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                   <div className="min-w-0">
                     <h2 className="text-[15px] font-semibold text-white">Daily check-in</h2>
                     {!arcStarted
-                      ? <div className="text-[11px] font-mono text-zinc-500">Starts {start}</div>
+                      ? <div className="text-[11px] font-mono text-zinc-500">Starts {longDate(start)}</div>
                       : selectedIsFuture
                         ? <div className="text-[11px] font-mono text-zinc-500">Not here yet. Come back on the day.</div>
                         : !isActiveDay(selectedDate) && <div className="text-[11px] font-mono text-zinc-500">Rest day, nothing owed</div>}
@@ -97,7 +96,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                     <p className="mt-3 text-xs leading-5 text-zinc-500">
                       {warmUp
                         ? 'Nothing to check yet. Run a warm-up until then, so checking in is already a habit on day one.'
-                        : 'Nothing to check yet. Change the dates to begin now.'}
+                        : 'Nothing to check yet. Start today and keep the same length, or edit the dates.'}
                     </p>
                     <div className="mt-4 grid grid-cols-2 gap-2">
                       {warmUp
@@ -107,7 +106,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                     </div>
                     {warmUp && (
                       <p className="mt-3 text-[11px] font-mono text-zinc-500 tabular-nums">
-                        {longDate(warmUp.start)} to {longDate(warmUp.end)}, then the arc
+                        {longDate(warmUp.start)} to {longDate(warmUp.end)}, then your arc
                       </p>
                     )}
                   </div>
@@ -331,6 +330,80 @@ export function Tracker({ arc }: { arc: Arc }) {
             </div>
 
             <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="w-9 h-9 shrink-0 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-300">
+                    {remindersOn ? <Bell size={15} /> : <BellOff size={15} />}
+                  </span>
+                  <div className="min-w-0">
+                    <h2 className="text-[15px] font-semibold text-white">Reminders</h2>
+                    <p className="text-[11px] font-mono text-zinc-500">
+                      {!remindersSupported
+                        ? 'Not available in this browser'
+                        : notifPermission === 'denied'
+                          ? 'Blocked for this site'
+                          : remindersOn
+                            ? REMINDER_SLOTS.filter(sl => reminders[sl]).map(sl => `${SLOT_LABELS[sl]} ${clockLabel(reminders[sl])}`).join(' · ')
+                            : 'Off'}
+                    </p>
+                  </div>
+                </div>
+                {remindersSupported && notifPermission !== 'denied' && (
+                  remindersOn
+                    ? <button onClick={turnOffReminders} className="h-11 px-4 shrink-0 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">Turn off</button>
+                    : <button onClick={askForReminders} className="h-11 px-4 shrink-0 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Turn on reminders</button>
+                )}
+              </div>
+
+              {remindersOn && (
+                <div className="mt-4 grid sm:grid-cols-2 gap-2">
+                  {REMINDER_SLOTS.map(slot => {
+                    const on = reminders[slot] !== null
+                    return (
+                      <div key={slot} className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[13px] text-zinc-300">{SLOT_LABELS[slot]}</span>
+                          <button
+                            aria-pressed={on}
+                            onClick={() => setReminderTime(slot, on ? null : DEFAULT_REMINDERS[slot])}
+                            className={`h-8 px-3 rounded-full text-[11px] font-mono border transition ${on ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'}`}
+                          >
+                            {on ? 'On' : 'Off'}
+                          </button>
+                        </div>
+                        <input
+                          type="time"
+                          aria-label={`${SLOT_LABELS[slot]} reminder time`}
+                          value={reminders[slot] ?? DEFAULT_REMINDERS[slot] ?? ''}
+                          disabled={!on}
+                          onChange={e => setReminderTime(slot, e.target.value || null)}
+                          className="mt-2 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 min-h-11 text-base sm:text-sm text-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                        />
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+
+              <p className="mt-3 text-[13px] leading-6 text-zinc-500">
+                {notifPermission === 'denied'
+                  ? 'You blocked notifications for this site, so nothing can be sent. Allow them again in your browser settings, then reload this page.'
+                  : !remindersSupported
+                    ? 'This browser does not offer web notifications. On an iPhone they work only once WinterArc is installed to the home screen.'
+                    : 'These fire only while WinterArc is open in a tab or running as the installed app. There is no server here, so nothing can wake a closed browser. They use your system notification sound, and they stay quiet on rest days and once the day is already complete.'}
+              </p>
+
+              {remindersOn && (
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <button onClick={testReminder} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">Send a test</button>
+                  <span role="status" aria-live="polite" className="text-xs font-mono text-zinc-500">
+                    {reminderTest === 'sent' ? 'Sent. Check your notifications.' : reminderTest === 'failed' ? 'The browser refused it.' : ''}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
               <Disclosure open={promptOpen} onToggle={() => setPromptOpen(v => !v)} title="Export and LLM prompt">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -349,7 +422,7 @@ export function Tracker({ arc }: { arc: Arc }) {
             <div className="rounded-2xl border border-red-500/20 bg-red-500/[0.04] p-4 flex flex-wrap items-center gap-3">
               <div className="min-w-0">
                 <div className="text-[15px] font-semibold text-white">Start over</div>
-                <p className="mt-1 text-[13px] leading-5 text-zinc-500">Deletes this arc from the browser. No undo.</p>
+                <p className="mt-1 text-[13px] leading-5 text-zinc-500">Deletes every day you have logged, warm-up included. No undo.</p>
               </div>
               <button onClick={() => setConfirmReset(true)} className="ml-auto shrink-0 h-11 px-5 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-sm font-semibold hover:bg-red-500/15 transition">Reset arc</button>
             </div>

@@ -22,9 +22,17 @@ export function useLocalStorage<T>(
   // kept in a ref so the storage listener never has to resubscribe
   const validateRef = useRef(validate)
   useEffect(() => { validateRef.current = validate })
+  // the listener subscribes once, so it must not close over a stale initial value
+  const initialRef = useRef(initial)
+  useEffect(() => { initialRef.current = initial })
   const [broken, setBroken] = useState(false)
-  // what this tab last wrote or accepted, so a write and its own echo never fight
-  const lastRaw = useRef<string | null>(null)
+  // What this tab last wrote or accepted, so a write and its own echo never fight.
+  // Seeded from the raw string rather than null, because otherwise the first effect
+  // writes the default straight over a value that failed validation, and with no
+  // import path that destroys the only copy of it.
+  const lastRaw = useRef<string | null>((() => {
+    try { return localStorage.getItem(key) } catch { return null }
+  })())
 
   useEffect(() => {
     const raw = JSON.stringify(val)
@@ -35,7 +43,10 @@ export function useLocalStorage<T>(
 
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
-      if (e.key !== key || e.storageArea !== localStorage || e.newValue === null) return
+      if (e.key !== key || e.storageArea !== localStorage) return
+      // A removal is a reset in another tab. Ignoring it left this tab holding the
+      // whole arc, and its next write put the data the user just deleted back.
+      if (e.newValue === null) { lastRaw.current = null; setVal(initialRef.current); return }
       if (e.newValue === lastRaw.current) return
       let next: T
       try { next = JSON.parse(e.newValue) as T } catch { return }

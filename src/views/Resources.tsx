@@ -4,7 +4,7 @@ import { PageHeading } from '@/components/app/Surface'
 import { resources } from '@/config'
 
 export function Resources({ arc }: { arc: Arc }) {
-  const { quote, quoteCredit, stats } = arc
+  const { hasData, quote, quoteCredit, runLabel, stats } = arc
   return (
           <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
             <PageHeading icon={Compass} eyebrow="Resources" title="Tools worth using" subtitle="Everything here is usable without paying. No affiliate links." />
@@ -26,7 +26,7 @@ export function Resources({ arc }: { arc: Arc }) {
             <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
               <div className="flex items-center justify-between">
                 <h2 className="font-semibold text-white flex items-center gap-2"><Star size={14} /> Quote of the day</h2>
-                <span className="text-xs font-mono text-zinc-500">Day {stats.dayNum || 1}</span>
+                <span className="text-xs font-mono text-zinc-500">{hasData ? `${runLabel} ${stats.dayNum}` : 'Today'}</span>
               </div>
               <blockquote className="mt-3 text-[15px] leading-6 text-zinc-200">
                 {quote.text}

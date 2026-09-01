@@ -34,6 +34,7 @@ export default function App() {
     goTo,
     hasData,
     installEvent,
+    justUpdated,
     loadStars,
     mobileMenuOpen,
     nativeShare,
@@ -52,6 +53,7 @@ export default function App() {
     setBackupBeforeReset,
     setConfirmReset,
     setMobileMenuOpen,
+    setJustUpdated,
     setResetting,
     setSelectedDate,
     setShareOpen,
@@ -74,6 +76,12 @@ export default function App() {
       {entriesBroken && (
         <div role="alert" className="bg-red-500/10 border-b border-red-500/20 px-5 py-2.5 text-center text-[13px] text-red-200">
           This browser is blocking storage, so nothing you check here will be saved. Private windows and blocked cookies both cause this.
+        </div>
+      )}
+      {justUpdated && (
+        <div role="status" aria-live="polite" className="bg-zinc-900 border-b border-zinc-800 px-5 py-2 flex items-center justify-center gap-3 text-[13px] text-zinc-300">
+          <span>Updated to the newest version. Your arc is untouched.</span>
+          <button onClick={() => setJustUpdated(false)} aria-label="Dismiss" className="w-8 h-8 grid place-items-center rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition"><X size={14} /></button>
         </div>
       )}
       <header className="sticky top-0 z-30 backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800 pt-[env(safe-area-inset-top)]">
@@ -236,7 +244,7 @@ export default function App() {
             <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} onClick={e => e.stopPropagation()} className="w-full max-w-[440px] rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
               <h2 className="text-[22px] font-bold tracking-tight text-white">Reset your arc</h2>
               <p className="mt-2 text-sm leading-6 text-zinc-500">
-                This removes {stats.totalChecked} checks across {stats.dayNum} days. It lives only in this browser, so once it is gone there is nothing to restore it from.
+                This removes every check in this browser, including any earlier run such as a warm-up, not only the {stats.totalChecked} inside these dates. It lives only here, so once it is gone there is nothing to restore it from.
               </p>
               <label className="mt-4 flex items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 cursor-pointer">
                 <input type="checkbox" checked={backupBeforeReset} onChange={e => setBackupBeforeReset(e.target.checked)} className="mt-0.5 accent-white w-4 h-4" />

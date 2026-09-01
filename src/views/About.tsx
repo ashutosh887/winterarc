@@ -4,7 +4,8 @@ import { Eyebrow } from '@/components/app/Surface'
 import { site } from '@/config'
 
 export function About({ arc }: { arc: Arc }) {
-  const { goTo, longDate, setupWarmUp, startOnboarding, winterArc } = arc
+  const { goTo, longDate, setupWarmUp, startOnboarding, today, winterArc } = arc
+  const midArc = today > winterArc.start && today <= winterArc.end
   return (
           <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
             <Eyebrow icon={Snowflake}>The idea</Eyebrow>
@@ -49,12 +50,16 @@ export function About({ arc }: { arc: Arc }) {
             </div>
 
             <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
-              <div className="text-[15px] font-semibold text-white">You do not have to wait for October</div>
+              <div className="text-[15px] font-semibold text-white">You do not have to wait for the season</div>
               <p className="mt-2 text-[13px] leading-6 text-zinc-500 max-w-[720px]">
-                Deciding to start is the easy part and it wears off. If the arc is still weeks out, setup offers a warm-up instead: a short run from today up to the day before the arc begins{setupWarmUp ? `, which right now is ${longDate(setupWarmUp.start)} to ${longDate(setupWarmUp.end)}` : ''}. You use it to find out which habits you actually hold and which ones you picked because they sounded good.
+                Deciding to start is the easy part and it wears off. Setup never hands you a date you have to sit and wait for. {setupWarmUp
+                  ? `The arc is close enough to warm up to, so setup offers a run from today to ${longDate(setupWarmUp.end)}, the day before it begins.`
+                  : midArc
+                    ? 'The arc is already running, so setup starts you today and tracks what is left of it rather than opening on weeks of red days you never had the chance to log.'
+                    : `The arc is further out than a warm-up can bridge, so setup starts you today for 90 days and leaves the winter arc one tap away as a preset.`} You use that run to find out which habits you actually hold and which ones you picked because they sounded good.
               </p>
               <p className="mt-2 text-[13px] leading-6 text-zinc-500 max-w-[720px]">
-                When the warm-up ends, the tracker offers to roll you into the winter arc on {longDate(winterArc.start)} with the same habits and an empty grid. The warm-up days are not deleted and not merged in. They stay in this browser and in your JSON export, they just stop counting toward the arc, so a rough first week of learning the tool never sits in the record as a failed arc.
+                When a warm-up ends, the tracker offers to roll you into the arc with the same habits and an empty grid. If you had already set your own dates before warming up, those are the dates it hands back. The warm-up days are not deleted and not merged in. They stay in this browser and in both exports, they just stop counting toward the arc, so a rough first week of learning the tool never sits in the record as a failed arc.
               </p>
             </div>
 

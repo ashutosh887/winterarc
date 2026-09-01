@@ -1,6 +1,7 @@
 /** Every key the app owns. Reset and the crash screen both clear exactly this list. */
 export const STORAGE_KEYS = [
   'wa_settings', 'wa_settings_v2', 'wa_habits', 'wa_habits_v2', 'wa_entries', 'wa_stars',
+  'wa_reminders_fired',
 ] as const
 
 export function readStore<T>(key: string, fallback: T): T {

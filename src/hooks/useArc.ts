@@ -1,20 +1,43 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
 import { site, templates, challenges, quotes as QUOTES } from '@/config'
 import { PRESETS } from '@/lib/presets'
-import { ALL_WEEKDAYS, MAX_WAIT_DAYS, addDays, arcPresets, daysBetween, getDefaultArc, getRecommendedArc, parseYMD, todayYMD, warmUpBefore, weekdayOf } from '@/lib/date'
+import { ALL_WEEKDAYS, MAX_WAIT_DAYS, addDays, arcPresets, daysBetween, getDefaultArc, getRecommendedArc, isValidYMD, parseYMD, todayYMD, warmUpBefore, weekdayOf } from '@/lib/date'
 import { PATHS, viewForPath } from '@/lib/routes'
+import {
+  DEFAULT_REMINDERS, REMINDER_SLOTS, anyReminderOn, firedId, isDue, normalizeReminders,
+  nowMinutes, pruneFired, reminderText,
+} from '@/lib/reminders'
 import { clearArcStorage, readStore, writeStore } from '@/lib/storage'
 import { customHabitId } from '@/lib/habits'
 import { useLocalStorage } from './useLocalStorage'
 import type {
   Achievement, ArcMode, ArcRange, BeforeInstallPromptEvent, Entries, Habit, HabitId, ISODate,
-  MonthGroup, Settings, View,
+  MonthGroup, ReminderSlot, Reminders, Settings, View,
 } from '@/lib/types'
 
 /** True when this page is already running as the installed app. */
 function isStandalone() {
   return window.matchMedia('(display-mode: standalone)').matches
     || (window.navigator as Navigator & { standalone?: boolean }).standalone === true
+}
+
+/** Notification is missing entirely in some embedded webviews, so never assume it. */
+function notificationsSupported(): boolean {
+  try { return typeof window !== 'undefined' && 'Notification' in window } catch { return false }
+}
+
+/**
+ * Android Chrome refuses `new Notification` outright and only shows one raised by
+ * the service worker, so the worker is tried first and the constructor is the
+ * fallback for desktop browsers that have no worker registered yet.
+ */
+async function raiseNotification(title: string, body: string, tag: string): Promise<boolean> {
+  const opts: NotificationOptions = { body, tag, icon: '/pwa-192x192.png', badge: '/pwa-192x192.png' }
+  try {
+    const reg = await navigator.serviceWorker?.getRegistration()
+    if (reg?.showNotification) { await reg.showNotification(title, opts); return true }
+  } catch { /* no worker, or the worker refused */ }
+  try { void new Notification(title, opts); return true } catch { return false }
 }
 
 /** The banner is a once-per-session offer, tracked apart from the prompt itself. */
@@ -61,6 +84,20 @@ export function useArc() {
   const [resetting, setResetting] = useState(false)
   const [backupBeforeReset, setBackupBeforeReset] = useState(true)
   const [promptCopied, setPromptCopied] = useState(false)
+  // read once and cleared, so the notice shows for the reload that earned it and no other
+  const [justUpdated, setJustUpdated] = useState(() => {
+    try {
+      if (sessionStorage.getItem('wa_updated') !== '1') return false
+      sessionStorage.removeItem('wa_updated')
+      return true
+    } catch { return false }
+  })
+  const remindersSupported = notificationsSupported()
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission>(
+    () => (notificationsSupported() ? Notification.permission : 'denied'),
+  )
+  const [reminderTest, setReminderTest] = useState<'sent' | 'failed' | null>(null)
+  const [tmpReminders, setTmpReminders] = useState<Reminders>(DEFAULT_REMINDERS)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const overlayDown = useRef(false)
 
@@ -91,6 +128,12 @@ export function useArc() {
       clearTimeout(t)
     }
   }, [installed])
+
+  useEffect(() => {
+    if (!justUpdated) return
+    const t = setTimeout(() => setJustUpdated(false), 7000)
+    return () => clearTimeout(t)
+  }, [justUpdated])
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -171,12 +214,23 @@ export function useArc() {
     * today, because handing somebody a grid that opens on five weeks of red days
     * they were never able to log is a lie about what happened.
     */
+  /**
+   * The arc a warm-up interrupted, if it is still worth resuming. Without this the
+   * roll-over would hand back the winter arc and quietly lose the dates somebody
+   * picked for themselves before they chose to warm up first.
+   */
+  const savedNext = settings?.next
+  const resumeArc = useMemo(() => {
+    if (!savedNext || !isValidYMD(savedNext.start) || !isValidYMD(savedNext.end)) return null
+    if (savedNext.end < today) return null
+    return { start: savedNext.start < today ? today : savedNext.start, end: savedNext.end }
+  }, [savedNext, today])
   const nextArc = useMemo(
-    () => (today > winterArc.start && today <= winterArc.end ? { start: today, end: winterArc.end } : winterArc),
-    [today, winterArc],
+    () => resumeArc ?? (today > winterArc.start && today <= winterArc.end ? { start: today, end: winterArc.end } : winterArc),
+    [resumeArc, today, winterArc],
   )
   /** True when the target was cut short because the arc is already under way. */
-  const nextArcTrimmed = nextArc.start !== winterArc.start
+  const nextArcTrimmed = !resumeArc && nextArc.start !== winterArc.start
   /**
    * Nothing rolls over into itself, and nothing rolls over into a window most of
    * a year away. Either case sends them to setup instead.
@@ -305,7 +359,94 @@ export function useArc() {
   const runHeadline = `${runNoun} ${stats.dayNum} of ${totalDays}`
   const runShort = `${runNoun} ${stats.dayNum}/${totalDays}`
 
-  const quote = useMemo(() => QUOTES[stats.dayNum % QUOTES.length], [stats.dayNum])
+  const storedReminders = settings?.reminders
+  const reminders = useMemo(() => normalizeReminders(storedReminders), [storedReminders])
+  const remindersOn = remindersSupported && notifPermission === 'granted' && anyReminderOn(reminders)
+
+  /**
+   * The whole scheduler. There is no push server, so this can only fire while a
+   * page or the installed app is running. That limit is stated in the UI rather
+   * than papered over, because a reminder somebody counts on and never receives
+   * is worse than no reminder at all.
+   */
+  useEffect(() => {
+    if (!remindersOn || !hasData) return
+    // guards re-entry while a raise is in flight; the log is only written on success,
+    // so a browser that refuses the notification does not burn the slot for the day
+    let raising = false
+    const tick = async () => {
+      if (raising) return
+      const day = todayYMD()
+      if (day < start || day > end || !isActiveDay(day)) return
+      const entry = entries[day] || {}
+      // nothing to nag about once the day is done
+      if (effectiveHabits.length > 0 && effectiveHabits.every(h => entry[h.id])) return
+      // the app already in front of you does not need to interrupt you
+      if (document.visibilityState === 'visible' && document.hasFocus()) return
+      const now = nowMinutes()
+      const log = pruneFired(readStore<string[]>('wa_reminders_fired', []), day)
+      const slot = REMINDER_SLOTS.find(sl => !log.includes(firedId(day, sl)) && isDue(reminders[sl], now))
+      if (!slot) return
+      raising = true
+      try {
+        const { title, body } = reminderText(runHeadline, effectiveHabits, entry)
+        const shown = await raiseNotification(title, body, firedId(day, slot))
+        if (!shown) return
+        // re-read rather than reusing `log`, since another tab may have fired meanwhile
+        const fresh = pruneFired(readStore<string[]>('wa_reminders_fired', []), day)
+        const key = firedId(day, slot)
+        if (!fresh.includes(key)) writeStore('wa_reminders_fired', [...fresh, key])
+      } finally {
+        raising = false
+      }
+    }
+    const id = setInterval(() => { void tick() }, 30000)
+    void tick()
+    const onVisibility = () => { void tick() }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVisibility) }
+  }, [remindersOn, hasData, reminders, start, end, isActiveDay, entries, effectiveHabits, runHeadline])
+
+  // the permission can be revoked in browser settings while the app is open
+  useEffect(() => {
+    if (!remindersSupported || !navigator.permissions?.query) return
+    let status: PermissionStatus | null = null
+    const onChange = () => status && setNotifPermission(status.state === 'granted' ? 'granted' : status.state === 'denied' ? 'denied' : 'default')
+    navigator.permissions.query({ name: 'notifications' as PermissionName })
+      .then(s => { status = s; s.addEventListener('change', onChange) })
+      .catch(() => {})
+    return () => status?.removeEventListener('change', onChange)
+  }, [remindersSupported])
+
+  function writeReminders(next: Reminders) {
+    setSettings(prev => (prev ? { ...prev, reminders: next } : prev))
+  }
+  function setReminderTime(slot: ReminderSlot, value: string | null) {
+    writeReminders({ ...reminders, [slot]: value && value.length === 5 ? value : null })
+  }
+  /** Must be called from a real click. Browsers drop a permission prompt without one. */
+  async function askForReminders() {
+    if (!remindersSupported) return
+    let p = Notification.permission
+    if (p === 'default') {
+      try { p = await Notification.requestPermission() } catch { return }
+    }
+    setNotifPermission(p)
+    if (p === 'granted' && !anyReminderOn(reminders)) writeReminders(DEFAULT_REMINDERS)
+  }
+  function turnOffReminders() { writeReminders({ morning: null, evening: null }) }
+  /** Proves the permission, the sound and the wording in one tap, with no waiting. */
+  async function testReminder() {
+    const { title, body } = reminderText(runHeadline, effectiveHabits, entries[today] || {})
+    const ok = await raiseNotification(title, body, `wa-test-${Date.now()}`)
+    setReminderTest(ok ? 'sent' : 'failed')
+    setTimeout(() => setReminderTest(null), 4000)
+  }
+
+  // A corrupt stored date makes dayNum NaN, and QUOTES[NaN] is undefined. Reading
+  // .source off that used to throw, which put the crash screen and its offer to
+  // delete the arc in front of somebody whose only problem was one bad field.
+  const quote = useMemo(() => QUOTES[Number.isFinite(stats.dayNum) ? stats.dayNum % QUOTES.length : 0], [stats.dayNum])
   // Attribution travels with the quote everywhere it goes: the header, the image
   // and the shared text. A quote leaving the app without its author is the bug.
   const quoteCredit = quote.source ? `${quote.author}, ${quote.source}` : quote.author
@@ -341,18 +482,21 @@ export function useArc() {
    * never touched here, so a day logged during a warm-up is still in the browser
    * and still in the JSON export. It just stops counting toward the new arc.
    */
-  function switchArc(range: ArcRange, mode: ArcMode) {
+  function switchArc(range: ArcRange, mode: ArcMode, next?: ArcRange) {
+    // rebuilt from scratch, so leaving `next` off is what clears a resumed arc
     setSettings({
       start: range.start,
       end: range.end,
       mode,
       name: settings?.name ?? null,
       activeDays: Array.isArray(settings?.activeDays) && settings.activeDays.length ? settings.activeDays : ALL_WEEKDAYS,
+      reminders,
+      ...(next ? { next } : {}),
     })
     setSelectedDate(today < range.start ? range.start : today > range.end ? range.end : today)
     setUndo(null)
   }
-  function startWarmUp() { if (warmUp) switchArc(warmUp, 'warmup') }
+  function startWarmUp() { if (warmUp) switchArc(warmUp, 'warmup', { start, end }) }
   function startWinterArc() { switchArc(nextArc, 'arc') }
   /** Keeps the length they chose and drags the whole window onto today. */
   function startToday() { switchArc({ start: today, end: addDays(today, Math.max(0, totalDays - 1)) }, 'arc') }
@@ -364,6 +508,7 @@ export function useArc() {
     setTmpSelected(new Set(effectiveHabits.map(h => h.id)))
     setCustomList(effectiveHabits.filter(h => h.tier === 'custom'))
     setTmpDays(Array.isArray(settings?.activeDays) && settings.activeDays.length ? settings.activeDays : ALL_WEEKDAYS)
+    setTmpReminders(settings ? normalizeReminders(settings.reminders) : DEFAULT_REMINDERS)
     setOnboardStep(1); setShowOnboarding(true)
   }
   function completeOnboarding() {
@@ -376,7 +521,8 @@ export function useArc() {
     // Picking the offered warm-up range is what marks a run as a warm-up. Typing
     // those exact dates by hand means the same thing, so it is treated the same.
     const mode: ArcMode = setupWarmUp && tmpStart === setupWarmUp.start && tmpEnd === setupWarmUp.end ? 'warmup' : 'arc'
-    setSettings({ start: tmpStart, end: tmpEnd, name: tmpName.trim() || null, activeDays: tmpDays.length ? tmpDays : ALL_WEEKDAYS, mode })
+    setSettings({ start: tmpStart, end: tmpEnd, name: tmpName.trim() || null, activeDays: tmpDays.length ? tmpDays : ALL_WEEKDAYS, mode, reminders: normalizeReminders(tmpReminders) })
+    if (anyReminderOn(tmpReminders)) void askForReminders()
     setHabitsV2(chosen); setHabits(chosen)
     setShowOnboarding(false); goTo('tracker'); setSelectedDate(tmpStart)
   }
@@ -395,10 +541,13 @@ export function useArc() {
     setTmpStart(settings?.start ?? recommended.start); setTmpEnd(settings?.end ?? recommended.end)
     setTmpSelected(new Set(t.habitIds)); setCustomList([])
     setTmpDays(Array.isArray(settings?.activeDays) && settings.activeDays.length ? settings.activeDays : ALL_WEEKDAYS)
+    setTmpReminders(settings ? normalizeReminders(settings.reminders) : DEFAULT_REMINDERS)
     setOnboardStep(2); setShowOnboarding(true)
   }
   function exportJSON() {
-    const data = { settings: { start, end, name: settings?.name ?? null, activeDays }, habits: effectiveHabits, entries, exportedAt: new Date().toISOString() }
+    // spread first so mode, reminders and anything added later ride along; a backup
+    // that quietly omits fields is a worse backup than none
+    const data = { settings: { ...settings, start, end, name: settings?.name ?? null, activeDays }, habits: effectiveHabits, entries, exportedAt: new Date().toISOString() }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `winter-arc-${start}_${end}.json`; a.click(); URL.revokeObjectURL(url)
   }
@@ -409,7 +558,10 @@ export function useArc() {
   }
   function exportCSV() {
     const header = ['date', ...effectiveHabits.map(h => csvEscape(h.name)), 'perfect']
-    const rows = allDates.map(d => {
+    // days logged before a roll-over sit outside the window but are still the
+    // user's record, so the CSV carries them rather than pretending they never happened
+    const dates = [...new Set([...allDates, ...Object.keys(entries)])].sort()
+    const rows = dates.map(d => {
       const e = entries[d] || {}
       const vals = effectiveHabits.map(h => e[h.id] ? '1' : '0')
       const perfect = effectiveHabits.length && effectiveHabits.every(h => e[h.id]) ? '1' : '0'
@@ -675,6 +827,13 @@ export function useArc() {
   function longDate(d: ISODate) {
     return (d.slice(0, 4) === today.slice(0, 4) ? longFmt : longYearFmt).format(parseYMD(d))
   }
+  const nextArcCta = resumeArc ? 'Start your arc' : 'Start the winter arc'
+  const nextArcLabel = resumeArc
+    ? `Your arc runs ${longDate(nextArc.start)} to ${longDate(nextArc.end)}, the dates you set before the warm-up.`
+    : nextArcTrimmed
+      ? `The winter arc is already running and ends ${longDate(nextArc.end)}. Pick it up from today.`
+      : `The winter arc runs ${longDate(nextArc.start)} to ${longDate(nextArc.end)}.`
+
   function dayLabel(d: ISODate) {
     if (d === today) return 'Today'
     if (d === addDays(today, -1)) return 'Yesterday'
@@ -850,10 +1009,26 @@ export function useArc() {
     winterArc,
     nextArc,
     nextArcTrimmed,
+    nextArcLabel,
+    nextArcCta,
+    resumeArc,
     recommended,
     canRollOver,
     presets,
     setupWarmUp,
+    justUpdated,
+    setJustUpdated,
+    remindersSupported,
+    notifPermission,
+    reminders,
+    remindersOn,
+    reminderTest,
+    tmpReminders,
+    setTmpReminders,
+    setReminderTime,
+    askForReminders,
+    turnOffReminders,
+    testReminder,
     runNoun,
     runLabel,
     runHeadline,

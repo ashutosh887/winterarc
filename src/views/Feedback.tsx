@@ -28,6 +28,9 @@ export function Feedback() {
               <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">
                 The hosted site runs Microsoft Clarity so I can see which screens break. It records pages, clicks and scrolling, with text masked. It cannot read your habits, dates or name, because those live in browser storage it never touches. Run your own copy without <code className="px-1 rounded bg-zinc-950 border border-zinc-800 text-zinc-400">VITE_CLARITY_ID</code> and nothing is measured at all.
               </p>
+              <p className="mt-2 text-[13px] leading-6 text-zinc-500">
+                Reminders are not measured and are not sent anywhere. The times you pick are saved next to your arc in this browser, and the notification is raised by the browser on your own device. There is no push server here, so nothing about your schedule reaches me or anybody else.
+              </p>
             </div>
 
             <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">

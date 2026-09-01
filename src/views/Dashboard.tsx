@@ -5,16 +5,16 @@ import { HabitIcon } from '@/components/app/HabitIcon'
 import { Ring } from '@/components/app/Ring'
 
 export function Dashboard({ arc }: { arc: Arc }) {
-  const { achievements, activeDays, allDates, downloadImage, effectiveHabits, end, entries, exportCSV, exportJSON, goTo, isActiveDay, isPerfectDay, nativeShare, quote, quoteCredit, setSettings, setWeeksOpen, settings, start, startOnboarding, stats, weeksOpen } = arc
+  const { achievements, activeDays, allDates, downloadImage, effectiveHabits, end, entries, exportCSV, exportJSON, goTo, isActiveDay, isPerfectDay, isWarmUp, longDate, nativeShare, quote, quoteCredit, setSettings, setWeeksOpen, settings, start, startOnboarding, stats, weeksOpen } = arc
   return (
           <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <Eyebrow icon={Trophy}>Dashboard</Eyebrow>
                 <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">
-                  {settings?.name ? `${settings.name}'s arc` : 'Your arc'}
+                  {settings?.name ? `${settings.name}'s ${isWarmUp ? 'warm-up' : 'arc'}` : isWarmUp ? 'Your warm-up' : 'Your arc'}
                 </h1>
-                <p className="mt-1.5 text-sm text-zinc-500 tabular-nums">{start} to {end} · {effectiveHabits.length} {effectiveHabits.length === 1 ? 'habit' : 'habits'} · {activeDays.length === 7 ? 'every day' : `${activeDays.length} days a week`}</p>
+                <p className="mt-1.5 text-sm text-zinc-500">{longDate(start)} to {longDate(end)} · {effectiveHabits.length} {effectiveHabits.length === 1 ? 'habit' : 'habits'} · {activeDays.length === 7 ? 'every day' : `${activeDays.length} days a week`}</p>
               </div>
               <button onClick={() => goTo('tracker')} className="h-11 px-5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-sm hover:text-white hover:border-zinc-700 transition">Open tracker</button>
             </div>

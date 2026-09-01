@@ -19,7 +19,7 @@ export default defineConfig({
         id: '/',
         name: 'WinterArc habit tracker',
         short_name: 'WinterArc',
-        description: 'Track a few daily habits for the 92 days from October 1 to December 31. Everything stays in your browser.',
+        description: 'Track a few daily habits for a fixed run of days. Start today, or run the October to December winter arc. Everything stays in your browser.',
         lang: 'en',
         dir: 'ltr',
         theme_color: '#09090b',
@@ -37,7 +37,10 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-        globIgnores: ['**/ThreeHero-*.js'],
+        // sw-notify is imported by the worker itself, so precaching it would cache it twice
+        globIgnores: ['**/ThreeHero-*.js', '**/sw-notify.js'],
+        // gives the generated worker a notificationclick handler without leaving generateSW
+        importScripts: ['/sw-notify.js'],
         navigateFallbackDenylist: [/^\/(robots\.txt|sitemap\.xml|manifest\.webmanifest)$/],
         cleanupOutdatedCaches: true,
         clientsClaim: true,

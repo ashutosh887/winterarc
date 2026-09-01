@@ -28,7 +28,7 @@ npm run build      # must pass
 
 Copy `.env.example` to `.env.local`. Everything works with it empty.
 
-`VITE_CLARITY_ID` turns on Microsoft Clarity on the hosted site so I can see which screens break. Leave it blank and the app makes no analytics calls at all. It never reads habit data, which lives in browser storage Clarity cannot touch.
+Setting `VITE_CLARITY_ID` loads Microsoft Clarity wherever the app runs, local dev included, so I can see which screens break. `initClarity` gates on the variable alone and not on the build mode, so leave it blank locally unless you mean to be recorded. Blank means no analytics call at all. It never reads habit data, which lives in browser storage Clarity cannot touch.
 
 ## Commits
 

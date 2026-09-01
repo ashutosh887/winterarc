@@ -9,11 +9,12 @@ import { HabitTile } from '@/components/app/HabitTile'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Logo } from '@/components/app/Ring'
+import { DEFAULT_REMINDERS, REMINDER_SLOTS, SLOT_LABELS } from '@/lib/reminders'
 import { PRESETS, TIER_LABELS } from '@/lib/presets'
 import { templates } from '@/config'
 
 export function OnboardingDialog({ arc }: { arc: Arc }) {
-  const { addCustom, arcLength, completeOnboarding, customList, customName, longDate, onboardStep, overlayProps, presets, setCustomList, setCustomName, setOnboardStep, setShowOnboarding, setTmpDays, setTmpEnd, setTmpName, setTmpSelected, setTmpStart, setupWarmUp, tmpDays, tmpEnd, tmpName, tmpSelected, tmpStart, today, winterArc } = arc
+  const { addCustom, arcLength, completeOnboarding, customList, customName, longDate, onboardStep, overlayProps, presets, setCustomList, setCustomName, setOnboardStep, setShowOnboarding, setTmpDays, setTmpEnd, setTmpName, setTmpSelected, setTmpStart, setTmpReminders, setupWarmUp, tmpDays, tmpEnd, tmpName, tmpReminders, tmpSelected, tmpStart, today, winterArc } = arc
   const pickedWarmUp = !!setupWarmUp && tmpStart === setupWarmUp.start && tmpEnd === setupWarmUp.end
   return (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} {...overlayProps(() => setShowOnboarding(false))} className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-6 pt-4 sm:pt-6 bg-zinc-950/80 backdrop-blur-xl" role="dialog" aria-modal="true" aria-label="Set up your arc">
@@ -107,6 +108,44 @@ export function OnboardingDialog({ arc }: { arc: Arc }) {
                           A warm-up, so you are not waiting around to begin. The winter arc starts {longDate(winterArc.start)}, and when this run ends the tracker offers to roll you into it with the same habits.
                         </div>
                       )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-zinc-500">Daily reminders</Label>
+                        <span className="text-[11px] font-mono text-zinc-500">Optional</span>
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-2">
+                        {REMINDER_SLOTS.map(slot => {
+                          const on = tmpReminders[slot] !== null
+                          return (
+                            <div key={slot} className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-[13px] text-zinc-300">{SLOT_LABELS[slot]}</span>
+                                <button
+                                  type="button"
+                                  aria-pressed={on}
+                                  onClick={() => setTmpReminders(prev => ({ ...prev, [slot]: on ? null : DEFAULT_REMINDERS[slot] }))}
+                                  className={`h-8 px-3 rounded-full text-[11px] font-mono border transition ${on ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'}`}
+                                >
+                                  {on ? 'On' : 'Off'}
+                                </button>
+                              </div>
+                              <Input
+                                type="time"
+                                aria-label={`${SLOT_LABELS[slot]} reminder time`}
+                                value={tmpReminders[slot] ?? DEFAULT_REMINDERS[slot] ?? ''}
+                                disabled={!on}
+                                onChange={e => setTmpReminders(prev => ({ ...prev, [slot]: e.target.value || null }))}
+                                className="mt-2 h-11 appearance-none disabled:opacity-40"
+                              />
+                            </div>
+                          )
+                        })}
+                      </div>
+                      <p className="text-xs leading-5 text-zinc-500">
+                        Your browser asks permission when you save. Reminders fire only while WinterArc is open in a tab or running as the installed app. There is no server here, so nothing can wake a closed browser. You can change or silence them any time on the tracker.
+                      </p>
                     </div>
                   </div>
                 </div>

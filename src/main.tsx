@@ -12,6 +12,8 @@ if ('serviceWorker' in navigator) {
   const reloadOnce = () => {
     if (reloading || !hadController) return
     reloading = true
+    // survives the reload so the app can say why the page just jumped
+    try { sessionStorage.setItem('wa_updated', '1') } catch { /* private mode */ }
     window.location.reload()
   }
 

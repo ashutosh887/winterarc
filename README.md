@@ -6,6 +6,10 @@ still weeks away, setup offers a warm-up that runs from today up to the day befo
 tracker then offers to roll you into the arc with the same habits. Everything is stored in your
 browser. No account, no server, works offline.
 
+Optional daily reminders, one morning and one evening, use the browser's own notifications and your
+system sound. There is no push server, so they fire only while WinterArc is open in a tab or running
+as the installed app, and they stay quiet on rest days and once the day is already complete.
+
 Live: https://trywinterarc.vercel.app
 
 ## Stack
@@ -24,7 +28,8 @@ npm run typecheck
 
 ## Environment
 
-Copy `.env.example` to `.env.local`. It runs fine empty. `VITE_CLARITY_ID` enables Microsoft Clarity on the hosted site only.
+Copy `.env.example` to `.env.local`. It runs fine empty. Setting `VITE_CLARITY_ID` loads Microsoft Clarity
+wherever the app runs, local dev included. Leave it blank and no analytics script loads at all.
 
 ## Where things live
 

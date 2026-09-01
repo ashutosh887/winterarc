@@ -33,6 +33,27 @@ export interface Settings {
   activeDays: number[]
   /** Absent on arcs saved before warm-ups existed, which are all plain arcs. */
   mode?: ArcMode
+  /** Absent on arcs saved before reminders existed, which means both slots off. */
+  reminders?: Reminders
+  /**
+   * The arc a warm-up is leading into, stashed when the warm-up replaces it so
+   * the roll-over can hand back the dates the person actually chose. Cleared as
+   * soon as it is resumed.
+   */
+  next?: ArcRange
+}
+
+/** The two moments a day somebody wants nudging: setting up, and closing out. */
+export type ReminderSlot = 'morning' | 'evening'
+
+/**
+ * Local reminder times as 'HH:MM' in 24 hour time, null when that slot is off.
+ * These fire from the page or the service worker while the app is open. There is
+ * no push server, so nothing here can reach a closed browser.
+ */
+export interface Reminders {
+  morning: string | null
+  evening: string | null
 }
 
 export type View =

@@ -18,7 +18,7 @@ export function Landing({ arc }: { arc: Arc }) {
     ? `Winter arc starts ${longDate(winterArc.start)}. Start today as a warm-up and roll into it.`
     : today >= winterArc.start && today <= winterArc.end
       ? `Winter arc is running. Start from today and track what is left of it.`
-      : `Winter arc runs ${longDate(winterArc.start)} to ${longDate(winterArc.end)}. Any other dates work too.`
+      : `Winter arc runs ${longDate(winterArc.start)} to ${longDate(winterArc.end)}. That is a long wait, so setup starts you today instead.`
   return (
           <main id="main">
             <section className="relative overflow-hidden aurora">
