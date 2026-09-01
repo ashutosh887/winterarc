@@ -77,6 +77,7 @@ export function useArc() {
   const [showInstallHint, setShowInstallHint] = useState(false)
   const [copied, setCopied] = useState(false)
   const [promptOpen, setPromptOpen] = useState(false)
+  const [remindersOpen, setRemindersOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [streakInfo, setStreakInfo] = useState(false)
   const [weeksOpen, setWeeksOpen] = useState(false)
@@ -988,6 +989,8 @@ export function useArc() {
     setCopied,
     promptOpen,
     setPromptOpen,
+    remindersOpen,
+    setRemindersOpen,
     shareOpen,
     setShareOpen,
     streakInfo,

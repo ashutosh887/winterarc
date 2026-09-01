@@ -10,7 +10,7 @@ import { addDays } from '@/lib/date'
 import { fadeUp, stagger } from '@/lib/motion'
 
 export function Tracker({ arc }: { arc: Arc }) {
-  const { activeDays, allDates, arcEnded, arcStarted, canRollOver, copyPrompt, dailyPct, dayComplete, dayDoneCount, dayLabel, dayPct, daysToStart, effectiveHabits, end, entries, exportCSV, exportJSON, focusMonth, habitStreak, isActiveDay, isPerfectDay, isWarmUp, llmPrompt, longDate, missedReminders, months, nextArcCta, nextArcLabel, openMonths, promptCopied, promptOpen, selectedDate, selectedIsFuture, setConfirmReset, setEntries, setOpenMonths, setPromptOpen, setSelectedDate, setShareOpen, setReminderTime, setStreakInfo, setUndo, askForReminders, notifPermission, reminderTest, reminders, remindersOn, remindersSet, remindersSupported, runLabel, start, startOnboarding, startToday, startWarmUp, startWinterArc, stats, stepDay, streakInfo, today, toggleHabit, totalDays, testReminder, turnOffReminders, undo, warmUp } = arc
+  const { activeDays, allDates, arcEnded, arcStarted, canRollOver, copyPrompt, dailyPct, dayComplete, dayDoneCount, dayLabel, dayPct, daysToStart, effectiveHabits, end, entries, exportCSV, exportJSON, focusMonth, habitStreak, isActiveDay, isPerfectDay, isWarmUp, llmPrompt, longDate, missedReminders, months, nextArcCta, nextArcLabel, openMonths, promptCopied, promptOpen, remindersOpen, setRemindersOpen, selectedDate, selectedIsFuture, setConfirmReset, setEntries, setOpenMonths, setPromptOpen, setSelectedDate, setShareOpen, setReminderTime, setStreakInfo, setUndo, askForReminders, notifPermission, reminderTest, reminders, remindersOn, remindersSet, remindersSupported, runLabel, start, startOnboarding, startToday, startWarmUp, startWinterArc, stats, stepDay, streakInfo, today, toggleHabit, totalDays, testReminder, turnOffReminders, undo, warmUp } = arc
   return (
     <>
           <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
@@ -63,14 +63,13 @@ export function Tracker({ arc }: { arc: Arc }) {
                   <div className="text-[11px] font-mono text-zinc-400 truncate">checks</div>
                 </div>
               </motion.div>
-              <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 col-span-2 lg:col-span-1 flex flex-col justify-center">
+              <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex flex-col justify-center transition hover:border-zinc-700">
                 <button onClick={() => setShareOpen(true)} aria-haspopup="dialog" className="w-full flex items-center gap-2.5 text-left rounded-xl">
                   <IconChip icon={Share2} size={44} />
                   <span className="min-w-0">
-                    <span className="block text-[11px] font-mono tracking-widest text-zinc-500">Share</span>
-                    <span className="block text-[13px] font-semibold text-white">Post your grid</span>
+                    <span className="block text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-400 truncate">Share</span>
+                    <span className="block text-[13px] font-semibold text-white leading-tight">Post your grid</span>
                   </span>
-                  <ChevronRight size={15} className="ml-auto shrink-0 text-zinc-500" />
                 </button>
               </motion.div>
             </motion.div>
@@ -340,91 +339,90 @@ export function Tracker({ arc }: { arc: Arc }) {
             </div>
 
             <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="w-9 h-9 shrink-0 rounded-full bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-300">
-                    {remindersOn ? <Bell size={15} /> : <BellOff size={15} />}
-                  </span>
-                  <div className="min-w-0">
-                    <h2 className="text-[15px] font-semibold text-white">Reminders</h2>
-                    <p className="text-[11px] font-mono text-zinc-500">
-                      {!remindersSupported
-                        ? 'Not available in this browser'
-                        : notifPermission === 'denied'
-                          ? 'Blocked for this site'
-                          : remindersSet
-                            ? REMINDER_SLOTS.filter(sl => reminders[sl]).map(sl => `${SLOT_LABELS[sl]} ${clockLabel(reminders[sl])}`).join(' · ')
-                            : 'Off'}
-                    </p>
-                  </div>
-                </div>
-                {remindersSupported && (
-                  remindersSet
-                    ? <button onClick={turnOffReminders} className="h-11 px-4 shrink-0 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">Delete both</button>
-                    : <button onClick={askForReminders} className="h-11 px-4 shrink-0 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Turn on reminders</button>
-                )}
-              </div>
-
-              {remindersSupported && (
-                <div className="mt-4 grid sm:grid-cols-2 gap-2">
-                  {REMINDER_SLOTS.map(slot => {
-                    const on = reminders[slot] !== null
-                    return (
-                      <div key={slot} className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-[13px] text-zinc-300">{SLOT_LABELS[slot]}</span>
-                          <button
-                            aria-pressed={on}
-                            aria-label={on ? `Delete the ${SLOT_LABELS[slot].toLowerCase()} reminder` : `Add a ${SLOT_LABELS[slot].toLowerCase()} reminder`}
-                            onClick={() => setReminderTime(slot, on ? null : DEFAULT_REMINDERS[slot])}
-                            className={`h-11 px-4 shrink-0 rounded-full text-[12px] font-mono border transition ${on ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'}`}
-                          >
-                            {on ? 'Delete' : 'Add'}
-                          </button>
-                        </div>
-                        <input
-                          type="time"
-                          aria-label={`${SLOT_LABELS[slot]} reminder time`}
-                          value={reminders[slot] ?? DEFAULT_REMINDERS[slot] ?? ''}
-                          disabled={!on}
-                          onChange={e => setReminderTime(slot, e.target.value || null)}
-                          className="mt-2 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 min-h-11 text-base sm:text-sm text-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed"
-                        />
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-
-              {remindersSupported && remindersSet && notifPermission !== 'granted' && (
-                <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 flex flex-wrap items-center gap-3">
-                  <span className="text-[13px] text-zinc-300 min-w-0 flex-1">
-                    {notifPermission === 'denied'
-                      ? 'These times are saved, but notifications are blocked for this site.'
-                      : 'These times are saved. Your browser has not been asked for permission yet.'}
-                  </span>
-                  {notifPermission !== 'denied' && (
-                    <button onClick={askForReminders} className="h-11 px-4 shrink-0 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Allow notifications</button>
+              <Disclosure
+                open={remindersOpen}
+                onToggle={() => setRemindersOpen(v => !v)}
+                title="Reminders"
+                lead={<IconChip icon={remindersOn ? Bell : BellOff} size={36} />}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-[11px] font-mono text-zinc-500 min-w-0">
+                    {!remindersSupported
+                      ? 'Not available in this browser'
+                      : notifPermission === 'denied'
+                        ? 'Blocked for this site'
+                        : remindersSet
+                          ? REMINDER_SLOTS.filter(sl => reminders[sl]).map(sl => `${SLOT_LABELS[sl]} ${clockLabel(reminders[sl])}`).join(' · ')
+                          : 'Off'}
+                  </p>
+                  {remindersSupported && (
+                    remindersSet
+                      ? <button onClick={turnOffReminders} className="h-11 px-4 shrink-0 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">Delete both</button>
+                      : <button onClick={askForReminders} className="h-11 px-4 shrink-0 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Turn on reminders</button>
                   )}
                 </div>
-              )}
 
-              <p className="mt-3 text-[13px] leading-6 text-zinc-500">
-                {notifPermission === 'denied'
-                  ? 'You blocked notifications for this site. Allow them again in your browser settings, then reload.'
-                  : !remindersSupported
-                    ? 'This browser has no web notifications. On an iPhone they work once WinterArc is on your home screen.'
-                    : 'They fire only while WinterArc is open in a tab or installed as an app. No server here, so nothing can wake a closed browser. When a time passes without one reaching you, the check-in card says so. Rest days and finished days stay quiet, and the sound is your own.'}
-              </p>
+                {remindersSupported && (
+                  <div className="mt-4 grid sm:grid-cols-2 gap-2">
+                    {REMINDER_SLOTS.map(slot => {
+                      const on = reminders[slot] !== null
+                      return (
+                        <div key={slot} className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[13px] text-zinc-300">{SLOT_LABELS[slot]}</span>
+                            <button
+                              aria-pressed={on}
+                              aria-label={on ? `Delete the ${SLOT_LABELS[slot].toLowerCase()} reminder` : `Add a ${SLOT_LABELS[slot].toLowerCase()} reminder`}
+                              onClick={() => setReminderTime(slot, on ? null : DEFAULT_REMINDERS[slot])}
+                              className={`h-11 px-4 shrink-0 rounded-full text-[12px] font-mono border transition ${on ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'}`}
+                            >
+                              {on ? 'Delete' : 'Add'}
+                            </button>
+                          </div>
+                          <input
+                            type="time"
+                            aria-label={`${SLOT_LABELS[slot]} reminder time`}
+                            value={reminders[slot] ?? DEFAULT_REMINDERS[slot] ?? ''}
+                            disabled={!on}
+                            onChange={e => setReminderTime(slot, e.target.value || null)}
+                            className="mt-2 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 min-h-11 text-base sm:text-sm text-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                          />
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
 
-              {remindersOn && (
-                <div className="mt-3 flex flex-wrap items-center gap-3">
-                  <button onClick={testReminder} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">Send a test</button>
-                  <span role="status" aria-live="polite" className="text-xs font-mono text-zinc-500">
-                    {reminderTest === 'sent' ? 'Sent. Check your notifications.' : reminderTest === 'failed' ? 'The browser refused it.' : ''}
-                  </span>
-                </div>
-              )}
+                {remindersSupported && remindersSet && notifPermission !== 'granted' && (
+                  <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 flex flex-wrap items-center gap-3">
+                    <span className="text-[13px] text-zinc-300 min-w-0 flex-1">
+                      {notifPermission === 'denied'
+                        ? 'These times are saved, but notifications are blocked for this site.'
+                        : 'These times are saved. Your browser has not been asked for permission yet.'}
+                    </span>
+                    {notifPermission !== 'denied' && (
+                      <button onClick={askForReminders} className="h-11 px-4 shrink-0 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Allow notifications</button>
+                    )}
+                  </div>
+                )}
+
+                <p className="mt-3 text-[13px] leading-6 text-zinc-500">
+                  {notifPermission === 'denied'
+                    ? 'You blocked notifications for this site. Allow them again in your browser settings, then reload.'
+                    : !remindersSupported
+                      ? 'This browser has no web notifications. On an iPhone they work once WinterArc is on your home screen.'
+                      : 'They fire only while WinterArc is open in a tab or installed as an app. No server here, so nothing can wake a closed browser. When a time passes without one reaching you, the check-in card says so. Rest days and finished days stay quiet, and the sound is your own.'}
+                </p>
+
+                {remindersOn && (
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <button onClick={testReminder} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">Send a test</button>
+                    <span role="status" aria-live="polite" className="text-xs font-mono text-zinc-500">
+                      {reminderTest === 'sent' ? 'Sent. Check your notifications.' : reminderTest === 'failed' ? 'The browser refused it.' : ''}
+                    </span>
+                  </div>
+                )}
+              </Disclosure>
             </div>
 
             <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
