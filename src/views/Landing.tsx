@@ -6,7 +6,7 @@ import QuietBoundary from '@/components/app/QuietBoundary'
 
 const ThreeHero = lazy(() => import('@/ThreeHero'))
 
-import { Eyebrow } from '@/components/app/Surface'
+import { Eyebrow, IconChip } from '@/components/app/Surface'
 import { HabitIcon } from '@/components/app/HabitIcon'
 import { Ring } from '@/components/app/Ring'
 import { fadeUp, stagger } from '@/lib/motion'
@@ -71,9 +71,9 @@ export function Landing({ arc }: { arc: Arc }) {
                     <div key={st.k} className="rounded-2xl border border-zinc-800 bg-zinc-950 p-3 flex items-center gap-2.5">
                       <Ring pct={st.pct} size={38} stroke={3}><span className="text-[9px] font-mono font-bold text-white">{st.pct}%</span></Ring>
                       <div className="min-w-0">
-                        <div className="text-[10px] font-mono tracking-widest text-zinc-500">{st.k}</div>
+                        <div className="text-[11px] font-mono tracking-widest text-zinc-500">{st.k}</div>
                         <div className="text-[15px] font-bold text-white leading-tight tabular-nums">{st.v}</div>
-                        <div className="text-[10px] font-mono text-zinc-500 truncate">{st.sub}</div>
+                        <div className="text-[11px] font-mono text-zinc-500 truncate">{st.sub}</div>
                       </div>
                     </div>
                   ))}
@@ -98,7 +98,7 @@ export function Landing({ arc }: { arc: Arc }) {
                       ))}
                     </div>
                     <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-                      <div className="text-[10px] font-mono tracking-widest text-zinc-500">Current streak</div>
+                      <div className="text-[11px] font-mono tracking-widest text-zinc-500">Current streak</div>
                       <div className="mt-1 flex items-end gap-2">
                         <span className="text-[26px] leading-none font-bold tabular-nums text-white">6</span>
                         <span className="pb-0.5 text-[11px] text-zinc-500">days in a row</span>
@@ -151,11 +151,11 @@ export function Landing({ arc }: { arc: Arc }) {
 
               <div className="mt-8 space-y-6">
                 <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2 md:min-h-[280px]">
-                  <div className="p-6 sm:p-7 flex flex-col justify-center">
-                    <div className="w-9 h-9 rounded-full bg-white text-zinc-900 grid place-items-center"><Check size={16} /></div>
+                  <div className="p-5 sm:p-6 flex flex-col justify-center">
+                    <IconChip icon={Check} active />
                     <h3 className="mt-3 text-[15px] font-semibold text-white">The grid does not lie</h3>
-                    <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">One square a day. White is clean, grey is partial, red is a miss. You can fill in a day you forgot to log, but not one that has not happened.</p>
-                    <div className="mt-4 text-xs font-mono text-zinc-600">Local only · Export JSON/CSV anytime</div>
+                    <p className="mt-2 text-[14px] leading-6 text-zinc-400">One square a day. White is clean, grey is partial, red is a miss. You can fill in a day you forgot to log, but not one that has not happened.</p>
+                    <div className="mt-4 text-[11px] font-mono text-zinc-500">Local only · Export JSON/CSV anytime</div>
                   </div>
                   <div className="bg-zinc-950 p-5 grid place-items-center">
                     <div className="grid grid-cols-7 sm:grid-cols-14 gap-1.5 w-full max-w-[360px]">
@@ -177,18 +177,18 @@ export function Landing({ arc }: { arc: Arc }) {
                       </div>
                     </div>
                   </div>
-                  <div className="p-6 sm:p-7 flex flex-col justify-center order-1 md:order-2">
-                    <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-200 grid place-items-center"><Trophy size={16} /></div>
+                  <div className="p-5 sm:p-6 flex flex-col justify-center order-1 md:order-2">
+                    <IconChip icon={Trophy} />
                     <h3 className="mt-3 text-[15px] font-semibold text-white">Rings for each habit</h3>
-                    <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">See which habit is dragging and which one runs itself.</p>
-                    <div className="mt-4 text-xs font-mono text-zinc-600">Updates live as you check the day</div>
+                    <p className="mt-2 text-[14px] leading-6 text-zinc-400">See which habit is dragging and which one runs itself.</p>
+                    <div className="mt-4 text-[11px] font-mono text-zinc-500">Updates live as you check the day</div>
                   </div>
                 </div>
                 <div className="rounded-2xl border border-zinc-800 bg-zinc-900 overflow-hidden grid md:grid-cols-2 md:min-h-[280px]">
-                  <div className="p-6 sm:p-7 flex flex-col justify-center">
-                    <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-200 grid place-items-center"><ExternalLink size={16} /></div>
+                  <div className="p-5 sm:p-6 flex flex-col justify-center">
+                    <IconChip icon={ExternalLink} />
                     <h3 className="mt-3 text-[15px] font-semibold text-white">Share only if you want</h3>
-                    <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">A PNG for X or WhatsApp. Nothing leaves the device until you tap share.</p>
+                    <p className="mt-2 text-[14px] leading-6 text-zinc-400">A PNG for X or WhatsApp. Nothing leaves the device until you tap share.</p>
                     <div className="mt-4 flex gap-2">
                       <span className="px-3 py-1.5 rounded-full bg-white border border-white text-zinc-900 text-xs font-semibold">X Post</span>
                       <span className="px-3 py-1.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-semibold">WhatsApp</span>
@@ -206,23 +206,23 @@ export function Landing({ arc }: { arc: Arc }) {
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 sm:p-7">
-                    <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-200 grid place-items-center"><CalendarClock size={16} /></div>
+                  <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 sm:p-6">
+                    <IconChip icon={CalendarClock} />
                     <h3 className="mt-3 text-[15px] font-semibold text-white">Start before the season</h3>
-                    <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">
+                    <p className="mt-2 text-[14px] leading-6 text-zinc-400">
                       {setupWarmUp
                         ? `The arc starts ${longDate(winterArc.start)}. Rather than hand you a countdown, setup runs a warm-up from today to ${longDate(setupWarmUp.end)}, then rolls you into the arc with the same habits.`
                         : 'When the arc is still weeks away, setup runs a warm-up from today up to the day before it starts, then rolls you into the arc with the same habits.'}
                     </p>
-                    <div className="mt-4 text-xs font-mono text-zinc-600">Warm-up days are kept, not counted</div>
+                    <div className="mt-4 text-[11px] font-mono text-zinc-500">Warm-up days are kept, not counted</div>
                   </div>
-                  <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 sm:p-7">
-                    <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-200 grid place-items-center"><Bell size={16} /></div>
+                  <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 sm:p-6">
+                    <IconChip icon={Bell} />
                     <h3 className="mt-3 text-[15px] font-semibold text-white">One morning, one evening</h3>
-                    <p className="mt-1.5 text-[13px] leading-6 text-zinc-500">
+                    <p className="mt-2 text-[14px] leading-6 text-zinc-400">
                       Optional reminders at times you set, using your own system sound. There is no push server, so they fire while WinterArc is open or installed. Rest days and finished days stay quiet.
                     </p>
-                    <div className="mt-4 text-xs font-mono text-zinc-600">Off until you turn them on</div>
+                    <div className="mt-4 text-[11px] font-mono text-zinc-500">Off until you turn them on</div>
                   </div>
                 </div>
               </div>
@@ -242,7 +242,7 @@ export function Landing({ arc }: { arc: Arc }) {
                   ].map(s => (
                     <motion.div variants={fadeUp} key={s.n} className="flex gap-4">
                       <div className="text-[13px] font-mono tracking-widest text-zinc-500 pt-0.5">{s.n}</div>
-                      <div><div className="text-[14px] font-semibold text-white">{s.t}</div><div className="mt-1 text-[13px] leading-5 text-zinc-500">{s.d}</div></div>
+                      <div><div className="text-[14px] font-semibold text-white">{s.t}</div><div className="mt-2 text-[14px] leading-6 text-zinc-400">{s.d}</div></div>
                     </motion.div>
                   ))}
                 </div>

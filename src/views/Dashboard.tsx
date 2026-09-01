@@ -1,26 +1,23 @@
 import { ImageDown, Pencil, Share2, Trophy } from 'lucide-react'
 import type { Arc } from '@/hooks/useArc'
-import { Eyebrow } from '@/components/app/Surface'
+import { Page, PageHeading } from '@/components/app/Surface'
 import { HabitIcon } from '@/components/app/HabitIcon'
 import { Ring } from '@/components/app/Ring'
 
 export function Dashboard({ arc }: { arc: Arc }) {
   const { achievements, activeDays, allDates, downloadImage, effectiveHabits, end, entries, exportCSV, exportJSON, goTo, isActiveDay, isPerfectDay, isWarmUp, longDate, nativeShare, quote, quoteCredit, setSettings, setWeeksOpen, settings, start, startOnboarding, stats, weeksOpen } = arc
   return (
-          <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <Eyebrow icon={Trophy}>Dashboard</Eyebrow>
-                <h1 className="mt-2 text-[22px] sm:text-[26px] font-bold tracking-tight text-white">
-                  {settings?.name ? `${settings.name}'s ${isWarmUp ? 'warm-up' : 'arc'}` : isWarmUp ? 'Your warm-up' : 'Your arc'}
-                </h1>
-                <p className="mt-1.5 text-sm text-zinc-500">{longDate(start)} to {longDate(end)} · {effectiveHabits.length} {effectiveHabits.length === 1 ? 'habit' : 'habits'} · {activeDays.length === 7 ? 'every day' : `${activeDays.length} days a week`}</p>
-              </div>
-              <button onClick={() => goTo('tracker')} className="h-11 px-5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-sm hover:text-white hover:border-zinc-700 transition">Open tracker</button>
-            </div>
+          <Page app>
+            <PageHeading
+              icon={Trophy}
+              eyebrow="Dashboard"
+              title={settings?.name ? `${settings.name}'s ${isWarmUp ? 'warm-up' : 'arc'}` : isWarmUp ? 'Your warm-up' : 'Your arc'}
+              subtitle={`${longDate(start)} to ${longDate(end)} · ${effectiveHabits.length} ${effectiveHabits.length === 1 ? 'habit' : 'habits'} · ${activeDays.length === 7 ? 'every day' : `${activeDays.length} days a week`}`}
+              actions={<button onClick={() => goTo('tracker')} className="h-12 px-5 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-sm hover:text-white hover:border-zinc-700 transition">Open tracker</button>}
+            />
 
             <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4 [&>*]:min-w-0">
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col items-center">
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 sm:p-6 flex flex-col items-center">
                 <div className="text-[11px] font-mono tracking-widest text-zinc-500">Overall</div>
                 <div className="mt-4">
                   <Ring pct={stats.pct} size={160} stroke={10}>
@@ -35,7 +32,7 @@ export function Dashboard({ arc }: { arc: Arc }) {
                   ].map(([k, v]) => (
                     <div key={k} className="rounded-xl border border-zinc-800 bg-zinc-950 py-2.5">
                       <div className="text-[17px] font-bold text-white tabular-nums leading-tight">{v}</div>
-                      <div className="text-[10px] font-mono tracking-widest text-zinc-500">{k}</div>
+                      <div className="text-[11px] font-mono tracking-widest text-zinc-500">{k}</div>
                     </div>
                   ))}
                 </div>
@@ -44,7 +41,7 @@ export function Dashboard({ arc }: { arc: Arc }) {
                   <button onClick={() => downloadImage()} className="h-11 rounded-full bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition inline-flex items-center justify-center gap-1.5"><ImageDown size={14} /> PNG</button>
                 </div>
               </div>
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col">
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 sm:p-6 flex flex-col">
                 <div className="flex items-center justify-between">
                   <div className="text-[11px] font-mono tracking-widest text-zinc-500">Weekly</div>
                   <button onClick={() => setWeeksOpen(v => !v)} aria-expanded={weeksOpen} className="inline-flex items-center min-h-11 px-3 -mr-3 text-[11px] font-mono text-zinc-400 hover:text-white transition">
@@ -85,9 +82,9 @@ export function Dashboard({ arc }: { arc: Arc }) {
                     </div>
                   )
                 })()}
-                <div className="mt-3 text-[10px] font-mono text-zinc-500">{Math.ceil(allDates.length / 7)} weeks</div>
+                <div className="mt-3 text-[11px] font-mono text-zinc-500">{Math.ceil(allDates.length / 7)} weeks</div>
               </div>
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col">
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 sm:p-6 flex flex-col">
                 <div className="text-[11px] font-mono tracking-widest text-zinc-500">Today</div>
                 <blockquote className="mt-3 text-[15px] leading-6 text-zinc-200">
                   {quote.text}
@@ -151,6 +148,6 @@ export function Dashboard({ arc }: { arc: Arc }) {
                 ))}
               </div>
             </div>
-          </main>
+          </Page>
   )
 }
