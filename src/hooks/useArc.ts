@@ -4,7 +4,7 @@ import { PRESETS } from '@/lib/presets'
 import { ALL_WEEKDAYS, MAX_WAIT_DAYS, addDays, arcPresets, daysBetween, getDefaultArc, getRecommendedArc, isValidYMD, parseYMD, todayYMD, warmUpBefore, weekdayOf } from '@/lib/date'
 import { PATHS, viewForPath } from '@/lib/routes'
 import {
-  DEFAULT_REMINDERS, REMINDER_SLOTS, anyReminderOn, firedId, isDue, normalizeReminders,
+  DEFAULT_REMINDERS, REMINDER_SLOTS, anyReminderOn, firedId, isDue, missedSlots, normalizeReminders,
   nowMinutes, pruneFired, reminderText,
 } from '@/lib/reminders'
 import { clearArcStorage, readStore, writeStore } from '@/lib/storage'
@@ -97,6 +97,8 @@ export function useArc() {
     () => (notificationsSupported() ? Notification.permission : 'denied'),
   )
   const [reminderTest, setReminderTest] = useState<'sent' | 'failed' | null>(null)
+  const [clockMin, setClockMin] = useState(() => nowMinutes())
+  const [firedLog, setFiredLog] = useState<string[]>(() => pruneFired(readStore<string[]>('wa_reminders_fired', []), todayYMD()))
   const [tmpReminders, setTmpReminders] = useState<Reminders>(DEFAULT_REMINDERS)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const overlayDown = useRef(false)
@@ -272,12 +274,20 @@ export function useArc() {
   useEffect(() => { setOpenMonths([focusMonth]) }, [focusMonth])
 
   useEffect(() => {
-    const tick = () => setToday(prev => {
-      const now = todayYMD()
-      if (now === prev) return prev
-      setSelectedDate(sel => (sel === prev ? now : sel))
-      return now
-    })
+    const tick = () => {
+      setToday(prev => {
+        const now = todayYMD()
+        if (now === prev) return prev
+        setSelectedDate(sel => (sel === prev ? now : sel))
+        return now
+      })
+      setClockMin(nowMinutes())
+      // re-read rather than trusting local state, since a sibling tab may have raised one
+      setFiredLog(prev => {
+        const next = pruneFired(readStore<string[]>('wa_reminders_fired', []), todayYMD())
+        return next.length === prev.length && next.every((k, i) => k === prev[i]) ? prev : next
+      })
+    }
     const id = setInterval(tick, 60000)
     document.addEventListener('visibilitychange', tick)
     window.addEventListener('focus', tick)
@@ -393,7 +403,9 @@ export function useArc() {
         // re-read rather than reusing `log`, since another tab may have fired meanwhile
         const fresh = pruneFired(readStore<string[]>('wa_reminders_fired', []), day)
         const key = firedId(day, slot)
-        if (!fresh.includes(key)) writeStore('wa_reminders_fired', [...fresh, key])
+        const next = fresh.includes(key) ? fresh : [...fresh, key]
+        if (!fresh.includes(key)) writeStore('wa_reminders_fired', next)
+        setFiredLog(next)
       } finally {
         raising = false
       }
@@ -415,6 +427,18 @@ export function useArc() {
       .catch(() => {})
     return () => status?.removeEventListener('change', onChange)
   }, [remindersSupported])
+
+  /**
+   * Reminder times that came and went today without a notification. The tracker says
+   * so, which is the only catch-up a page with no push server can honestly offer.
+   */
+  const missedReminders = useMemo(() => {
+    if (!remindersOn || !hasData) return []
+    if (today < start || today > end || !isActiveDay(today)) return []
+    const entry = entries[today] || {}
+    if (effectiveHabits.length > 0 && effectiveHabits.every(h => entry[h.id])) return []
+    return missedSlots(reminders, firedLog, today, clockMin)
+  }, [remindersOn, hasData, today, start, end, isActiveDay, entries, effectiveHabits, reminders, firedLog, clockMin])
 
   function writeReminders(next: Reminders) {
     setSettings(prev => (prev ? { ...prev, reminders: next } : prev))
@@ -1017,6 +1041,7 @@ export function useArc() {
     reminders,
     remindersSet,
     remindersOn,
+    missedReminders,
     reminderTest,
     tmpReminders,
     setTmpReminders,

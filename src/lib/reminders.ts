@@ -80,3 +80,15 @@ export function firedId(date: ISODate, slot: ReminderSlot): string {
 export function pruneFired(fired: string[], today: ISODate): string[] {
   return Array.isArray(fired) ? fired.filter(k => typeof k === 'string' && k.startsWith(`${today}:`)) : []
 }
+
+/**
+ * Slots whose time has passed today with nothing raised. A backgrounded tab can be
+ * frozen through its whole window, and a tab in front of you is skipped on purpose,
+ * so without this the reminder is simply never mentioned again.
+ */
+export function missedSlots(r: Reminders, fired: string[], date: ISODate, now: number): ReminderSlot[] {
+  return REMINDER_SLOTS.filter(sl => {
+    const t = minutesOf(r[sl])
+    return t !== null && now >= t && !fired.includes(firedId(date, sl))
+  })
+}

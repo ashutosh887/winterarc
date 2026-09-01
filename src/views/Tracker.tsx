@@ -10,7 +10,7 @@ import { addDays } from '@/lib/date'
 import { fadeUp, stagger } from '@/lib/motion'
 
 export function Tracker({ arc }: { arc: Arc }) {
-  const { activeDays, allDates, arcEnded, arcStarted, canRollOver, copyPrompt, dailyPct, dayComplete, dayDoneCount, dayLabel, dayPct, daysToStart, effectiveHabits, end, entries, exportCSV, exportJSON, focusMonth, habitStreak, isActiveDay, isPerfectDay, isWarmUp, llmPrompt, longDate, months, nextArcCta, nextArcLabel, openMonths, promptCopied, promptOpen, selectedDate, selectedIsFuture, setConfirmReset, setEntries, setOpenMonths, setPromptOpen, setSelectedDate, setShareOpen, setReminderTime, setStreakInfo, setUndo, askForReminders, notifPermission, reminderTest, reminders, remindersOn, remindersSet, remindersSupported, runLabel, start, startOnboarding, startToday, startWarmUp, startWinterArc, stats, stepDay, streakInfo, today, toggleHabit, totalDays, testReminder, turnOffReminders, undo, warmUp } = arc
+  const { activeDays, allDates, arcEnded, arcStarted, canRollOver, copyPrompt, dailyPct, dayComplete, dayDoneCount, dayLabel, dayPct, daysToStart, effectiveHabits, end, entries, exportCSV, exportJSON, focusMonth, habitStreak, isActiveDay, isPerfectDay, isWarmUp, llmPrompt, longDate, missedReminders, months, nextArcCta, nextArcLabel, openMonths, promptCopied, promptOpen, selectedDate, selectedIsFuture, setConfirmReset, setEntries, setOpenMonths, setPromptOpen, setSelectedDate, setShareOpen, setReminderTime, setStreakInfo, setUndo, askForReminders, notifPermission, reminderTest, reminders, remindersOn, remindersSet, remindersSupported, runLabel, start, startOnboarding, startToday, startWarmUp, startWinterArc, stats, stepDay, streakInfo, today, toggleHabit, totalDays, testReminder, turnOffReminders, undo, warmUp } = arc
   return (
     <>
           <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
@@ -129,6 +129,16 @@ export function Tracker({ arc }: { arc: Arc }) {
                   ><ChevronRight size={16} /></button>
                 </div>
                 <input type="date" aria-label="Day to check in" value={selectedDate} min={start} max={today < end ? today : end} disabled={!arcStarted} onChange={e => { const v = e.target.value; if (!v) return; const cap = today < end ? today : end; setSelectedDate(v < start ? start : v > cap ? cap : v) }} className="mt-2 w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 min-h-11 text-base sm:text-sm text-zinc-400 disabled:opacity-40 disabled:cursor-not-allowed" />
+                {arcStarted && selectedDate === today && missedReminders.length > 0 && (
+                  <div role="status" className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 flex items-start gap-2.5">
+                    <span className="mt-px shrink-0 text-zinc-400"><BellOff size={14} /></span>
+                    <p className="text-[13px] leading-5 text-zinc-400">
+                      {missedReminders.length > 1
+                        ? 'Both reminder times passed today.'
+                        : `${SLOT_LABELS[missedReminders[0]]} reminder time passed.`}
+                    </p>
+                  </div>
+                )}
                 <div className={`mt-4 space-y-2 ${arcStarted ? '' : 'hidden'}`}>
                   {effectiveHabits.map((h, hi) => {
                     const done = !!(entries[selectedDate] || {})[h.id]
@@ -404,7 +414,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                   ? 'You blocked notifications for this site. Allow them again in your browser settings, then reload.'
                   : !remindersSupported
                     ? 'This browser has no web notifications. On an iPhone they work once WinterArc is on your home screen.'
-                    : 'They fire only while WinterArc is open in a tab or installed as an app. No server here, so nothing can wake a closed browser. Rest days and finished days stay quiet, and the sound is your own.'}
+                    : 'They fire only while WinterArc is open in a tab or installed as an app. No server here, so nothing can wake a closed browser. When a time passes without one reaching you, the check-in card says so. Rest days and finished days stay quiet, and the sound is your own.'}
               </p>
 
               {remindersOn && (

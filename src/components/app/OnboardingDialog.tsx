@@ -144,7 +144,7 @@ export function OnboardingDialog({ arc }: { arc: Arc }) {
                         })}
                       </div>
                       <p className="text-xs leading-5 text-zinc-500">
-                        Your browser asks permission when you save. They fire only while the app is open, because there is no server to wake a closed browser. Change or silence them any time on the tracker.
+                        Your browser asks permission when you save. They fire only while the app is open, because there is no server to wake a closed browser. If a time passes without one reaching you, the check-in card says so. Change or silence them any time on the tracker.
                       </p>
                     </div>
                   </div>
