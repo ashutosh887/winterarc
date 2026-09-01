@@ -39,8 +39,13 @@ export default function App() {
     nativeShare,
     navLinks,
     overlayProps,
+    longDate,
     quote,
+    recommended,
     resetAll,
+    runHeadline,
+    runLabel,
+    setupWarmUp,
     resetting,
     runInstall,
     selectedDate,
@@ -137,7 +142,7 @@ export default function App() {
             <span className="min-w-0 text-sm text-zinc-400 line-clamp-2 sm:truncate">
               {quote.text} <span className="text-zinc-500">&mdash; {quote.author}</span>
             </span>
-            <span className="ml-auto hidden sm:inline shrink-0 text-[11px] font-mono text-zinc-500 tabular-nums">Day {stats.dayNum} / {totalDays} · {dayPct}%</span>
+            <span className="ml-auto hidden sm:inline shrink-0 text-[11px] font-mono text-zinc-500 tabular-nums">{runLabel} {stats.dayNum} / {totalDays} · {dayPct}%</span>
           </motion.div>
           </div>
         </div>
@@ -179,6 +184,11 @@ export default function App() {
             <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 text-white grid place-items-center mx-auto"><ArrowRight size={18} /></div>
             <h1 className="mt-4 text-[22px] font-bold tracking-tight text-white">No arc yet</h1>
             <p className="mt-2 text-sm text-zinc-500">Start your arc to see the tracker. It takes 30 seconds.</p>
+            <p className="mt-1.5 text-[13px] leading-6 text-zinc-500 max-w-[420px] mx-auto">
+              {setupWarmUp
+                ? `Setup starts you today and runs a warm-up to ${longDate(setupWarmUp.end)}, then offers you the winter arc.`
+                : `Setup starts you on ${longDate(recommended.start)}. Any other dates work too.`}
+            </p>
             <Button onClick={startOnboarding} className="mt-6 h-11 px-5">Start your arc <ArrowRight size={14} /></Button>
           </div>
         </main>
@@ -199,7 +209,7 @@ export default function App() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h2 className="text-[22px] font-bold tracking-tight text-white">Post your grid</h2>
-                  <p className="mt-1 text-sm text-zinc-400">Day {stats.dayNum} of {totalDays}, {stats.pct}% done, streak {stats.streak}.</p>
+                  <p className="mt-1 text-sm text-zinc-400">{runHeadline}, {stats.pct}% done, streak {stats.streak}.</p>
                 </div>
                 <button onClick={() => setShareOpen(false)} aria-label="Close" className="w-11 h-11 -mt-2 -mr-2 shrink-0 grid place-items-center rounded-full text-zinc-500 hover:text-white hover:bg-zinc-800 transition"><X size={18} /></button>
               </div>

@@ -4,7 +4,7 @@ import { Eyebrow } from '@/components/app/Surface'
 import { site } from '@/config'
 
 export function About({ arc }: { arc: Arc }) {
-  const { goTo, startOnboarding } = arc
+  const { goTo, longDate, setupWarmUp, startOnboarding, winterArc } = arc
   return (
           <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-12">
             <Eyebrow icon={Snowflake}>The idea</Eyebrow>
@@ -37,7 +37,7 @@ export function About({ arc }: { arc: Arc }) {
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
                 <div className="text-[15px] font-semibold text-white">Why the dates are yours</div>
                 <p className="mt-2 text-[13px] leading-6 text-zinc-500">
-                  The default is October 1 to December 31 because that is what people mean by a winter arc. It is a default, not a rule. Set any start and end date in setup and the grid, the streaks and the badges all follow your dates.
+                  October 1 to December 31 is what people mean by a winter arc, so that is the shape of it. It is a default, not a rule. Set any start and end date in setup and the grid, the streaks and the badges all follow your dates.
                 </p>
               </div>
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
@@ -46,6 +46,16 @@ export function About({ arc }: { arc: Arc }) {
                   Most trackers let you freeze a streak or repair a day. That turns the number into a score you protect rather than a record of what happened. Here a missed day stays red. You can backfill a day you forgot to log, because that is a record-keeping gap rather than a missed habit, and future days stay locked so nobody can pre-tick their way to a streak.
                 </p>
               </div>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+              <div className="text-[15px] font-semibold text-white">You do not have to wait for October</div>
+              <p className="mt-2 text-[13px] leading-6 text-zinc-500 max-w-[720px]">
+                Deciding to start is the easy part and it wears off. If the arc is still weeks out, setup offers a warm-up instead: a short run from today up to the day before the arc begins{setupWarmUp ? `, which right now is ${longDate(setupWarmUp.start)} to ${longDate(setupWarmUp.end)}` : ''}. You use it to find out which habits you actually hold and which ones you picked because they sounded good.
+              </p>
+              <p className="mt-2 text-[13px] leading-6 text-zinc-500 max-w-[720px]">
+                When the warm-up ends, the tracker offers to roll you into the winter arc on {longDate(winterArc.start)} with the same habits and an empty grid. The warm-up days are not deleted and not merged in. They stay in this browser and in your JSON export, they just stop counting toward the arc, so a rough first week of learning the tool never sits in the record as a failed arc.
+              </p>
             </div>
 
             <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-5">

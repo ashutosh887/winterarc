@@ -18,12 +18,21 @@ export interface Habit {
 export type DayEntry = Record<HabitId, boolean>
 export type Entries = Record<ISODate, DayEntry>
 
+/**
+ * A warm-up is a short run taken before the arc it leads into. It behaves like
+ * any other arc, and the only thing the mode changes is what the app calls it
+ * and whether the tracker offers to roll it over when it ends.
+ */
+export type ArcMode = 'arc' | 'warmup'
+
 export interface Settings {
   start: ISODate
   end: ISODate
   name: string | null
   /** Weekday numbers, 0 = Sunday, matching Date.getDay(). */
   activeDays: number[]
+  /** Absent on arcs saved before warm-ups existed, which are all plain arcs. */
+  mode?: ArcMode
 }
 
 export type View =

@@ -12,7 +12,13 @@ import { Ring } from '@/components/app/Ring'
 import { fadeUp, stagger } from '@/lib/motion'
 
 export function Landing({ arc }: { arc: Arc }) {
-  const { goTo, hasData, heroReady, startOnboarding } = arc
+  const { goTo, hasData, heroReady, longDate, setupWarmUp, startOnboarding, today, winterArc } = arc
+  // What setup will actually do if they tap Start, said before they tap it.
+  const seasonNote = setupWarmUp
+    ? `Winter arc starts ${longDate(winterArc.start)}. Start today as a warm-up and roll into it.`
+    : today >= winterArc.start && today <= winterArc.end
+      ? `Winter arc is running. Start from today and track what is left of it.`
+      : `Winter arc runs ${longDate(winterArc.start)} to ${longDate(winterArc.end)}. Any other dates work too.`
   return (
           <main id="main">
             <section className="relative overflow-hidden aurora">
@@ -37,6 +43,13 @@ export function Landing({ arc }: { arc: Arc }) {
                   <button onClick={() => { hasData ? goTo('tracker') : goTo('templates') }} className="w-full sm:w-auto inline-flex items-center justify-center px-7 h-12 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-200 font-medium text-[15px] hover:bg-zinc-800 hover:border-zinc-700 transition">
                     {hasData ? 'Open tracker' : 'Browse templates'}
                   </button>
+                </motion.div>
+
+                <motion.div variants={fadeUp} className="mt-6 flex justify-center">
+                  <span className="inline-flex items-center gap-2.5 rounded-full border border-zinc-800 bg-zinc-900/80 backdrop-blur px-4 py-2 text-[12px] leading-5 text-zinc-400 text-left">
+                    <span className="w-1.5 h-1.5 shrink-0 rounded-full bg-white" />
+                    {seasonNote}
+                  </span>
                 </motion.div>
               </motion.div>
               </div>
@@ -202,7 +215,7 @@ export function Landing({ arc }: { arc: Arc }) {
 
                 <div className="mt-8 grid sm:grid-cols-3 gap-6">
                   {[
-                    { n: '01', t: 'Set it up', d: 'Your dates, your habits. Five is plenty. Past ten you are lying to yourself.' },
+                    { n: '01', t: 'Set it up', d: 'Your dates, your habits. Five is plenty. Past ten you are lying to yourself. If the arc is still weeks away, setup offers a warm-up so you begin today.' },
                     { n: '02', t: 'Tap what you did', d: 'Backfill any past date. Forgetting to log is not the same as missing.' },
                     { n: '03', t: 'Watch the grid fill', d: 'Red stays red, and tomorrow stays locked until it arrives.' },
                   ].map(s => (

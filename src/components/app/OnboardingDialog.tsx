@@ -2,7 +2,7 @@ import { ArrowRight, Check, X } from 'lucide-react'
 import { motion } from 'framer-motion'
 import type { Arc } from '@/hooks/useArc'
 import type { Tier } from '@/lib/types'
-import { ALL_WEEKDAYS, ARC_PRESETS, WEEKDAYS, daysBetween } from '@/lib/date'
+import { ALL_WEEKDAYS, WEEKDAYS, daysBetween } from '@/lib/date'
 import { Button } from '@/components/ui/button'
 import { HabitIcon } from '@/components/app/HabitIcon'
 import { HabitTile } from '@/components/app/HabitTile'
@@ -13,7 +13,8 @@ import { PRESETS, TIER_LABELS } from '@/lib/presets'
 import { templates } from '@/config'
 
 export function OnboardingDialog({ arc }: { arc: Arc }) {
-  const { addCustom, arcLength, completeOnboarding, customList, customName, onboardStep, overlayProps, setCustomList, setCustomName, setOnboardStep, setShowOnboarding, setTmpDays, setTmpEnd, setTmpName, setTmpSelected, setTmpStart, tmpDays, tmpEnd, tmpName, tmpSelected, tmpStart, today } = arc
+  const { addCustom, arcLength, completeOnboarding, customList, customName, longDate, onboardStep, overlayProps, presets, setCustomList, setCustomName, setOnboardStep, setShowOnboarding, setTmpDays, setTmpEnd, setTmpName, setTmpSelected, setTmpStart, setupWarmUp, tmpDays, tmpEnd, tmpName, tmpSelected, tmpStart, today, winterArc } = arc
+  const pickedWarmUp = !!setupWarmUp && tmpStart === setupWarmUp.start && tmpEnd === setupWarmUp.end
   return (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} {...overlayProps(() => setShowOnboarding(false))} className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-6 pt-4 sm:pt-6 bg-zinc-950/80 backdrop-blur-xl" role="dialog" aria-modal="true" aria-label="Set up your arc">
             <motion.div initial={{ opacity: 0, scale: 0.97, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97, y: 8 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} onClick={e => e.stopPropagation()} className="w-full max-w-[760px] max-h-[92dvh] flex flex-col overscroll-contain rounded-2xl bg-zinc-900 border border-zinc-800 shadow-2xl">
@@ -32,8 +33,8 @@ export function OnboardingDialog({ arc }: { arc: Arc }) {
                     <div className="space-y-2">
                       <Label className="text-zinc-500">How long</Label>
                       <div className="flex flex-wrap gap-2">
-                        {ARC_PRESETS.map(preset => {
-                          const range = preset.range()
+                        {presets.map(preset => {
+                          const range = preset.range
                           const active = tmpStart === range.start && tmpEnd === range.end
                           return (
                             <button
@@ -99,6 +100,11 @@ export function OnboardingDialog({ arc }: { arc: Arc }) {
                             : tmpStart === today ? 'Starts today.' : `Already running, day ${daysBetween(tmpStart, today)}.`}
                           {' '}
                           {tmpDays.length < 7 ? `${Math.round(arcLength * tmpDays.length / 7)} of those are scheduled days.` : 'Every day is scheduled.'}
+                        </div>
+                      )}
+                      {pickedWarmUp && (
+                        <div className="mt-2.5 rounded-lg bg-zinc-900 px-3 py-2 text-xs leading-5 text-zinc-400">
+                          A warm-up, so you are not waiting around to begin. The winter arc starts {longDate(winterArc.start)}, and when this run ends the tracker offers to roll you into it with the same habits.
                         </div>
                       )}
                     </div>

@@ -1,8 +1,6 @@
 import { Check, ChevronDown, ChevronLeft, ChevronRight, Info, Share2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import type { Arc } from '@/hooks/useArc'
-import type { Settings } from '@/lib/types'
-import { ALL_WEEKDAYS } from '@/lib/date'
 import { Disclosure } from '@/components/app/Disclosure'
 import { HabitIcon } from '@/components/app/HabitIcon'
 import { IconChip } from '@/components/app/Surface'
@@ -11,16 +9,41 @@ import { addDays } from '@/lib/date'
 import { fadeUp, stagger } from '@/lib/motion'
 
 export function Tracker({ arc }: { arc: Arc }) {
-  const { activeDays, allDates, arcStarted, copyPrompt, dailyPct, dayComplete, dayDoneCount, dayLabel, dayPct, daysToStart, effectiveHabits, end, entries, exportCSV, exportJSON, focusMonth, habitStreak, isActiveDay, isPerfectDay, llmPrompt, months, openMonths, promptCopied, promptOpen, selectedDate, selectedIsFuture, setConfirmReset, setEntries, setOpenMonths, setPromptOpen, setSelectedDate, setSettings, setShareOpen, setStreakInfo, setUndo, settings, start, startOnboarding, stats, stepDay, streakInfo, today, toggleHabit, totalDays, undo } = arc
+  const { activeDays, allDates, arcEnded, arcStarted, canRollOver, copyPrompt, dailyPct, dayComplete, dayDoneCount, dayLabel, dayPct, daysToStart, effectiveHabits, end, entries, exportCSV, exportJSON, focusMonth, habitStreak, isActiveDay, isPerfectDay, isWarmUp, llmPrompt, longDate, months, nextArc, nextArcTrimmed, openMonths, promptCopied, promptOpen, selectedDate, selectedIsFuture, setConfirmReset, setEntries, setOpenMonths, setPromptOpen, setSelectedDate, setShareOpen, setStreakInfo, setUndo, runLabel, start, startOnboarding, startToday, startWarmUp, startWinterArc, stats, stepDay, streakInfo, today, toggleHabit, totalDays, undo, warmUp } = arc
   return (
     <>
           <main id="main" className="max-w-[1040px] mx-auto px-5 sm:px-6 py-8">
             <h1 className="sr-only">Tracker</h1>
+            {arcEnded && (
+              <div className="mb-3 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h2 className="text-[17px] font-bold tracking-tight text-white">{isWarmUp ? 'Warm-up done.' : 'Arc complete.'}</h2>
+                  <span className="text-[13px] text-zinc-400 tabular-nums">{stats.perfect} of {stats.scheduled} days perfect, {stats.pct}% of checks.</span>
+                </div>
+                <p className="mt-1.5 text-[13px] leading-6 text-zinc-500 max-w-[560px]">
+                  {!canRollOver
+                    ? 'That window is closed and there is nothing left to check in it. Set the next one whenever you are ready.'
+                    : nextArcTrimmed
+                      ? `The winter arc is already running and ends ${longDate(nextArc.end)}. Pick it up from today with the same habits and rest days. Everything you logged stays in this browser and in the JSON export, it just stops counting toward the new run.`
+                      : `The winter arc runs ${longDate(nextArc.start)} to ${longDate(nextArc.end)}. Same habits, same rest days, an empty grid. Everything you logged stays in this browser and in the JSON export, it just stops counting toward the new run.`}
+                </p>
+                <div className={`mt-4 gap-2 ${canRollOver ? 'grid grid-cols-2 sm:max-w-[420px]' : 'flex'}`}>
+                  {canRollOver ? (
+                    <>
+                      <button onClick={startWinterArc} className="h-11 px-4 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Start the winter arc</button>
+                      <button onClick={startOnboarding} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">Edit dates</button>
+                    </>
+                  ) : (
+                    <button onClick={startOnboarding} className="h-11 px-5 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Set up your next arc</button>
+                  )}
+                </div>
+              </div>
+            )}
             <motion.div initial="hidden" animate="show" variants={stagger} className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
               <motion.div variants={fadeUp} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 flex items-center gap-2.5">
                 <Ring pct={dayPct} size={44} stroke={3}><span className="text-[11px] font-mono font-bold tabular-nums text-white">{dayPct}%</span></Ring>
                 <div className="min-w-0">
-                  <div className="text-[10px] sm:text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-400 truncate">Day</div>
+                  <div className="text-[10px] sm:text-[11px] font-mono tracking-normal sm:tracking-widest text-zinc-400 truncate">{runLabel}</div>
                   <div className="text-[17px] font-bold text-white leading-tight tabular-nums">{stats.dayNum}</div>
                   <div className="text-[10px] font-mono text-zinc-400 truncate">{stats.remaining} left</div>
                 </div>
@@ -71,22 +94,22 @@ export function Tracker({ arc }: { arc: Arc }) {
                   <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-4 text-center">
                     <div className="text-[34px] leading-none font-bold tabular-nums text-white">{daysToStart}</div>
                     <div className="mt-1 text-[13px] text-zinc-400">{daysToStart === 1 ? 'day until you start' : 'days until you start'}</div>
-                    <p className="mt-3 text-xs leading-5 text-zinc-500">Nothing to check yet. Change the dates to begin now.</p>
+                    <p className="mt-3 text-xs leading-5 text-zinc-500">
+                      {warmUp
+                        ? 'Nothing to check yet. Run a warm-up until then, so checking in is already a habit on day one.'
+                        : 'Nothing to check yet. Change the dates to begin now.'}
+                    </p>
                     <div className="mt-4 grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => {
-                          const next: Settings = {
-                            name: settings?.name ?? null,
-                            activeDays: settings?.activeDays ?? ALL_WEEKDAYS,
-                            start: today,
-                            end: addDays(today, Math.max(0, totalDays - 1)),
-                          }
-                          setSettings(next); setSelectedDate(today)
-                        }}
-                        className="h-11 px-4 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition"
-                      >Start today</button>
+                      {warmUp
+                        ? <button onClick={startWarmUp} className="h-11 px-4 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Start a warm-up</button>
+                        : <button onClick={startToday} className="h-11 px-4 rounded-full bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-100 transition">Start today</button>}
                       <button onClick={startOnboarding} className="h-11 px-4 rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300 text-[13px] hover:text-white hover:border-zinc-700 transition">Edit dates</button>
                     </div>
+                    {warmUp && (
+                      <p className="mt-3 text-[11px] font-mono text-zinc-500 tabular-nums">
+                        {longDate(warmUp.start)} to {longDate(warmUp.end)}, then the arc
+                      </p>
+                    )}
                   </div>
                 )}
                 <div className={`mt-3 flex items-center gap-2 ${arcStarted ? '' : 'hidden'}`}>

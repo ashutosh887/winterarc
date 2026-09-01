@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
 import { site, templates, challenges, quotes as QUOTES } from '@/config'
 import { PRESETS } from '@/lib/presets'
-import { ALL_WEEKDAYS, DEFAULT_END, DEFAULT_START, addDays, daysBetween, parseYMD, todayYMD, weekdayOf } from '@/lib/date'
+import { ALL_WEEKDAYS, MAX_WAIT_DAYS, addDays, arcPresets, daysBetween, getDefaultArc, getRecommendedArc, parseYMD, todayYMD, warmUpBefore, weekdayOf } from '@/lib/date'
 import { PATHS, viewForPath } from '@/lib/routes'
 import { clearArcStorage, readStore, writeStore } from '@/lib/storage'
 import { customHabitId } from '@/lib/habits'
 import { useLocalStorage } from './useLocalStorage'
 import type {
-  Achievement, BeforeInstallPromptEvent, Entries, Habit, HabitId, ISODate,
+  Achievement, ArcMode, ArcRange, BeforeInstallPromptEvent, Entries, Habit, HabitId, ISODate,
   MonthGroup, Settings, View,
 } from '@/lib/types'
 
@@ -38,8 +38,8 @@ export function useArc() {
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [onboardStep, setOnboardStep] = useState(1)
   const [tmpName, setTmpName] = useState('')
-  const [tmpStart, setTmpStart] = useState<ISODate>(DEFAULT_START)
-  const [tmpEnd, setTmpEnd] = useState<ISODate>(DEFAULT_END)
+  const [tmpStart, setTmpStart] = useState<ISODate>(() => getRecommendedArc().start)
+  const [tmpEnd, setTmpEnd] = useState<ISODate>(() => getRecommendedArc().end)
   const [tmpSelected, setTmpSelected] = useState<Set<HabitId>>(new Set())
   const [customName, setCustomName] = useState('')
   const [customList, setCustomList] = useState<Habit[]>([])
@@ -140,8 +140,15 @@ export function useArc() {
     return Array.isArray(raw) ? raw.filter(h => h && typeof h.id === 'string' && typeof h.name === 'string') : []
   }, [habitsV2, habits])
   const hasData = settings && effectiveHabits.length > 0
-  const start = settings?.start ?? DEFAULT_START
-  const end = settings?.end ?? DEFAULT_END
+  // Recomputed as `today` ticks, so a tab left open overnight on Sep 30 wakes up
+  // knowing the winter arc has begun.
+  const recommended = useMemo(() => getRecommendedArc(today), [today])
+  const winterArc = useMemo(() => getDefaultArc(today), [today])
+  const presets = useMemo(() => arcPresets(today), [today])
+  /** The warm-up setup offers, measured against the winter arc rather than a saved run. */
+  const setupWarmUp = useMemo(() => warmUpBefore(winterArc.start, today), [winterArc, today])
+  const start = settings?.start ?? recommended.start
+  const end = settings?.end ?? recommended.end
   const totalDays = useMemo(() => daysBetween(start, end), [start, end])
   const activeDaysKey = Array.isArray(settings?.activeDays) && settings.activeDays.length
     ? [...settings.activeDays].sort().join(',')
@@ -154,6 +161,32 @@ export function useArc() {
   const selectedIsFuture = selectedDate > today
   const arcStarted = today >= start
   const daysToStart = arcStarted ? 0 : daysBetween(today, start) - 1
+  const arcEnded = today > end
+  const arcMode: ArcMode = settings?.mode === 'warmup' ? 'warmup' : 'arc'
+  const isWarmUp = arcMode === 'warmup'
+  /** Offered while the arc is still ahead, so the wait is spent building the habit. */
+  const warmUp = useMemo(() => (arcStarted ? null : warmUpBefore(start, today)), [arcStarted, start, today])
+  /**
+    * What a finished run rolls into. An arc already under way is trimmed to start
+    * today, because handing somebody a grid that opens on five weeks of red days
+    * they were never able to log is a lie about what happened.
+    */
+  const nextArc = useMemo(
+    () => (today > winterArc.start && today <= winterArc.end ? { start: today, end: winterArc.end } : winterArc),
+    [today, winterArc],
+  )
+  /** True when the target was cut short because the arc is already under way. */
+  const nextArcTrimmed = nextArc.start !== winterArc.start
+  /**
+   * Nothing rolls over into itself, and nothing rolls over into a window most of
+   * a year away. Either case sends them to setup instead.
+   */
+  const canRollOver = arcEnded
+    && !(nextArc.start === start && nextArc.end === end)
+    && daysBetween(today, nextArc.start) - 1 <= MAX_WAIT_DAYS
+  const runNoun = isWarmUp ? 'Warm-up day' : 'Day'
+  /** What to call the day counter wherever it appears next to a number. */
+  const runLabel = isWarmUp ? 'Warm-up' : 'Day'
   const isPerfectDay = useCallback((d: ISODate) => {
     const e = entries[d] || {}
     return effectiveHabits.length > 0 && effectiveHabits.every(h => e[h.id])
@@ -269,6 +302,9 @@ export function useArc() {
   const dailyPct = effectiveHabits.length ? Math.round((dayDoneCount / effectiveHabits.length) * 100) : 0
   const dayPct = totalDays ? Math.round((stats.dayNum / totalDays) * 100) : 0
 
+  const runHeadline = `${runNoun} ${stats.dayNum} of ${totalDays}`
+  const runShort = `${runNoun} ${stats.dayNum}/${totalDays}`
+
   const quote = useMemo(() => QUOTES[stats.dayNum % QUOTES.length], [stats.dayNum])
   // Attribution travels with the quote everywhere it goes: the header, the image
   // and the shared text. A quote leaving the app without its author is the bug.
@@ -300,10 +336,31 @@ export function useArc() {
       return { ...prev, [date]: cur }
     })
   }
+  /**
+   * Same habits, same rest days, a new window. Entries are keyed by date and are
+   * never touched here, so a day logged during a warm-up is still in the browser
+   * and still in the JSON export. It just stops counting toward the new arc.
+   */
+  function switchArc(range: ArcRange, mode: ArcMode) {
+    setSettings({
+      start: range.start,
+      end: range.end,
+      mode,
+      name: settings?.name ?? null,
+      activeDays: Array.isArray(settings?.activeDays) && settings.activeDays.length ? settings.activeDays : ALL_WEEKDAYS,
+    })
+    setSelectedDate(today < range.start ? range.start : today > range.end ? range.end : today)
+    setUndo(null)
+  }
+  function startWarmUp() { if (warmUp) switchArc(warmUp, 'warmup') }
+  function startWinterArc() { switchArc(nextArc, 'arc') }
+  /** Keeps the length they chose and drags the whole window onto today. */
+  function startToday() { switchArc({ start: today, end: addDays(today, Math.max(0, totalDays - 1)) }, 'arc') }
+
   function startOnboarding() {
     setTmpName(settings?.name ?? '')
-    setTmpStart(settings?.start ?? DEFAULT_START)
-    setTmpEnd(settings?.end ?? DEFAULT_END)
+    setTmpStart(settings?.start ?? recommended.start)
+    setTmpEnd(settings?.end ?? recommended.end)
     setTmpSelected(new Set(effectiveHabits.map(h => h.id)))
     setCustomList(effectiveHabits.filter(h => h.tier === 'custom'))
     setTmpDays(Array.isArray(settings?.activeDays) && settings.activeDays.length ? settings.activeDays : ALL_WEEKDAYS)
@@ -316,7 +373,10 @@ export function useArc() {
     if (parseYMD(tmpStart) > parseYMD(tmpEnd)) { alert('Start date must be before end date'); return }
     if (arcLength > 730) { alert('Keep the arc under two years. Pick a closer end date.'); return }
     if (chosen.length > 10 && !confirm(`You picked ${chosen.length} habits. Recommended max is 10. Continue?`)) return
-    setSettings({ start: tmpStart, end: tmpEnd, name: tmpName.trim() || null, activeDays: tmpDays.length ? tmpDays : ALL_WEEKDAYS })
+    // Picking the offered warm-up range is what marks a run as a warm-up. Typing
+    // those exact dates by hand means the same thing, so it is treated the same.
+    const mode: ArcMode = setupWarmUp && tmpStart === setupWarmUp.start && tmpEnd === setupWarmUp.end ? 'warmup' : 'arc'
+    setSettings({ start: tmpStart, end: tmpEnd, name: tmpName.trim() || null, activeDays: tmpDays.length ? tmpDays : ALL_WEEKDAYS, mode })
     setHabitsV2(chosen); setHabits(chosen)
     setShowOnboarding(false); goTo('tracker'); setSelectedDate(tmpStart)
   }
@@ -332,7 +392,7 @@ export function useArc() {
   function applyTemplate(tid: string) {
     const t = templates.find(x => x.id === tid); if (!t) return
     setTmpName(settings?.name ?? tmpName)
-    setTmpStart(settings?.start ?? DEFAULT_START); setTmpEnd(settings?.end ?? DEFAULT_END)
+    setTmpStart(settings?.start ?? recommended.start); setTmpEnd(settings?.end ?? recommended.end)
     setTmpSelected(new Set(t.habitIds)); setCustomList([])
     setTmpDays(Array.isArray(settings?.activeDays) && settings.activeDays.length ? settings.activeDays : ALL_WEEKDAYS)
     setOnboardStep(2); setShowOnboarding(true)
@@ -411,7 +471,7 @@ export function useArc() {
     ctx.fillText(site.tagline, PAD + markWidth + 18, 70)
 
     ctx.fillStyle = '#fafafa'; ctx.font = '800 58px ui-sans-serif,system-ui'
-    ctx.fillText(achievement ? achievement.label : `Day ${stats.dayNum} of ${totalDays}`, PAD, 148)
+    ctx.fillText(achievement ? achievement.label : runHeadline, PAD, 148)
     ctx.fillStyle = '#a1a1aa'; ctx.font = '400 21px ui-sans-serif,system-ui'
     // never cut a habit name mid-word on a public image; drop to a count instead
     const names = effectiveHabits.map(h => h.name)
@@ -510,26 +570,26 @@ export function useArc() {
   function downloadImage(achievement?: Achievement) {
     const url = drawShareCard({ achievement })
     if (!url) return
-    const a = document.createElement('a'); a.href = url; a.download = achievement ? `winter-arc-${achievement.id}.png` : `winter-arc-day${stats.dayNum}.png`; a.click()
+    const a = document.createElement('a'); a.href = url; a.download = achievement ? `winter-arc-${achievement.id}.png` : `winter-arc-${isWarmUp ? 'warmup-' : ''}day${stats.dayNum}.png`; a.click()
   }
   function shareToX(achievement?: Achievement) {
     downloadImage(achievement)
     const text = achievement
-      ? `${achievement.label}. Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done, streak ${stats.streak}.\n\n${quoteShareText}\n`
-      : `Day ${stats.dayNum}/${totalDays}. ${stats.perfect} perfect days, ${stats.pct}% done, streak ${stats.streak}.\n\n${quoteShareText}\n`
+      ? `${achievement.label}. ${runShort}, ${stats.pct}% done, streak ${stats.streak}.\n\n${quoteShareText}\n`
+      : `${runShort}. ${stats.perfect} perfect days, ${stats.pct}% done, streak ${stats.streak}.\n\n${quoteShareText}\n`
     const url = site.domain
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'noopener,noreferrer,width=600,height=400')
   }
   function shareToWhatsApp(achievement?: Achievement) {
     const text = achievement
-      ? `${achievement.label} unlocked. Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done, streak ${stats.streak}.\n\n${quoteShareText}\n\n${site.domain}`
-      : `WinterArc day ${stats.dayNum}/${totalDays}. ${stats.pct}% done, streak ${stats.streak}.\n\n${quoteShareText}\n\n${site.domain}`
+      ? `${achievement.label} unlocked. ${runShort}, ${stats.pct}% done, streak ${stats.streak}.\n\n${quoteShareText}\n\n${site.domain}`
+      : `WinterArc. ${runShort}, ${stats.pct}% done, streak ${stats.streak}.\n\n${quoteShareText}\n\n${site.domain}`
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer')
   }
   async function nativeShare(achievement?: Achievement) {
     const text = achievement
       ? `${achievement.label}. ${achievement.desc}\n\n${quoteShareText}`
-      : `Day ${stats.dayNum}/${totalDays}, ${stats.pct}% done\n\n${quoteShareText}`
+      : `${runShort}, ${stats.pct}% done\n\n${quoteShareText}`
     if (!navigator.share) return shareToX(achievement)
     const payload = { title: 'WinterArc', text, url: site.domain }
     try {
@@ -609,6 +669,12 @@ export function useArc() {
   }, [showOnboarding, confirmReset, shareOpen])
 
   const dayFmt = useMemo(() => new Intl.DateTimeFormat('en', { weekday: 'long', day: 'numeric', month: 'short' }), [])
+  const longFmt = useMemo(() => new Intl.DateTimeFormat('en', { month: 'long', day: 'numeric' }), [])
+  const longYearFmt = useMemo(() => new Intl.DateTimeFormat('en', { month: 'long', day: 'numeric', year: 'numeric' }), [])
+  /** A date for running prose. The year appears only when it is not this one. */
+  function longDate(d: ISODate) {
+    return (d.slice(0, 4) === today.slice(0, 4) ? longFmt : longYearFmt).format(parseYMD(d))
+  }
   function dayLabel(d: ISODate) {
     if (d === today) return 'Today'
     if (d === addDays(today, -1)) return 'Yesterday'
@@ -777,6 +843,26 @@ export function useArc() {
     selectedIsFuture,
     arcStarted,
     daysToStart,
+    arcEnded,
+    arcMode,
+    isWarmUp,
+    warmUp,
+    winterArc,
+    nextArc,
+    nextArcTrimmed,
+    recommended,
+    canRollOver,
+    presets,
+    setupWarmUp,
+    runNoun,
+    runLabel,
+    runHeadline,
+    runShort,
+    switchArc,
+    startWarmUp,
+    startWinterArc,
+    startToday,
+    longDate,
     isPerfectDay,
     months,
     focusMonth,

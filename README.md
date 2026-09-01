@@ -1,8 +1,10 @@
 # WinterArc
 
-A habit tracker for a fixed run of days. It defaults to October 1 through December 31, the winter arc,
-but you can set any start and end date you want. Everything is stored in your browser. No account, no
-server, works offline.
+A habit tracker for a fixed run of days. October 1 through December 31 is the winter arc, but you can
+set any start and end date you want. You never have to wait for the season either: when the arc is
+still weeks away, setup offers a warm-up that runs from today up to the day before it starts, and the
+tracker then offers to roll you into the arc with the same habits. Everything is stored in your
+browser. No account, no server, works offline.
 
 Live: https://trywinterarc.vercel.app
 
