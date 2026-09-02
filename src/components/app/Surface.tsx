@@ -12,11 +12,18 @@ export const INSET = 'rounded-xl border border-zinc-800 bg-zinc-950'
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
 export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon'
 
-const variantMap: Record<ButtonVariant, 'default' | 'secondary' | 'ghost' | 'destructive'> = {
+const variantMap: Record<ButtonVariant, 'default' | 'secondary' | 'outline' | 'destructive'> = {
   primary: 'default',
   secondary: 'secondary',
-  ghost: 'ghost',
+  ghost: 'outline',
   danger: 'destructive',
+}
+
+const VARIANT_CLASS: Record<ButtonVariant, string> = {
+  primary: 'hover:border-zinc-100',
+  secondary: 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:border-zinc-600',
+  ghost: 'bg-zinc-950',
+  danger: 'border-red-500/20 text-red-300',
 }
 
 const SIZE_CLASS: Record<ButtonSize, string> = {
@@ -27,7 +34,7 @@ const SIZE_CLASS: Record<ButtonSize, string> = {
 }
 
 export function buttonClass(variant: ButtonVariant = 'ghost', size: ButtonSize = 'sm', className?: string) {
-  return cn(shadVariants({ variant: variantMap[variant] }), SIZE_CLASS[size], 'rounded-full font-semibold border shrink-0 whitespace-nowrap', className)
+  return cn(shadVariants({ variant: variantMap[variant] }), SIZE_CLASS[size], VARIANT_CLASS[variant], 'rounded-full font-semibold border shrink-0 whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed', className)
 }
 
 type ButtonOwn = { variant?: ButtonVariant; size?: ButtonSize; full?: boolean }
