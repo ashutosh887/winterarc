@@ -5,7 +5,6 @@ import { defineConfig } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 import { readFileSync } from 'node:fs'
 
-// The footer shows this, so a person can say which build they are looking at.
 const version = (JSON.parse(readFileSync(fileURLToPath(new URL('./package.json', import.meta.url)), 'utf8')) as { version: string }).version
 
 export default defineConfig({
@@ -13,6 +12,18 @@ export default defineConfig({
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   build: {
     chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('three') || id.includes('@react-three')) return 'three'
+            if (id.includes('framer-motion')) return 'motion'
+            if (id.includes('radix-ui') || id.includes('lucide-react')) return 'ui'
+            return 'vendor'
+          }
+        },
+      },
+    },
   },
   plugins: [
     react(),
@@ -32,7 +43,6 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
-        // the installed app opens on the tracker; the nav still reaches every page
         start_url: '/tracker',
         categories: ['productivity', 'health', 'lifestyle'],
         icons: [
@@ -43,9 +53,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-        // sw-notify is imported by the worker itself, so precaching it would cache it twice
         globIgnores: ['**/ThreeHero-*.js', '**/sw-notify.js'],
-        // gives the generated worker a notificationclick handler without leaving generateSW
         importScripts: ['/sw-notify.js'],
         navigateFallbackDenylist: [/^\/(robots\.txt|sitemap\.xml|manifest\.webmanifest)$/],
         cleanupOutdatedCaches: true,
