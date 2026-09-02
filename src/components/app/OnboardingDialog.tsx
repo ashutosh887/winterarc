@@ -12,6 +12,7 @@ import { DEFAULT_REMINDERS, REMINDER_SLOTS, SLOT_LABELS } from '@/lib/reminders'
 import { PRESETS, TIER_LABELS } from '@/lib/presets'
 import { templates } from '@/config'
 import { buttonClass } from '@/components/app/Surface'
+import { Switch } from '@/components/ui/switch'
 
 export function OnboardingDialog({ arc }: { arc: Arc }) {
   const { addCustom, arcLength, completeOnboarding, customList, customName, longDate, onboardStep, overlayProps, presets, setCustomList, setCustomName, setOnboardStep, setShowOnboarding, setTmpDays, setTmpEnd, setTmpName, setTmpSelected, setTmpStart, setTmpReminders, setupWarmUp, tmpDays, tmpEnd, tmpName, tmpReminders, tmpSelected, tmpStart, today, winterArc } = arc
@@ -120,16 +121,14 @@ export function OnboardingDialog({ arc }: { arc: Arc }) {
                           const on = tmpReminders[slot] !== null
                           return (
                             <div key={slot} className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-                              <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center justify-between gap-3">
                                 <span className="text-[13px] text-zinc-300">{SLOT_LABELS[slot]}</span>
-                                <button
-                                  type="button"
-                                  aria-pressed={on}
-                                  onClick={() => setTmpReminders(prev => ({ ...prev, [slot]: on ? null : DEFAULT_REMINDERS[slot] }))}
-                                  className={`h-8 px-3 rounded-full text-[11px] font-mono border transition ${on ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'}`}
-                                >
-                                  {on ? 'On' : 'Off'}
-                                </button>
+                                <Switch
+                                  checked={on}
+                                  onCheckedChange={v => setTmpReminders(prev => ({ ...prev, [slot]: v ? DEFAULT_REMINDERS[slot] : null }))}
+                                  ariaLabel={`${SLOT_LABELS[slot]} reminder`}
+                                  size="sm"
+                                />
                               </div>
                               <Input
                                 type="time"

@@ -9,9 +9,11 @@
     <meta name="apple-mobile-web-app-title" content="WinterArc" />
     <meta name="author" content="Ashutosh Jha" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
-    <meta name="description" content="A local-first habit tracker for your winter arc that saves everything in your browser and needs no account." />
+    <meta name="description" content="WinterArc is a local-first habit tracker for your winter arc. Pick habits, set your dates, and mark each day on a grid. Everything stays in your browser. You do not need an account." />
+    <meta name="keywords" content="winter arc, habit tracker, habit grid, 75 hard, winter arc challenge, daily habits, streak tracker, PWA habit tracker" />
     <link rel="canonical" href="https://trywinterarc.vercel.app/" />
-    <title>WinterArc | Winter Arc Habit Tracker</title>
+    <link rel="preconnect" href="https://api.github.com" crossorigin />
+    <title>WinterArc - Winter Arc Habit Tracker | Local-First Daily Grid</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -26,8 +28,8 @@
     <meta property="og:site_name" content="WinterArc" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:url" content="https://trywinterarc.vercel.app/" />
-    <meta property="og:title" content="WinterArc | Winter Arc Habit Tracker" />
-    <meta property="og:description" content="A local-first habit tracker for your winter arc that saves everything in your browser and needs no account." />
+    <meta property="og:title" content="WinterArc - Winter Arc Habit Tracker" />
+    <meta property="og:description" content="Pick habits, set your winter arc dates, and mark each day on a grid. Local-first, no account, installs as a PWA." />
     <meta property="og:image" content="https://trywinterarc.vercel.app/og-image.png" />
     <meta property="og:image:secure_url" content="https://trywinterarc.vercel.app/og-image.png" />
     <meta property="og:image:type" content="image/png" />
@@ -39,8 +41,8 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@ashutosh887_" />
     <meta name="twitter:creator" content="@ashutosh887_" />
-    <meta name="twitter:title" content="WinterArc | Winter Arc Habit Tracker" />
-    <meta name="twitter:description" content="A local-first habit tracker for your winter arc that saves everything in your browser and needs no account." />
+    <meta name="twitter:title" content="WinterArc - Winter Arc Habit Tracker" />
+    <meta name="twitter:description" content="Pick habits, set your winter arc dates, and mark each day on a grid. Local-first, no account, installs as a PWA." />
     <meta name="twitter:image" content="https://trywinterarc.vercel.app/og-image.png" />
     <meta name="twitter:image:alt" content="WinterArc habit grid on a dark background" />
 
@@ -93,6 +95,18 @@
           ]
         },
         {
+          "@type": "HowTo",
+          "@id": "https://trywinterarc.vercel.app/#howto",
+          "name": "How to start a winter arc",
+          "description": "Set up a winter arc in WinterArc and track it daily.",
+          "totalTime": "PT2M",
+          "step": [
+            { "@type": "HowToStep", "name": "Set your dates", "text": "Choose your start and end dates. Use the winter arc (Oct 1 to Dec 31) or any window you want. If the arc is far away, start a warm-up today." },
+            { "@type": "HowToStep", "name": "Pick habits", "text": "Pick 3 to 5 habits from templates or add your own. Keep it under 10." },
+            { "@type": "HowToStep", "name": "Check in daily", "text": "Each day, tick the habits you did. You can backfill past days, but future days stay locked. White is perfect, grey is partial, red is missed." }
+          ]
+        },
+        {
           "@type": "FAQPage",
           "@id": "https://trywinterarc.vercel.app/#faq",
           "mainEntity": [
@@ -104,6 +118,16 @@
             { "@type": "Question", "name": "Can I fill in past days?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Pick any past date inside your arc and toggle the habits for that day. Future days stay locked, so nobody can pre-tick their way to a streak." } },
             { "@type": "Question", "name": "Does it work offline and install as an app?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. It installs as a progressive web app from your browser and keeps working without a connection." } }
           ]
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://trywinterarc.vercel.app/#webpage",
+          "url": "https://trywinterarc.vercel.app/",
+          "name": "WinterArc - Winter Arc Habit Tracker",
+          "url": "https://trywinterarc.vercel.app/",
+          "isPartOf": { "@id": "https://trywinterarc.vercel.app/#website" },
+          "about": { "@id": "https://trywinterarc.vercel.app/#app" },
+          "speakable": { "@type": "SpeakableSpecification", "cssSelector": ["#main h1", "#features h2", "#how h2"] }
         }
       ]
     }

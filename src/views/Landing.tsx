@@ -13,7 +13,6 @@ import { fadeUp, stagger } from '@/lib/motion'
 
 export function Landing({ arc }: { arc: Arc }) {
   const { goTo, hasData, heroReady, longDate, setupWarmUp, startOnboarding, today, winterArc } = arc
-  // What setup will actually do if they tap Start, said before they tap it.
   const seasonNote = setupWarmUp
     ? `Winter arc starts ${longDate(winterArc.start)}. Start today as a warm-up and roll into it.`
     : today >= winterArc.start && today <= winterArc.end
@@ -38,7 +37,6 @@ export function Landing({ arc }: { arc: Arc }) {
 
                 <motion.div variants={fadeUp} className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
                   {hasData ? (
-                    // An arc already exists, so setup is not the ask. Editing it lives on the navbar.
                     <button onClick={() => goTo('tracker')} className={buttonClass('primary', 'lg', 'w-full sm:w-auto')}>
                       Open tracker <ArrowRight size={16} />
                     </button>

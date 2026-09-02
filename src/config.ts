@@ -75,7 +75,6 @@ export const challenges: Challenge[] = [
 ]
 
 export const quotes: Quote[] = [
-  // Public domain. Primary texts are linked in CONTRIBUTING.md.
   { text: "Never suffer an exception to occur till the new habit is securely rooted in your life.", author: "William James", source: "The Principles of Psychology, 1890" },
   { text: "Nothing we ever do is, in strict scientific literalness, wiped out.", author: "William James", source: "The Principles of Psychology, 1890" },
   { text: "We are spinning our own fates, good or evil, and never to be undone.", author: "William James", source: "The Principles of Psychology, 1890" },
@@ -85,7 +84,6 @@ export const quotes: Quote[] = [
   { text: "No longer talk at all about the kind of man that a good man ought to be, but be such.", author: "Marcus Aurelius", source: "Meditations X.16, trans. Long" },
   { text: "No great thing is created suddenly, any more than a bunch of grapes or a fig.", author: "Epictetus", source: "Discourses I.15" },
 
-  // In copyright, quoted short and attributed.
   { text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author: "Will Durant", source: "The Story of Philosophy, 1926" },
   { text: "How we spend our days is, of course, how we spend our lives.", author: "Annie Dillard", source: "The Writing Life, 1989" },
   { text: "Inspiration is for amateurs. The rest of us just show up and get to work.", author: "Chuck Close", source: "Esquire, 2001" },

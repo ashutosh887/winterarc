@@ -8,6 +8,7 @@ import { Ring } from '@/components/app/Ring'
 import { DEFAULT_REMINDERS, REMINDER_SLOTS, SLOT_LABELS, clockLabel } from '@/lib/reminders'
 import { addDays } from '@/lib/date'
 import { fadeUp, stagger } from '@/lib/motion'
+import { Switch } from '@/components/ui/switch'
 
 export function Tracker({ arc }: { arc: Arc }) {
   const { activeDays, allDates, arcEnded, arcStarted, canRollOver, copyPrompt, dailyPct, dayComplete, dayDoneCount, dayLabel, dayPct, daysToStart, effectiveHabits, end, entries, exportCSV, exportJSON, focusMonth, habitStreak, isActiveDay, isPerfectDay, isWarmUp, llmPrompt, longDate, missedReminders, months, nextArcCta, nextArcLabel, openMonths, promptCopied, promptOpen, remindersOpen, setRemindersOpen, selectedDate, selectedIsFuture, setConfirmReset, setEntries, setOpenMonths, setPromptOpen, setSelectedDate, setShareOpen, setReminderTime, setStreakInfo, setUndo, askForReminders, notifPermission, reminderTest, reminders, remindersOn, remindersSet, remindersSupported, runLabel, start, startOnboarding, startToday, startWarmUp, startWinterArc, stats, stepDay, streakInfo, today, toggleHabit, totalDays, testReminder, turnOffReminders, undo, warmUp } = arc
@@ -193,7 +194,7 @@ export function Tracker({ arc }: { arc: Arc }) {
                         return { ...prev, [selectedDate]: kept }
                       })
                     }}
-                    className={`h-11 rounded-full text-sm font-semibold border transition disabled:opacity-40 disabled:cursor-not-allowed ${dayComplete ? 'bg-zinc-950 border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700' : 'bg-white border-white text-zinc-900 hover:bg-zinc-100'}`}
+                    className={buttonClass(dayComplete ? 'ghost' : 'primary', 'md', 'disabled:opacity-40')}
                   >{dayComplete ? 'Uncheck all' : 'Mark all done'}</button>
                   <button disabled={selectedDate === (today < end ? today : end)} onClick={() => setSelectedDate(today < end ? today : end)} className={buttonClass('ghost', 'md')}>Go to today</button>
                 </div>
@@ -368,16 +369,14 @@ export function Tracker({ arc }: { arc: Arc }) {
                       const on = reminders[slot] !== null
                       return (
                         <div key={slot} className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-                          <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center justify-between gap-3">
                             <span className="text-[13px] text-zinc-300">{SLOT_LABELS[slot]}</span>
-                            <button
-                              aria-pressed={on}
-                              aria-label={on ? `Delete the ${SLOT_LABELS[slot].toLowerCase()} reminder` : `Add a ${SLOT_LABELS[slot].toLowerCase()} reminder`}
-                              onClick={() => setReminderTime(slot, on ? null : DEFAULT_REMINDERS[slot])}
-                              className={`h-11 px-4 shrink-0 rounded-full text-[12px] font-mono border transition ${on ? 'bg-white text-zinc-900 border-white' : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'}`}
-                            >
-                              {on ? 'Delete' : 'Add'}
-                            </button>
+                            <Switch
+                              checked={on}
+                              onCheckedChange={v => setReminderTime(slot, v ? DEFAULT_REMINDERS[slot] : null)}
+                              ariaLabel={`${SLOT_LABELS[slot]} reminder`}
+                              size="sm"
+                            />
                           </div>
                           <input
                             type="time"
