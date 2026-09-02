@@ -53,7 +53,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-        globIgnores: ['**/ThreeHero-*.js', '**/sw-notify.js'],
+        globIgnores: ['**/ThreeHero-*.js', '**/three-*.js', '**/sw-notify.js'],
         importScripts: ['/sw-notify.js'],
         navigateFallbackDenylist: [/^\/(robots\.txt|sitemap\.xml|manifest\.webmanifest)$/],
         cleanupOutdatedCaches: true,
