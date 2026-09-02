@@ -8,15 +8,14 @@ Live: https://trywinterarc.vercel.app
 
 ## What it does
 
-- **Any arc, any length.** Pick the dates, pick the habits from a template or write your own.
-- **A warm-up so you never wait.** When the arc is still weeks away, setup offers a run from today up
-  to the day before it starts, then rolls you into the arc with the same habits and your original dates.
-- **Rest days.** Weekdays you mark as rest never count as a miss and never break a streak.
-- **A grid for the whole run**, per habit rings, streaks, perfect days and completion.
-- **Achievements** that unlock against checks, perfect days, streaks and percentage.
-- **A share card** rendered to PNG in the browser, with the quote and its author.
-- **Export** to JSON and CSV, plus a copyable prompt for feeding your run to an LLM.
-- **Installable.** It is a PWA, opens on the tracker, and works with no network.
+- Any arc, any length. Pick the dates, pick the habits from a template or write your own.
+- A warm-up so you never wait. When the arc is still weeks away, setup offers a run from today up to the day before it starts, then rolls you into the arc with the same habits and your original dates.
+- Rest days. Weekdays you mark as rest never count as a miss and never break a streak.
+- A grid for the whole run, per habit rings, streaks, perfect days and completion.
+- Achievements that unlock against checks, perfect days, streaks and percentage.
+- A share card rendered to PNG in the browser, with the quote and its author.
+- Export to JSON and CSV, plus a copyable prompt for feeding your run to an LLM.
+- Installable. It is a PWA, opens on the tracker, and works with no network.
 
 ## Reminders
 

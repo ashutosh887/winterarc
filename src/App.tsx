@@ -125,7 +125,7 @@ export default function App() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} {...overlayProps(() => setConfirmReset(false))} className="fixed inset-0 z-50 grid place-items-center px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] bg-zinc-950/80 backdrop-blur" role="dialog" aria-modal="true" aria-label="Reset your arc">
               <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} onClick={e => e.stopPropagation()} className="w-full max-w-[440px] rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
                 <h2 className="text-[22px] font-bold tracking-tight text-white">Reset your arc</h2>
-                <p className="mt-2 text-sm leading-6 text-zinc-500">This removes every check in this browser, not only the {stats.totalChecked} inside these dates. Nothing else holds a copy.</p>
+                <p className="mt-2 text-sm leading-6 text-zinc-500">This removes every check in this browser, including the {stats.totalChecked} inside these dates. Nothing else holds a copy.</p>
                 <label className="mt-4 flex items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 cursor-pointer">
                   <input type="checkbox" checked={backupBeforeReset} onChange={e => setBackupBeforeReset(e.target.checked)} className="mt-0.5 accent-white w-4 h-4" />
                   <span className="text-[13px] leading-5 text-zinc-300">Export a JSON copy first<span className="block text-zinc-500">Saves the file, then clears.</span></span>
