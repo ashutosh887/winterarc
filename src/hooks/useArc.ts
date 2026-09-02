@@ -363,6 +363,7 @@ export function useArc() {
     let cancelled = false
     const tick = async () => {
       if (raising || cancelled) return
+      if (document.visibilityState === 'visible' && document.hasFocus()) return
       const day = todayYMD()
       if (day < start || day > end || !isActiveDay(day)) return
       const entry = entries[day] || {}
@@ -388,14 +389,11 @@ export function useArc() {
     const id = setInterval(() => { void tick() }, 30000)
     void tick()
     const onVisibility = () => { void tick() }
-    const onFocus = () => { void tick() }
     document.addEventListener('visibilitychange', onVisibility)
-    window.addEventListener('focus', onFocus)
     return () => {
       cancelled = true
       clearInterval(id)
       document.removeEventListener('visibilitychange', onVisibility)
-      window.removeEventListener('focus', onFocus)
     }
   }, [remindersOn, hasData, reminders, start, end, isActiveDay, entries, effectiveHabits, runHeadline])
 
