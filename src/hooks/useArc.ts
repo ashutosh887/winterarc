@@ -15,40 +15,47 @@ import type {
   MonthGroup, ReminderSlot, Reminders, Settings, View,
 } from '@/lib/types'
 
-/** True when this page is already running as the installed app. */
 function isStandalone() {
   return window.matchMedia('(display-mode: standalone)').matches
     || (window.navigator as Navigator & { standalone?: boolean }).standalone === true
 }
 
-/** Notification is missing entirely in some embedded webviews, so never assume it. */
 function notificationsSupported(): boolean {
   try { return typeof window !== 'undefined' && 'Notification' in window } catch { return false }
 }
 
-/**
- * Android Chrome refuses `new Notification` and only shows one raised by the
- * service worker. So try the worker first. The constructor is the fallback for
- * desktop browsers with no worker registered yet.
- */
 async function raiseNotification(title: string, body: string, tag: string): Promise<boolean> {
-  const opts: NotificationOptions = { body, tag, icon: '/pwa-192x192.png', badge: '/pwa-192x192.png' }
-  try {
-    const reg = await navigator.serviceWorker?.getRegistration()
-    if (reg?.showNotification) { await reg.showNotification(title, opts); return true }
-  } catch { /* no worker, or the worker refused */ }
-  try { void new Notification(title, opts); return true } catch { return false }
+  const opts: NotificationOptions = {
+    body,
+    tag,
+    icon: '/pwa-192x192.png',
+    badge: '/pwa-192x192.png',
+    requireInteraction: false,
+    silent: false,
+  }
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const reg = await navigator.serviceWorker?.getRegistration()
+      if (reg?.showNotification) {
+        if (Notification.permission !== 'granted') return false
+        await reg.showNotification(title, opts)
+        return true
+      }
+    } catch { /* no worker, or the worker refused — fall through */ }
+    try {
+      if (Notification.permission !== 'granted') return false
+      void new Notification(title, opts)
+      return true
+    } catch { /* retry once */ }
+    if (attempt === 0) await new Promise(r => setTimeout(r, 800))
+  }
+  return false
 }
 
-/** The banner is a once-per-session offer, tracked apart from the prompt itself. */
 function installHintDismissed() {
   try { return sessionStorage.getItem('wa_install_hint') === 'dismissed' } catch { return false }
 }
 
-/**
- * Every piece of arc state, its derived values and the actions that change it.
- * Lifted out of App so the views can be plain components that read one object.
- */
 export function useArc() {
   const [settings, setSettings] = useLocalStorage<Settings | null>('wa_settings_v2', null, v => v === null || (typeof v === 'object' && !Array.isArray(v)))
   const [habits, setHabits] = useLocalStorage<Habit[]>('wa_habits', [], Array.isArray)
@@ -85,7 +92,6 @@ export function useArc() {
   const [resetting, setResetting] = useState(false)
   const [backupBeforeReset, setBackupBeforeReset] = useState(true)
   const [promptCopied, setPromptCopied] = useState(false)
-  // read once and cleared, so the notice shows for the reload that earned it and no other
   const [justUpdated, setJustUpdated] = useState(() => {
     try {
       if (sessionStorage.getItem('wa_updated') !== '1') return false
@@ -106,9 +112,6 @@ export function useArc() {
 
   useEffect(() => {
     if (installed) return
-    // The prompt is captured even when the banner was dismissed. Dismissing the
-    // banner hides the banner, it must not throw away the event the Install
-    // page needs to offer a real install button later in the same session.
     const onPrompt = (e: Event) => {
       e.preventDefault()
       setInstallEvent(e as BeforeInstallPromptEvent)
@@ -122,7 +125,6 @@ export function useArc() {
     }
     window.addEventListener('beforeinstallprompt', onPrompt)
     window.addEventListener('appinstalled', onInstalled)
-    // Anything that fired before this effect ran is waiting in the holder.
     if (window.waInstallPrompt) setInstallEvent(window.waInstallPrompt)
     const t = installHintDismissed() ? 0 : window.setTimeout(() => setShowInstallHint(true), 2500)
     return () => {
@@ -140,9 +142,14 @@ export function useArc() {
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const idle = window.requestIdleCallback || (cb => setTimeout(cb, 1200))
-    const id = idle(() => setHeroReady(true))
-    return () => (window.cancelIdleCallback || clearTimeout)(id)
+    const conn = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection
+    if (conn?.saveData) return
+    if (conn?.effectiveType && ['slow-2g', '2g', '3g'].includes(conn.effectiveType as string)) return
+    const idle = (window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback
+      || ((cb: () => void) => window.setTimeout(cb, 2000) as unknown as number)
+    const cancelIdle = (window as Window & { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback || clearTimeout
+    const id = idle(() => setHeroReady(true), { timeout: 4000 })
+    return () => cancelIdle(id)
   }, [])
 
   useEffect(() => {
@@ -151,7 +158,6 @@ export function useArc() {
     if (cached && typeof cached.n === 'number' && Date.now() - cached.at < DAY) setStars(cached.n)
   }, [])
 
-  // fetched on intent, not on load, so a visit never contacts a third party by itself
   const starsAsked = useRef(false)
   function loadStars() {
     if (starsAsked.current || stars !== null) return
@@ -186,12 +192,9 @@ export function useArc() {
     return Array.isArray(raw) ? raw.filter(h => h && typeof h.id === 'string' && typeof h.name === 'string') : []
   }, [habitsV2, habits])
   const hasData = settings && effectiveHabits.length > 0
-  // Recomputed as `today` ticks, so a tab left open overnight on Sep 30 wakes up
-  // knowing the winter arc has begun.
   const recommended = useMemo(() => getRecommendedArc(today), [today])
   const winterArc = useMemo(() => getDefaultArc(today), [today])
   const presets = useMemo(() => arcPresets(today), [today])
-  /** The warm-up setup offers, measured against the winter arc rather than a saved run. */
   const setupWarmUp = useMemo(() => warmUpBefore(winterArc.start, today), [winterArc, today])
   const start = settings?.start ?? recommended.start
   const end = settings?.end ?? recommended.end
@@ -210,16 +213,7 @@ export function useArc() {
   const arcEnded = today > end
   const arcMode: ArcMode = settings?.mode === 'warmup' ? 'warmup' : 'arc'
   const isWarmUp = arcMode === 'warmup'
-  /** Offered while the arc is still ahead, so the wait is spent building the habit. */
   const warmUp = useMemo(() => (arcStarted ? null : warmUpBefore(start, today)), [arcStarted, start, today])
-  /**
-    * What a finished run rolls into. An arc already under way is trimmed to start
-    * today, so the new grid does not open on weeks of red days nobody could log.
-    */
-  /**
-   * The arc a warm-up interrupted, if it is still worth resuming. Without this the
-   * roll-over hands back the winter arc and loses the dates the user chose.
-   */
   const savedNext = settings?.next
   const resumeArc = useMemo(() => {
     if (!savedNext || !isValidYMD(savedNext.start) || !isValidYMD(savedNext.end)) return null
@@ -230,17 +224,11 @@ export function useArc() {
     () => resumeArc ?? (today > winterArc.start && today <= winterArc.end ? { start: today, end: winterArc.end } : winterArc),
     [resumeArc, today, winterArc],
   )
-  /** True when the target was cut short because the arc is already under way. */
   const nextArcTrimmed = !resumeArc && nextArc.start !== winterArc.start
-  /**
-   * Nothing rolls over into itself, and nothing rolls over into a window most of
-   * a year away. Either case sends them to setup instead.
-   */
   const canRollOver = arcEnded
     && !(nextArc.start === start && nextArc.end === end)
     && daysBetween(today, nextArc.start) - 1 <= MAX_WAIT_DAYS
   const runNoun = isWarmUp ? 'Warm-up day' : 'Day'
-  /** What to call the day counter wherever it appears next to a number. */
   const runLabel = isWarmUp ? 'Warm-up' : 'Day'
   const isPerfectDay = useCallback((d: ISODate) => {
     const e = entries[d] || {}
@@ -283,7 +271,6 @@ export function useArc() {
         return now
       })
       setClockMin(nowMinutes())
-      // re-read rather than trusting local state, since a sibling tab may have raised one
       setFiredLog(prev => {
         const next = pruneFired(readStore<string[]>('wa_reminders_fired', []), todayYMD())
         return next.length === prev.length && next.every((k, i) => k === prev[i]) ? prev : next
@@ -301,7 +288,6 @@ export function useArc() {
     return () => window.removeEventListener('popstate', onPop)
   }, [])
 
-  // an onboarded visitor landing on / goes straight to the tracker, including from the installed app
   const routedOnce = useRef(false)
   useEffect(() => {
     if (routedOnce.current) return
@@ -313,7 +299,6 @@ export function useArc() {
     }
   }, [hasData])
 
-  // the tracker and dashboard need data, so fall back rather than render nothing
   useEffect(() => {
     if (!hasData && (view === 'tracker' || view === 'dashboard')) return
     const path = PATHS[view] ?? '/'
@@ -337,7 +322,6 @@ export function useArc() {
     })
     const lastLogged = allDates.filter(d => Object.values(entries[d] || {}).some(Boolean)).pop()
     let anchor = today >= allDates[0] ? (today > end ? end : today) : (lastLogged ?? null)
-    // today is still in progress, so an unfinished today should not zero a live streak
     if (anchor === today && isActiveDay(today) && !isPerfect(today)) anchor = addDays(today, -1)
     if (anchor) {
       for (let i = allDates.length - 1; i >= 0; i--) {
@@ -370,28 +354,19 @@ export function useArc() {
 
   const storedReminders = settings?.reminders
   const reminders = useMemo(() => normalizeReminders(storedReminders), [storedReminders])
-  /** At least one slot has a time. Separate from whether the browser will show it. */
   const remindersSet = anyReminderOn(reminders)
   const remindersOn = remindersSupported && notifPermission === 'granted' && remindersSet
 
-  /**
-   * The whole scheduler. No push server, so it only fires while a page or the
-   * installed app is running. The UI says so.
-   */
   useEffect(() => {
     if (!remindersOn || !hasData) return
-    // guards re-entry while a raise is in flight; the log is only written on success,
-    // so a browser that refuses the notification does not burn the slot for the day
     let raising = false
+    let cancelled = false
     const tick = async () => {
-      if (raising) return
+      if (raising || cancelled) return
       const day = todayYMD()
       if (day < start || day > end || !isActiveDay(day)) return
       const entry = entries[day] || {}
-      // nothing to nag about once the day is done
       if (effectiveHabits.length > 0 && effectiveHabits.every(h => entry[h.id])) return
-      // the app already in front of you does not need to interrupt you
-      if (document.visibilityState === 'visible' && document.hasFocus()) return
       const now = nowMinutes()
       const log = pruneFired(readStore<string[]>('wa_reminders_fired', []), day)
       const slot = REMINDER_SLOTS.find(sl => !log.includes(firedId(day, sl)) && isDue(reminders[sl], now))
@@ -400,8 +375,7 @@ export function useArc() {
       try {
         const { title, body } = reminderText(runHeadline, effectiveHabits, entry)
         const shown = await raiseNotification(title, body, firedId(day, slot))
-        if (!shown) return
-        // re-read rather than reusing `log`, since another tab may have fired meanwhile
+        if (!shown || cancelled) return
         const fresh = pruneFired(readStore<string[]>('wa_reminders_fired', []), day)
         const key = firedId(day, slot)
         const next = fresh.includes(key) ? fresh : [...fresh, key]
@@ -414,11 +388,17 @@ export function useArc() {
     const id = setInterval(() => { void tick() }, 30000)
     void tick()
     const onVisibility = () => { void tick() }
+    const onFocus = () => { void tick() }
     document.addEventListener('visibilitychange', onVisibility)
-    return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVisibility) }
+    window.addEventListener('focus', onFocus)
+    return () => {
+      cancelled = true
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('focus', onFocus)
+    }
   }, [remindersOn, hasData, reminders, start, end, isActiveDay, entries, effectiveHabits, runHeadline])
 
-  // the permission can be revoked in browser settings while the app is open
   useEffect(() => {
     if (!remindersSupported || !navigator.permissions?.query) return
     let status: PermissionStatus | null = null
@@ -429,10 +409,6 @@ export function useArc() {
     return () => status?.removeEventListener('change', onChange)
   }, [remindersSupported])
 
-  /**
-   * Reminder times that came and went today without a notification. The tracker says
-   * so, which is the only catch-up a page with no push server can honestly offer.
-   */
   const missedReminders = useMemo(() => {
     if (!remindersOn || !hasData) return []
     if (today < start || today > end || !isActiveDay(today)) return []
@@ -447,7 +423,6 @@ export function useArc() {
   function setReminderTime(slot: ReminderSlot, value: string | null) {
     writeReminders({ ...reminders, [slot]: value && value.length === 5 ? value : null })
   }
-  /** Must be called from a real click. Browsers drop a permission prompt without one. */
   async function askForReminders() {
     if (!remindersSupported) return
     let p = Notification.permission
@@ -458,7 +433,6 @@ export function useArc() {
     if (p === 'granted' && !anyReminderOn(reminders)) writeReminders(DEFAULT_REMINDERS)
   }
   function turnOffReminders() { writeReminders({ morning: null, evening: null }) }
-  /** Checks permission and sound without waiting for a scheduled time. */
   async function testReminder() {
     const { title, body } = reminderText(runHeadline, effectiveHabits, entries[today] || {})
     const ok = await raiseNotification(title, body, `wa-test-${Date.now()}`)
@@ -466,11 +440,7 @@ export function useArc() {
     setTimeout(() => setReminderTest(null), 4000)
   }
 
-  // A corrupt stored date makes dayNum NaN, and QUOTES[NaN] is undefined. Reading
-  // .source off that threw, which raised the crash screen and its delete offer.
   const quote = useMemo(() => QUOTES[Number.isFinite(stats.dayNum) ? stats.dayNum % QUOTES.length : 0], [stats.dayNum])
-  // Attribution travels with the quote everywhere it goes: the header, the image
-  // and the shared text. A quote leaving the app without its author is the bug.
   const quoteCredit = quote.source ? `${quote.author}, ${quote.source}` : quote.author
   const quoteShareText = `"${quote.text}"\n${quote.author}`
 
@@ -499,12 +469,7 @@ export function useArc() {
       return { ...prev, [date]: cur }
     })
   }
-  /**
-   * Same habits, new window. Entries are keyed by date and are never touched here,
-   * so warm-up days stay in the browser and in both exports. They stop counting.
-   */
   function switchArc(range: ArcRange, mode: ArcMode, next?: ArcRange) {
-    // rebuilt from scratch, so leaving `next` off is what clears a resumed arc
     setSettings({
       start: range.start,
       end: range.end,
@@ -519,7 +484,6 @@ export function useArc() {
   }
   function startWarmUp() { if (warmUp) switchArc(warmUp, 'warmup', { start, end }) }
   function startWinterArc() { switchArc(nextArc, 'arc') }
-  /** Keeps the length they chose and drags the whole window onto today. */
   function startToday() { switchArc({ start: today, end: addDays(today, Math.max(0, totalDays - 1)) }, 'arc') }
 
   function startOnboarding() {
@@ -539,8 +503,6 @@ export function useArc() {
     if (parseYMD(tmpStart) > parseYMD(tmpEnd)) { alert('Start date must be before end date'); return }
     if (arcLength > 730) { alert('Keep the arc under two years. Pick a closer end date.'); return }
     if (chosen.length > 10 && !confirm(`You picked ${chosen.length} habits. Recommended max is 10. Continue?`)) return
-    // Picking the offered warm-up range is what marks a run as a warm-up. Typing
-    // those exact dates by hand means the same thing, so it is treated the same.
     const mode: ArcMode = setupWarmUp && tmpStart === setupWarmUp.start && tmpEnd === setupWarmUp.end ? 'warmup' : 'arc'
     setSettings({ start: tmpStart, end: tmpEnd, name: tmpName.trim() || null, activeDays: tmpDays.length ? tmpDays : ALL_WEEKDAYS, mode, reminders: normalizeReminders(tmpReminders) })
     if (anyReminderOn(tmpReminders)) void askForReminders()
@@ -550,8 +512,6 @@ export function useArc() {
   function addCustom() {
     const name = customName.trim()
     if (!name) return
-    // id comes from the name, not the clock, so removing a habit and adding it
-    // back under the same name reunites it with its own history
     const id = customHabitId(name, [...PRESETS.map(p => p.id), ...customList.map(h => h.id)])
     setCustomList(prev => [...prev, { id, name, icon: 'flag', tier: 'custom', desc: '' }])
     setTmpSelected(s => new Set([...s, id])); setCustomName('')
@@ -566,7 +526,6 @@ export function useArc() {
     setOnboardStep(2); setShowOnboarding(true)
   }
   function exportJSON() {
-    // spread first so mode, reminders and anything added later ride along
     const data = { settings: { ...settings, start, end, name: settings?.name ?? null, activeDays }, habits: effectiveHabits, entries, exportedAt: new Date().toISOString() }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `winter-arc-${start}_${end}.json`; a.click(); URL.revokeObjectURL(url)
@@ -578,7 +537,6 @@ export function useArc() {
   }
   function exportCSV() {
     const header = ['date', ...effectiveHabits.map(h => csvEscape(h.name)), 'perfect']
-    // days logged before a roll-over sit outside the window, so union them in
     const dates = [...new Set([...allDates, ...Object.keys(entries)])].sort()
     const rows = dates.map(d => {
       const e = entries[d] || {}
@@ -596,7 +554,6 @@ export function useArc() {
     }
     if (!backupBeforeReset) return clear()
     exportJSON()
-    // give the download a moment to start before the page navigates away
     setTimeout(clear, 1200)
   }
   const llmPrompt = useMemo(() => `Here is my habit data from ${start} to ${end}. Habits: ${effectiveHabits.map(h => h.name).join(', ')}. Days elapsed: ${stats.dayNum} of ${totalDays}. Perfect days: ${stats.perfect} (${stats.perfectPct}%). Checks completed: ${stats.pct}%. Current streak: ${stats.streak}, best ${stats.bestStreak}.\nRaw entries: ${JSON.stringify(entries).slice(0, 4000)}\n\nTell me which habit I miss most and on which weekdays. Then give me one change to make this week. Keep it under 150 words and skip the pep talk.`, [start, end, effectiveHabits, stats, totalDays, entries])
@@ -619,7 +576,6 @@ export function useArc() {
       ctx.fill()
     }
 
-    // same mark as the favicon and the OG image, so the three read as one brand
     const mark = (cx: number, cy: number, r: number) => {
       const u = r / 32
       ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2)
@@ -644,7 +600,6 @@ export function useArc() {
     ctx.fillStyle = '#fafafa'; ctx.font = '800 58px ui-sans-serif,system-ui'
     ctx.fillText(achievement ? achievement.label : runHeadline, PAD, 148)
     ctx.fillStyle = '#a1a1aa'; ctx.font = '400 21px ui-sans-serif,system-ui'
-    // never cut a habit name mid-word on a public image; drop to a count instead
     const names = effectiveHabits.map(h => h.name)
     let sub = achievement ? achievement.desc : names.join(', ')
     if (!achievement && sub.length > 74) {
@@ -674,7 +629,6 @@ export function useArc() {
       ctx.fillText(value, x + 18, 284)
     })
 
-    // the grid reflows so any arc length lands inside the same band
     const gy = 330, bandH = 170, gap = 5
     const n = allDates.length
     let cols = Math.ceil(Math.sqrt(n * (W - PAD * 2) / bandH))
@@ -775,15 +729,15 @@ export function useArc() {
     } catch {}
     try { await navigator.share(payload) } catch {}
   }
-  const navLinks = [
+  const navLinks = useMemo(() => [
     { label: 'Winter arc', onClick: () => goTo('about'), active: view === 'about' },
     { label: 'Templates', onClick: () => goTo('templates'), active: view === 'templates' },
     { label: 'Resources', onClick: () => goTo('resources'), active: view === 'resources' },
     ...(hasData ? [
       { label: 'Tracker', onClick: () => goTo('tracker'), active: view === 'tracker' },
       { label: 'Dashboard', onClick: () => goTo('dashboard'), active: view === 'dashboard' },
-    ] : []),
-  ]
+    ] as const : []),
+  ], [view, hasData])
 
   useEffect(() => {
     if (view !== 'tracker' || !hasData || showOnboarding || confirmReset) return
@@ -842,7 +796,6 @@ export function useArc() {
   const dayFmt = useMemo(() => new Intl.DateTimeFormat('en', { weekday: 'long', day: 'numeric', month: 'short' }), [])
   const longFmt = useMemo(() => new Intl.DateTimeFormat('en', { month: 'long', day: 'numeric' }), [])
   const longYearFmt = useMemo(() => new Intl.DateTimeFormat('en', { month: 'long', day: 'numeric', year: 'numeric' }), [])
-  /** A date for running prose. The year appears only when it is not this one. */
   function longDate(d: ISODate) {
     return (d.slice(0, 4) === today.slice(0, 4) ? longFmt : longYearFmt).format(parseYMD(d))
   }
@@ -893,11 +846,6 @@ export function useArc() {
     setShowInstallHint(false)
     try { sessionStorage.setItem('wa_install_hint', 'dismissed') } catch {}
   }
-  /**
-   * The only place that fires the native prompt, shared by the landing banner
-   * and the Install page. A prompt event can be used once, so a declined
-   * install clears it and the page falls back to the manual steps.
-   */
   async function runInstall() {
     if (!installEvent) {
       if (view !== 'install') goTo('install')
@@ -915,10 +863,6 @@ export function useArc() {
     dismissInstallHint()
   }
 
-  /**
-   * Backdrop dismissal that ignores a press which began inside the panel, so
-   * dragging a text selection past the edge of a dialog never closes it.
-   */
   function overlayProps(onDismiss: () => void) {
     return {
       onMouseDown: (e: MouseEvent<HTMLElement>) => { overlayDown.current = e.target === e.currentTarget },

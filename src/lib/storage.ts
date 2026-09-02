@@ -1,4 +1,3 @@
-/** Every key the app owns. Reset and the crash screen both clear exactly this list. */
 export const STORAGE_KEYS = [
   'wa_settings', 'wa_settings_v2', 'wa_habits', 'wa_habits_v2', 'wa_entries', 'wa_stars',
   'wa_reminders_fired',
@@ -13,7 +12,6 @@ export function readStore<T>(key: string, fallback: T): T {
   }
 }
 
-/** Returns false when the write failed, which in practice means the quota is full. */
 export function writeStore(key: string, val: unknown): boolean {
   try {
     localStorage.setItem(key, JSON.stringify(val))
